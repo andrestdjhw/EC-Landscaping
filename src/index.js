@@ -1,10 +1,31 @@
-import Person from "./scripts/Person"
-import ExampleReactComponent from "./scripts/ExampleReactComponent"
 import React from "react"
 import ReactDOM from "react-dom/client"
+import Navbar from "./scripts/Navbar"
+import Footer from "./scripts/Footer"
+import FloatingActions from "./scripts/FloatingActions"
 
-const person1 = new Person("Brad")
-if (document.querySelector("#render-react-example-here")) {
-  const root = ReactDOM.createRoot(document.querySelector("#render-react-example-here"))
-  root.render(<ExampleReactComponent />)
+/**
+ * Monta un componente en un nodo y le pasa como props el JSON que venga
+ * en data-props. Así el contenido editable vive en PHP y no en el bundle.
+ */
+function mount(selector, Component) {
+  const node = document.querySelector(selector)
+  if (!node) return
+  let props = {}
+  if (node.dataset.props) {
+    try {
+      props = JSON.parse(node.dataset.props)
+    } catch (err) {
+      console.warn(`[ec] data-props inválido en ${selector}`, err)
+    }
+  }
+  ReactDOM.createRoot(node).render(<Component {...props} />)
 }
+
+mount("#ec-navbar", Navbar)
+mount("#ec-footer", Footer)
+mount("#ec-floating-actions", FloatingActions)
+
+// Pendientes de la misma tanda:
+// mount("#ec-contact-form", ContactForm)
+// mount("#ec-chatbot", Chatbot)
