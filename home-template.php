@@ -394,40 +394,6 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
   </div>
 </section>
 
-<!-- ═══════════════════ 06 · WATER-WISE ═══════════════════ -->
-<!-- Pendiente 06: verificar montos y vigencia de los programas del distrito
-     Weber Basin antes de publicar. Las cifras están fuera del markup para
-     poder actualizarlas o quitarlas en un solo lugar. -->
-<section class="bg-forest text-bone lg:flex lg:min-h-svh lg:items-center">
-  <div class="w-full grid gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14 lg:px-10 lg:py-24">
-    <div>
-      <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-bone/70">Water-wise retrofits</p>
-      <h2 class="font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
-        The state helps pay to fix your largest water line item.
-      </h2>
-      <p class="mt-5 text-base leading-relaxed text-bone/80">
-        In the Weber Basin district — Weber, Davis, Morgan and Summit counties — commercial properties, HOAs and multifamily owners can qualify for landscape conversion incentives for turf removal.
-      </p>
-      <p class="mt-4 text-base leading-relaxed text-bone/80">
-        For a property manager, that changes the math: a recurring water and maintenance expense becomes a partially funded capital improvement — designed, permitted and installed by the same contractor who already maintains the site.
-      </p>
-      <a href="<?php echo esc_url($bid_href); ?>" class="mt-8 inline-block text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone underline decoration-ember decoration-2 underline-offset-8 transition-colors hover:text-white">
-        Ask what your property qualifies for
-      </a>
-    </div>
-
-    <div class="flex items-center">
-      <div class="w-full border border-bone/20 p-8">
-        <p class="text-xs leading-relaxed text-bone/70">
-          Espacio reservado para el incentivo por pie cuadrado y el ahorro anual en galones.
-          Se publican cuando el distrito confirme montos y vigencia — una cifra vencida en
-          una página que vende credibilidad cuesta más de lo que aporta.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ═══════════════════ 07 · CÓMO TRABAJAMOS ═══════════════════ -->
 <section class="bg-bone lg:flex lg:min-h-svh lg:items-center">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
