@@ -71,16 +71,23 @@ $clusters = array(
 /* 04 · PRECEDENTE — Versión B del copy deck.
    La Versión A (con Maverik y America First por nombre y con cifras) NO se
    publica hasta tener permiso escrito de ambos clientes: Pendiente 03. */
+$projects_video  = $ec_uploads['baseurl'] . '/2026/07/ProjectsECLandscaping.mp4';
+$projects_poster = '';
+
 $cases = array(
   array(
     'kicker' => 'Convenience store chain',
     'title'  => 'A Utah-headquartered chain with 800+ locations',
     'body'   => "Full site landscape installation to corporate brand standard, coordinated with the general contractor's opening schedule. Six-figure contract, delivered on the opening date.",
+    'image'  => $ec_uploads['baseurl'] . '/2026/07/ConvenienceStore-scaled.webp',
+    'alt'    => 'Commercial landscape installation at a convenience store site in Northern Utah',
   ),
   array(
     'kicker' => 'Financial institution',
     'title'  => 'One of Utah’s largest credit unions, 115+ branches',
     'body'   => 'Branch site landscape and hardscape installation, awarded after institutional review of licensing, insurance and safety documentation.',
+    'image'  => $ec_uploads['baseurl'] . '/2026/07/FinancialInstitution-scaled.webp',
+    'alt'    => 'Landscape and hardscape installation at a credit union branch in Northern Utah',
   ),
 );
 
@@ -187,7 +194,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <section class="relative isolate overflow-hidden bg-bone text-ink lg:min-h-0 lg:flex-1">
 
   <video
-    id="ec-hero-video"
+    data-bg-video
     class="absolute inset-0 -z-20 h-full w-full object-cover"
     data-src="<?php echo esc_url($hero['video']); ?>"
     <?php if ($hero['poster']) : ?>poster="<?php echo esc_url($hero['poster']); ?>"<?php endif; ?>
@@ -199,38 +206,6 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
     aria-hidden="true"
     tabindex="-1"
   ></video>
-
-  <script>
-    /* El src se asigna por JS, no en el HTML, para que el mp4 no se descargue
-       cuando no se va a ver. Tres casos donde no se carga:
-
-       · prefers-reduced-motion — video de fondo en loop es exactamente el
-         tipo de movimiento que esa preferencia pide evitar.
-       · pantallas chicas — el comprador de esta página revisa proveedores
-         desde una obra, con datos móviles. Un hero de varios MB ahí es
-         hostil, y en móvil el video queda tapado por el scrim de todas formas.
-       · saveData o 2G/3G — misma razón.
-
-       En esos casos queda el poster. El script va inline y junto al video
-       para correr durante el parseo, antes de que el navegador arranque
-       la reproducción. */
-    (function () {
-      var v = document.getElementById('ec-hero-video');
-      if (!v || !v.dataset.src) return;
-
-      var mq = window.matchMedia;
-      var reduce = mq && mq('(prefers-reduced-motion: reduce)').matches;
-      var small = mq && mq('(max-width: 767px)').matches;
-      var net = navigator.connection || {};
-      var thin = net.saveData === true || /^(slow-)?2g$|^3g$/.test(net.effectiveType || '');
-
-      if (reduce || small || thin) return;
-
-      v.src = v.dataset.src;
-      var p = v.play();
-      if (p && p.catch) p.catch(function () { /* autoplay bloqueado: queda el poster */ });
-    })();
-  </script>
 
   <!-- Scrim: bone casi opaco donde va el texto, abriéndose hacia la derecha.
        Gradiente explícito en lugar de utilidad de Tailwind para no depender
@@ -248,7 +223,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">
         <?php echo esc_html($hero['eyebrow']); ?>
       </p>
-      <h1 class="font-display text-4xl leading-[1.08] font-bold tracking-tight text-ink sm:text-5xl lg:text-[3.4rem] [@media(min-width:1024px)_and_(max-height:860px)]:text-[2.7rem]">
+      <h1 class="ec-shine font-display text-4xl leading-[1.08] font-bold tracking-tight text-ink sm:text-5xl lg:text-[3.4rem] [@media(min-width:1024px)_and_(max-height:860px)]:text-[2.7rem]">
         <?php echo esc_html($hero['title']); ?>
       </h1>
       <p class="mt-6 max-w-2xl text-lg leading-relaxed text-ink/80 [@media(min-width:1024px)_and_(max-height:860px)]:mt-4 [@media(min-width:1024px)_and_(max-height:860px)]:text-base">
@@ -304,11 +279,11 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <!-- ↑ cierra el contenedor de una pantalla que comparten hero y barra -->
 
 <!-- ═══════════════════ 03 · PARA QUIÉN CONSTRUIMOS ═══════════════════ -->
-<section id="commercial" class="bg-bone lg:flex lg:min-h-svh lg:items-center">
+<section id="commercial" class="bg-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Who we build for</p>
-      <h2 class="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         You’re not buying landscaping. You’re buying a schedule that holds.
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-ink/70">
@@ -332,11 +307,37 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 04 · PRECEDENTE INSTITUCIONAL ═══════════════════ -->
-<section id="projects" class="bg-ink text-bone lg:flex lg:min-h-svh lg:items-center">
-  <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
+<!-- Video a sangre. A diferencia del hero, aquí el scrim NO puede ser
+     asimétrico: las dos tarjetas de caso ocupan todo el ancho, así que la
+     mitad derecha también lleva texto. Es un velo oscuro parejo, apenas más
+     denso arriba, que garantiza el contraste caiga donde caiga el fotograma. -->
+<section id="projects" class="relative isolate overflow-hidden bg-ink text-bone lg:flex lg:min-h-svh lg:items-stretch">
+
+  <video
+    data-bg-video
+    class="absolute inset-0 -z-20 h-full w-full object-cover"
+    data-src="<?php echo esc_url($projects_video); ?>"
+    <?php if ($projects_poster) : ?>poster="<?php echo esc_url($projects_poster); ?>"<?php endif; ?>
+    muted
+    loop
+    playsinline
+    preload="none"
+    aria-hidden="true"
+    tabindex="-1"
+  ></video>
+
+  <div
+    class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(18,20,15,0.92)_0%,rgba(18,20,15,0.86)_45%,rgba(18,20,15,0.8)_100%)]"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Columna: el encabezado ocupa lo suyo y la rejilla de casos se queda
+       con todo el alto sobrante. Eso es lo que hace que las tarjetas lleguen
+       hasta abajo en lugar de dejar media pantalla de video vacía. -->
+  <div class="relative flex w-full flex-col px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember">Track record</p>
-      <h2 class="font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
+      <h2 class="ec-shine ec-shine--light font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
         Brands that audit every vendor already hired us.
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-bone/75">
@@ -344,18 +345,37 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       </p>
     </div>
 
-    <div class="mt-12 grid gap-6 lg:grid-cols-2">
+    <div class="mt-12 grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-2">
       <?php foreach ($cases as $case) : ?>
-        <article class="flex flex-col border border-white/12 bg-white/[0.03] p-8">
-          <p class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ember">
-            <?php echo esc_html($case['kicker']); ?>
-          </p>
-          <h3 class="mt-4 font-display text-xl leading-snug font-bold tracking-tight text-bone">
-            <?php echo esc_html($case['title']); ?>
-          </h3>
-          <p class="mt-4 text-sm leading-relaxed text-bone/70">
-            <?php echo esc_html($case['body']); ?>
-          </p>
+        <!-- Mismo tratamiento de superficie que la barra flotante del navbar:
+             rounded-lg + ring-1 ring-white/10 + shadow-lg shadow-ink/10 +
+             backdrop-blur-md. El fondo se queda en ink/55 y no en ink/95
+             para que el video siga leyéndose por detrás de la tarjeta. -->
+        <article class="flex flex-col overflow-hidden rounded-lg bg-ink/55 shadow-lg shadow-ink/10 ring-1 ring-white/10 backdrop-blur-md">
+          <?php if (!empty($case['image'])) : ?>
+            <!-- La imagen absorbe el alto sobrante (flex-1 + min-h-0) y el
+                 texto conserva el suyo. Sin min-h-0 la imagen empujaría la
+                 tarjeta más allá de la sección en vez de recortarse. -->
+            <img
+              src="<?php echo esc_url($case['image']); ?>"
+              alt="<?php echo esc_attr($case['alt']); ?>"
+              class="h-52 w-full shrink-0 object-cover lg:h-auto lg:min-h-[12rem] lg:flex-1 lg:shrink"
+              loading="lazy"
+              decoding="async"
+            />
+          <?php endif; ?>
+
+          <div class="p-8">
+            <p class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ember">
+              <?php echo esc_html($case['kicker']); ?>
+            </p>
+            <h3 class="mt-4 font-display text-xl leading-snug font-bold tracking-tight text-bone">
+              <?php echo esc_html($case['title']); ?>
+            </h3>
+            <p class="mt-4 text-sm leading-relaxed text-bone/70">
+              <?php echo esc_html($case['body']); ?>
+            </p>
+          </div>
         </article>
       <?php endforeach; ?>
     </div>
@@ -367,11 +387,11 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════════ 05 · CAPACIDADES ═══════════════════════ -->
-<section id="capabilities" class="bg-white lg:flex lg:min-h-svh lg:items-center">
+<section id="capabilities" class="bg-white lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Capabilities</p>
-      <h2 class="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         What we self-perform.
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-ink/70">
@@ -395,11 +415,11 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 07 · CÓMO TRABAJAMOS ═══════════════════ -->
-<section class="bg-bone lg:flex lg:min-h-svh lg:items-center">
+<section class="bg-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Process</p>
-      <h2 class="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         How a bid becomes a finished site.
       </h2>
     </div>
@@ -423,11 +443,11 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 08 · CREDENCIALES ═══════════════════ -->
-<section id="credentials" class="bg-white lg:flex lg:min-h-svh lg:items-center">
+<section id="credentials" class="bg-white lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Credentials</p>
-      <h2 class="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         The page your compliance team is going to ask for.
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-ink/70">
@@ -451,12 +471,12 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 09 · ÁREA DE SERVICIO ═══════════════════ -->
-<section id="service-area" class="bg-bone lg:flex lg:min-h-svh lg:items-center">
+<section id="service-area" class="bg-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-14">
       <div>
         <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Service area</p>
-        <h2 class="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+        <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
           Where we work.
         </h2>
         <p class="mt-5 text-base leading-relaxed text-ink/70">
@@ -488,9 +508,9 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 
 <!-- ═══════════════════ 10 · REPUTACIÓN ═══════════════════ -->
 <?php if (!empty($reviews)) : ?>
-  <section class="bg-white lg:flex lg:min-h-svh lg:items-center">
+  <section class="bg-white lg:flex lg:min-h-svh lg:items-start">
     <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-      <h2 class="max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+      <h2 class="ec-shine max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         <?php echo esc_html($review_summary['rating']); ?> stars.
         <?php echo esc_html($review_summary['count']); ?> reviews. And the crews get named.
       </h2>
@@ -511,9 +531,9 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <?php endif; ?>
 
 <!-- ═══════════════════════ 11 · FAQ ═══════════════════════ -->
-<section class="bg-bone lg:flex lg:min-h-svh lg:items-center">
+<section class="bg-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <h2 class="max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+    <h2 class="ec-shine max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
       Questions estimators actually ask.
     </h2>
 
@@ -537,10 +557,10 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════ 12 · CTA FINAL + FORMULARIO ═══════════════ -->
-<section id="request-a-bid" class="bg-ink text-bone lg:flex lg:min-h-svh lg:items-center">
+<section id="request-a-bid" class="bg-ink text-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full grid gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-16 lg:px-10 lg:py-24">
     <div>
-      <h2 class="font-display text-4xl leading-tight font-bold tracking-tight text-bone sm:text-5xl">
+      <h2 class="ec-shine ec-shine--light font-display text-4xl leading-tight font-bold tracking-tight text-bone sm:text-5xl">
         Send us the plans.
       </h2>
       <p class="mt-6 max-w-lg text-lg leading-relaxed text-bone/75">
@@ -556,6 +576,81 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
     <div id="ec-contact-form"></div>
   </div>
 </section>
+
+<script>
+  /* Un solo manejador para todos los [data-bg-video] de la página.
+     El src se asigna por JS, nunca en el HTML, por dos razones:
+
+     1. No se descarga cuando no se va a ver. Tres casos:
+        · prefers-reduced-motion — un video de fondo en loop es exactamente
+          el movimiento que esa preferencia pide evitar.
+        · pantallas chicas — el comprador de esta página revisa proveedores
+          desde una obra, con datos móviles, y en móvil el scrim lo tapa
+          casi por completo de todas formas.
+        · saveData o 2G/3G.
+        En esos casos queda el poster.
+
+     2. Carga diferida por proximidad. Con dos videos en la página, cargar
+        ambos al abrir duplica el peso inicial sin que se vea el segundo.
+        El de projects no empieza a descargar hasta que su sección se
+        acerca al viewport; el del hero ya está en pantalla, así que
+        arranca de inmediato. */
+  (function () {
+    var videos = document.querySelectorAll('[data-bg-video]');
+    if (!videos.length) return;
+
+    var mq = window.matchMedia;
+    var reduce = mq && mq('(prefers-reduced-motion: reduce)').matches;
+    var small = mq && mq('(max-width: 767px)').matches;
+    var net = navigator.connection || {};
+    var thin = net.saveData === true || /^(slow-)?2g$|^3g$/.test(net.effectiveType || '');
+
+    if (reduce || small || thin) return;
+
+    function start(v) {
+      if (!v.dataset.src || v.src) return;
+      v.src = v.dataset.src;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { /* autoplay bloqueado: queda el poster */ });
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(videos, start);
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        start(entry.target);
+        io.unobserve(entry.target);
+      });
+    }, { rootMargin: '200px 0px' });
+
+    Array.prototype.forEach.call(videos, function (v) { io.observe(v); });
+  })();
+  (function () {
+    /* Destello: se dispara una vez por titular al entrar en pantalla y se
+       deja de observar. Si el usuario pidió menos movimiento, ni siquiera se
+       añade la clase — el CSS ya lo cubre, pero así tampoco se agenda la
+       animación. */
+    var mq = window.matchMedia;
+    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
+
+    var titles = document.querySelectorAll('.ec-shine');
+    if (!titles.length || !('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-shining');
+        io.unobserve(entry.target);
+      });
+    }, { threshold: 0.35 });
+
+    Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
+  })();
+</script>
 
 <?php
 /* Schema LocalBusiness con el NAP único: Higley Rd, nunca Hooper (Pendiente 01). */

@@ -291,6 +291,76 @@
   }
 }
 
+/* ── Destello de titular ──────────────────────────────────────────
+   Barrido único al entrar en pantalla, nunca en bucle. Un brillo que se
+   repite sin parar es contenido en movimiento permanente: incumple el
+   criterio 2.2.2 de WCAG (pausar, detener, ocultar) y, en una página cuyo
+   trabajo es que un estimador la tome en serio, lee como banner.
+
+   El color base define el estado en reposo, así que el contraste real del
+   titular nunca depende de la animación. El realce solo aparece en una
+   banda estrecha y en movimiento; en el gris elegido son 4.5:1 sobre bone
+   incluso en su punto más claro.
+
+   El texto se vuelve transparente ÚNICAMENTE dentro del @supports: sin esa
+   guarda, un navegador sin background-clip:text dejaría todos los
+   titulares invisibles. */
+.ec-shine {
+  --shine-base: #12140f;
+  --shine-hl: #6b7280;
+}
+
+.ec-shine--light {
+  --shine-base: #f7f7f5;
+  --shine-hl: #ffffff;
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .ec-shine {
+    background-image: linear-gradient(
+      100deg,
+      var(--shine-base) 0%,
+      var(--shine-base) 42%,
+      var(--shine-hl) 50%,
+      var(--shine-base) 58%,
+      var(--shine-base) 100%
+    );
+    background-size: 280% 100%;
+    /* Con background-size mayor que el elemento, cualquier posición entre 0%
+       y 100% lo cubre por completo. Salirse de ese rango (130%, -30%) deja
+       zonas sin gradiente detrás, y como el texto es transparente, esas
+       letras desaparecen. El repeat-x es el cinturón de seguridad: los dos
+       extremos del gradiente son el color base, así que si algo quedara
+       descubierto, se rellena con el color sólido en vez de con nada. */
+    background-position: 100% 0;
+    background-repeat: repeat-x;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .ec-shine.is-shining {
+    animation: ec-shine-sweep 1100ms ease-out 1 forwards;
+  }
+}
+
+@keyframes ec-shine-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ec-shine {
+    animation: none !important;
+    background-image: none;
+    color: var(--shine-base);
+  }
+}
+
 /* El header es fixed: por defecto se compensa su altura para que el contenido
    no quede debajo. Ajustar si cambia la altura de la franja de utilidad. */
 :root {
