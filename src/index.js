@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client"
 import Navbar from "./scripts/Navbar"
 import Footer from "./scripts/Footer"
 import FloatingActions from "./scripts/FloatingActions"
+import ContactForm from "./scripts/ContactForm"
 
 /**
  * Monta un componente en un nodo y le pasa como props el JSON que venga
@@ -26,6 +27,9 @@ mount("#ec-navbar", Navbar)
 mount("#ec-footer", Footer)
 mount("#ec-floating-actions", FloatingActions)
 
-// Pendientes de la misma tanda:
-// mount("#ec-contact-form", ContactForm)
+// El modal se monta vacío y se dibuja solo al abrirse. Vive en footer.php
+// para que esté disponible en todas las plantillas, no solo en la landing.
+mount("#ec-contact-modal", ContactForm)
+
+// Pendiente de la misma tanda:
 // mount("#ec-chatbot", Chatbot)

@@ -2,8 +2,10 @@
 /**
  * Template Name: Landing Comercial
  *
- * Bloques 01 a 12 del copy deck. La navbar y el footer son componentes React
- * (header.php / footer.php); el formulario del bloque 12 monta en #ec-contact-form.
+ * Bloques 01 a 11 del copy deck. La navbar y el footer son componentes React
+ * (header.php / footer.php). El bloque 12 (CTA final + formulario) se eliminó
+ * a pedido, así que el punto de montaje #ec-contact-form ya no existe en esta
+ * plantilla.
  *
  * Todo el contenido vive en los arrays de abajo, no en el markup. Cuando haya
  * que producir la variante por vertical (c-stores, credit unions, HOAs) se
@@ -91,23 +93,36 @@ $cases = array(
   ),
 );
 
-/* 05 · CAPACIDADES */
+/* 05 · CAPACIDADES — carrusel de tarjetas con imagen.
+
+   Las rutas se arman desde wp_get_upload_dir() y no se pegan literales, igual
+   que el hero y los casos: así la URL sobrevive la migración de
+   ec-landscaping.local a producción sin tocar código.
+*/
 $capabilities = array(
   array(
     'title' => 'Commercial landscape installation',
     'body'  => 'New construction, retail pads, branch sites, multifamily and industrial. Grading and soil preparation, irrigation mains and zones, planting, sod, trees and final grade to plan.',
+    'image' => $ec_uploads['baseurl'] . '/2026/07/CommercialLandscapeInstallation-scaled.webp',
+    'alt'   => 'Commercial landscape installation in progress on a Northern Utah site',
   ),
   array(
     'title' => 'Hardscape & concrete',
     'body'  => 'Retaining walls, paver plazas and walkways, flat and stamped concrete, curbing, site walls and pool decks — self-performed under our own concrete and masonry license.',
+    'image' => $ec_uploads['baseurl'] . '/2026/07/HardscapeConcrete-scaled.webp',
+    'alt'   => 'Retaining wall and paver hardscape under construction',
   ),
   array(
     'title' => 'Grounds maintenance, irrigation & snow',
     'body'  => 'Annual contracts covering mowing, fertilization, pruning, spring startup, smart irrigation management, fall winterization, and snow and ice management through the winter. One vendor, twelve months.',
+    'image' => $ec_uploads['baseurl'] . '/2026/07/GroundsMaintenance-scaled.webp',
+    'alt'   => 'Grounds maintenance on a commercial property',
   ),
   array(
     'title' => 'Water-wise retrofits',
     'body'  => 'Turf conversion, drip and smart controllers, native and adapted plantings, and design that meets local water district requirements without looking like a gravel lot.',
+    'image' => $ec_uploads['baseurl'] . '/2026/07/WaterWiseRetrofits-scaled.webp',
+    'alt'   => 'Drought-tolerant planting with drip irrigation on a commercial property',
   ),
 );
 
@@ -169,14 +184,62 @@ $faqs = array(
     'q' => 'What happens if something fails after closeout?',
     'a' => 'Warranty terms are written into the closeout package. One phone call to the same number you had during the build — you won’t be routed to a national service center.',
   ),
+  array(
+    'q' => 'Do you bid as a subcontractor to the general contractor, or only direct to the owner?',
+    'a' => 'Both. Most of our commercial work comes through general contractors — we bid the landscape scope, confirm it with your superintendent and deliver submittals on your schedule. We also contract directly with owners, property managers and HOA boards.',
+  ),
+  array(
+    'q' => 'We have sites in more than one city. Can you hold the same standard across all of them?',
+    'a' => 'Yes. We work to written brand standards, and you get the same crew leads and the same documentation on every property. If your plan adds locations across Northern Utah, we would rather bid them as one program than one site at a time.',
+  ),
+  array(
+    // La primera mitad sale del paso 2 del proceso, que ya está aprobado.
+    // La segunda —precio por escrito antes de ejecutar— es un compromiso
+    // operativo que el copy deck no dice en ninguna parte: confirmar con
+    // Tomás antes de publicar, o recortar la respuesta a la primera frase.
+    'q' => 'How do you handle change orders?',
+    'a' => 'By pricing the work properly the first time. Our proposals are line-item, with quantities and exclusions written out, so there are no vague allowances waiting to turn into change orders. When the scope genuinely changes, you get it priced in writing before we build it.',
+  ),
+  array(
+    'q' => 'Do your designs meet local water district requirements?',
+    'a' => 'Yes. Turf conversion, drip and smart controllers, and native and adapted plantings are standard scopes for us, and we design to the requirements of the district your site sits in — without handing you a gravel lot.',
+  ),
   // Pendiente 08 (plazo de bid) y Pendiente 04 (bonding): esas dos preguntas
-  // se publican cuando Tomás confirme los datos. Mejor cuatro respuestas
-  // firmes que seis con huecos.
+  // se publican cuando Tomás confirme los datos. Mejor ocho respuestas
+  // firmes que diez con huecos.
 );
 
+/* OJO — ancla huérfana. El bloque 12 (#request-a-bid) se eliminó, así que este
+   href ya no apunta a nada: el CTA del hero hace clic y no pasa nada.
+
+   Lo mismo en otros dos lugares, que están fuera de este archivo:
+     · header.php  → 'bidHref' => '#request-a-bid'  (alimenta el botón del
+       navbar, el del panel móvil y el de la barra inferior fija)
+     · src/scripts/Footer.js → DEFAULT_COLUMNS, "Request a bid"
+
+   Se deja sin cambiar a propósito: inventar un destino sería peor que dejarlo
+   visible. Cuando se defina —una página /contact, un tel:, o el formulario
+   reubicado en otro bloque— hay que corregir los tres. */
 $bid_href = '#request-a-bid';
 $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 ?>
+
+<script>
+  /* Marca <html> como "hay revelado" antes de que se pinte nada. Va aquí y no
+     al final de la página a propósito: el estado oculto de [data-reveal] cuelga
+     de .ec-reveal, así que si esta clase llegara tarde se vería el bloque 03
+     completo y después desaparecería de golpe.
+
+     El corolario es que sin JavaScript la clase nunca se agrega y todo el
+     contenido queda visible. Nunca se esconde texto apostando a que corra un
+     script. Lo mismo con prefers-reduced-motion: no se agrega la clase, no hay
+     nada que revelar. */
+  (function () {
+    var mq = window.matchMedia;
+    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
+    document.documentElement.classList.add('ec-reveal');
+  })();
+</script>
 
 <!-- ═══════════════════════ 01 · HERO ═══════════════════════ -->
 <!-- Video a sangre detrás de toda la sección. El texto sigue en oscuro sobre
@@ -281,7 +344,9 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <!-- ═══════════════════ 03 · PARA QUIÉN CONSTRUIMOS ═══════════════════ -->
 <section id="commercial" class="bg-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="max-w-3xl">
+    <!-- El data-reveal va en el contenedor y no en el <h2>: ese elemento ya
+         lo anima ec-shine y dos transforms sobre el mismo nodo se pisan. -->
+    <div data-reveal class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Who we build for</p>
       <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         You’re not buying landscaping. You’re buying a schedule that holds.
@@ -291,17 +356,68 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       </p>
     </div>
 
-    <ul class="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
-      <?php foreach ($clusters as $cluster) : ?>
-        <li class="bg-bone p-7">
-          <h3 class="font-display text-lg font-bold tracking-tight text-ink">
-            <?php echo esc_html($cluster['title']); ?>
-          </h3>
-          <p class="mt-3 text-sm leading-relaxed text-ink/70">
-            <?php echo esc_html($cluster['body']); ?>
-          </p>
+    <!-- Cascada: --reveal-i escalona el delay. El encabezado es el índice 0 y
+         las tarjetas siguen en orden de lectura, así que el ojo baja con la
+         animación en lugar de perseguirla. -->
+    <?php
+    /* Rejilla de 6 columnas, no de 3. Las tarjetas normales ocupan 2 (tres por
+       fila, igual que antes) y las de la última fila se reparten en partes
+       iguales lo que sobra: con 5 clusters, dos tarjetas de 3 columnas cada
+       una. La fila cierra a lo ancho y no queda celda muerta enseñando el
+       ink/10 del fondo.
+
+       Calculado y no hardcodeado para que siga cerrando si mañana se agrega o
+       se quita un cluster. */
+    $ec_leftover = count($clusters) % 3;
+    $ec_break    = count($clusters) - $ec_leftover;
+    ?>
+    <!-- Las filas van en proporción, no a contenido. La primera se queda en el
+         alto que le pide su texto y la segunda toma 1.3 veces eso, así que la
+         banda de abajo pesa un poco más que la de arriba en lugar de solo
+         emparejarla. El número a mover es el 1.3.
+
+         Con fr y sin alto definido en el contenedor, las pistas se reparten
+         manteniendo la proporción sin quedar por debajo de su contenido: no
+         hay riesgo de que se recorte el copy si crece.
+
+         Ojo: asume dos filas, que es lo que dan 5 clusters en la rejilla de 6.
+         Si el array pasa a 7 o más, la tercera fila cae en auto y hay que
+         agregar la pista aquí. -->
+    <ul class="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-6 lg:grid-rows-[minmax(0,1fr)_minmax(0,1.3fr)]">
+      <?php foreach ($clusters as $i => $cluster) :
+        // 2 sobrantes → mitad y mitad. 1 sobrante → ancho completo.
+        $ec_span = 'lg:col-span-2';
+        if ($ec_leftover && $i >= $ec_break) {
+          $ec_span = 2 === $ec_leftover ? 'lg:col-span-3' : 'lg:col-span-6';
+        }
+        ?>
+        <!-- El <li> es la celda de la rejilla y la placa biselada va adentro:
+             el bisel necesita su propio box-shadow sin competir con el gap-px
+             que dibuja los filetes. flex + flex-1 para que la placa llene la
+             celda cuando el copy de las tarjetas vecinas es más largo. -->
+        <li data-reveal style="--reveal-i:<?php echo (int) $i + 1; ?>" class="flex <?php echo $ec_span; ?>">
+          <!-- Sin translate en hover: con gap-px, levantar la placa abriría
+               una franja de ink/10 de 2px bajo la tarjeta. El relieve solo
+               vende el volumen igual de bien. -->
+          <div class="bevel-tile flex-1 bg-bone p-7 transition-[box-shadow,background-color] duration-300 ease-out hover:bevel-tile-raised hover:bg-white motion-reduce:transition-none">
+            <h3 class="font-display text-lg font-bold tracking-tight text-ink">
+              <?php echo esc_html($cluster['title']); ?>
+            </h3>
+            <p class="mt-3 text-sm leading-relaxed text-ink/70">
+              <?php echo esc_html($cluster['body']); ?>
+            </p>
+          </div>
         </li>
       <?php endforeach; ?>
+
+      <?php
+      /* En lg la rejilla de 6 ya cierra sola. El hueco queda en sm, donde son
+         dos columnas y un número impar de clusters deja una celda muerta.
+         Se rellena con bone plano y sin bisel: es el plano sobre el que se
+         apoyan las placas, no una placa más. */
+      if (count($clusters) % 2 === 1) : ?>
+        <li aria-hidden="true" class="hidden bg-bone sm:block lg:hidden"></li>
+      <?php endif; ?>
     </ul>
   </div>
 </section>
@@ -399,17 +515,109 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       </p>
     </div>
 
-    <div class="mt-12 grid gap-8 sm:grid-cols-2">
-      <?php foreach ($capabilities as $item) : ?>
-        <div class="border-t-2 border-forest pt-5">
-          <h3 class="font-display text-lg font-bold tracking-tight text-ink">
-            <?php echo esc_html($item['title']); ?>
-          </h3>
-          <p class="mt-3 text-sm leading-relaxed text-ink/70">
-            <?php echo esc_html($item['body']); ?>
-          </p>
+    <!-- ── Marquee ───────────────────────────────────────────────────
+         Sigue siendo un contenedor con scroll nativo: el desplazamiento
+         continuo lo empuja el JS moviendo scrollLeft, no una animación de
+         transform. Esa decisión es la que permite que el dedo, la rueda y
+         el teclado sigan funcionando encima del movimiento — con un
+         transform animado el contenido se vuelve intocable.
+
+         El bucle es infinito porque la lista se imprime dos veces. Al llegar
+         a la mitad exacta del recorrido se resta esa mitad de scrollLeft: el
+         contenido en pantalla es idéntico, así que el salto no se ve. -->
+    <div data-carousel data-marquee class="mt-12">
+
+      <!-- Encabezado del control: las flechas viven arriba a la derecha y no
+           flotando sobre las tarjetas. Encima de la foto habría que resolver
+           contraste contra cuatro imágenes distintas. -->
+      <div class="mb-6 flex items-end justify-between gap-6">
+        <p class="max-w-md text-xs leading-relaxed text-ink/50">
+          Four scopes, one contract, one crew.
+        </p>
+
+        <div class="hidden shrink-0 items-center gap-2 lg:flex">
+          <button
+            type="button"
+            data-carousel-prev
+            aria-label="Previous capability"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4">
+              <path d="M19 12H6M11 6l-6 6 6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            data-carousel-next
+            aria-label="Next capability"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4">
+              <path d="M5 12h13M13 6l6 6-6 6" />
+            </svg>
+          </button>
         </div>
-      <?php endforeach; ?>
+      </div>
+
+      <!-- La pista sangra hasta el borde de la pantalla con márgenes negativos
+           y recupera la alineación con su propio padding. Así la tarjeta que
+           asoma se corta contra el borde del viewport y no contra un margen.
+
+           Ya no lleva scroll-snap ni scroll-smooth: los dos pelean con un
+           scrollLeft que se reescribe en cada frame — el snap tironea de
+           vuelta y el smooth anima el salto del bucle, que es justo lo que
+           tiene que ser instantáneo.
+
+           tabindex=0: un contenedor con scroll necesita foco propio para que
+           se pueda recorrer con las flechas del teclado. -->
+      <ul
+        data-carousel-track
+        tabindex="0"
+        aria-label="Capabilities"
+        class="-mx-5 flex gap-5 overflow-x-auto px-5 pb-2 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10 [&::-webkit-scrollbar]:hidden"
+      >
+        <?php
+        /* Dos pasadas: la real y su copia. La copia va aria-hidden y con alt
+           vacío — para un lector de pantalla las capacidades son cuatro, no
+           ocho. El navegador reusa las mismas imágenes de caché, así que la
+           duplicación no cuesta descargas. */
+        for ($ec_pass = 0; $ec_pass < 2; $ec_pass++) :
+          $ec_clone = (1 === $ec_pass);
+          foreach ($capabilities as $item) : ?>
+            <li
+              class="w-[80vw] shrink-0 sm:w-[23rem] lg:w-[25rem]"
+              <?php echo $ec_clone ? 'aria-hidden="true"' : ''; ?>
+            >
+              <article class="flex h-full flex-col overflow-hidden rounded-lg bg-bone ring-1 ring-ink/10 transition-shadow duration-300 hover:shadow-xl hover:shadow-ink/10 motion-reduce:transition-none">
+
+                <?php if (!empty($item['image'])) : ?>
+                  <img
+                    src="<?php echo esc_url($item['image']); ?>"
+                    alt="<?php echo $ec_clone ? '' : esc_attr($item['alt']); ?>"
+                    class="aspect-[4/3] w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                <?php else : ?>
+                  <!-- Respaldo: si una imagen se cae en la migración, la tarjeta
+                       queda con un panel liso en verde de marca en lugar de un
+                       ícono de imagen rota. Barato de mantener, así que se queda. -->
+                  <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#3A5A4A_0%,#2C4638_100%)]" aria-hidden="true"></div>
+                <?php endif; ?>
+
+                <div class="flex flex-1 flex-col border-t-2 border-forest p-7">
+                  <h3 class="font-display text-lg font-bold tracking-tight text-ink">
+                    <?php echo esc_html($item['title']); ?>
+                  </h3>
+                  <p class="mt-3 text-sm leading-relaxed text-ink/70">
+                    <?php echo esc_html($item['body']); ?>
+                  </p>
+                </div>
+              </article>
+            </li>
+          <?php endforeach;
+        endfor; ?>
+      </ul>
     </div>
   </div>
 </section>
@@ -443,37 +651,75 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 08 · CREDENCIALES ═══════════════════ -->
-<section id="credentials" class="bg-white lg:flex lg:min-h-svh lg:items-start">
-  <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="max-w-3xl">
-      <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Credentials</p>
-      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-        The page your compliance team is going to ask for.
-      </h2>
-      <p class="mt-5 text-lg leading-relaxed text-ink/70">
-        Boring for everyone else. Decisive for you.
-      </p>
-    </div>
+<section id="credentials" class="bg-white lg:grid lg:min-h-svh lg:grid-cols-2 lg:items-stretch">
 
-    <!-- Tabla y no tarjetas: una tabla se lee como documento, una tarjeta
-         se lee como marketing. Para un GC eso importa. -->
-    <dl class="mt-12 max-w-4xl">
-      <?php foreach ($credentials as $row) : ?>
-        <div class="grid gap-1 border-b border-ink/10 py-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-8">
-          <dt class="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">
-            <?php echo esc_html($row['label']); ?>
-          </dt>
-          <dd class="text-sm text-ink"><?php echo esc_html($row['value']); ?></dd>
-        </div>
-      <?php endforeach; ?>
-    </dl>
+  <!-- Columna izquierda: encabezado y tabla, montados sobre una placa
+       biselada. El padding exterior es el margen de la página y hace de aire
+       alrededor de la placa — sin él el bisel toca los bordes de la sección y
+       deja de leerse como una pieza apoyada.
+
+       Reusa bevel-tile-raised, que ya existe para el hover de las tarjetas del
+       bloque 03. Acá va como estado fijo: una placa de este tamaño necesita
+       más presencia que una tarjeta, y no hay nueva CSS que mantener.
+
+       El fondo pasa a bone. Sobre el blanco de la sección, un bisel blanco
+       sobre blanco no se ve: la luz superior del relieve necesita una
+       superficie más cálida contra la que contrastar. -->
+  <div class="flex flex-col px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
+    <div class="bevel-tile-raised flex-1 rounded-lg bg-bone p-7 sm:p-10">
+      <div class="max-w-3xl">
+        <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Credentials</p>
+        <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+          The page your compliance team is going to ask for.
+        </h2>
+        <p class="mt-5 text-lg leading-relaxed text-ink/70">
+          Boring for everyone else. Decisive for you.
+        </p>
+      </div>
+
+      <!-- Tabla y no tarjetas: una tabla se lee como documento, una tarjeta
+           se lee como marketing. Para un GC eso importa. -->
+      <dl class="mt-12">
+        <?php foreach ($credentials as $row) : ?>
+          <div class="grid gap-1 border-b border-ink/10 py-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-8">
+            <dt class="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">
+              <?php echo esc_html($row['label']); ?>
+            </dt>
+            <dd class="text-sm text-ink"><?php echo esc_html($row['value']); ?></dd>
+          </div>
+        <?php endforeach; ?>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Columna derecha: panel a sangre, sin padding. Toca el borde superior,
+       el inferior y el derecho de la sección.
+
+       La imagen va en position absolute y no en el flujo. Esa es la corrección:
+       una <img> en el flujo impone su alto natural y estira la sección hasta
+       donde mida el archivo — que es lo que la desbordaba. Sacada del flujo,
+       el alto lo manda la columna de la tabla y la foto se recorta para
+       llenarla, que es el comportamiento correcto para una fotografía.
+
+       El fondo ink cubre el instante antes de que cargue y cualquier franja
+       que quede si la proporción no cierra exacta. -->
+  <div class="relative min-h-[24rem] overflow-hidden bg-ink sm:min-h-[30rem] lg:min-h-0">
+    <img
+      src="<?php echo esc_url($ec_uploads['baseurl'] . '/2026/07/ec_landscaping_award.png'); ?>"
+      alt="BusinessRate Best of 2026 Award Winner plaque"
+      class="absolute inset-0 h-full w-full object-cover object-center"
+      loading="lazy"
+      decoding="async"
+    />
   </div>
 </section>
 
 <!-- ═══════════════════ 09 · ÁREA DE SERVICIO ═══════════════════ -->
 <section id="service-area" class="bg-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-14">
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-16">
+
+      <!-- ── Columna izquierda: la promesa y su diagrama ── -->
       <div>
         <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Service area</p>
         <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
@@ -482,25 +728,94 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
         <p class="mt-5 text-base leading-relaxed text-ink/70">
           50 miles from our Ogden yard, and up to 90 miles for large commercial installations. If your project sits outside that line and the scope justifies the drive, ask us anyway.
         </p>
+
+        <?php
+        /* El mapa se arma de la misma cadena de dirección que el NAP del
+           footer. Escrita una vez acá y derivadas las dos URLs: si mañana
+           cambia la dirección, no queda un mapa apuntando a la anterior.
+
+           output=embed es la forma sin API key. Sirve para un mapa de lugar
+           como este; si en algún momento hace falta controlar zoom, marcadores
+           o estilo, ahí sí toca Maps Embed API y su clave. */
+        $ec_map_query = '3754 N Higley Rd Suite 2, Ogden, UT 84404';
+        $ec_map_embed = 'https://www.google.com/maps?q=' . rawurlencode($ec_map_query) . '&output=embed';
+        $ec_map_href  = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($ec_map_query);
+        ?>
+
+        <!-- Marco del mapa. El iframe va en absolute dentro de un contenedor
+             con proporción fija: así el alto queda reservado antes de que
+             cargue y la sección no salta cuando aparece.
+
+             loading=lazy no es cosmético — sin eso el iframe arrastra el
+             JavaScript de Maps en la carga inicial de una página que ya trae
+             dos videos. -->
+        <div class="relative mt-10 aspect-[4/3] w-full overflow-hidden rounded-lg bg-ink/5 ring-1 ring-ink/10 sm:aspect-[3/2]">
+          <iframe
+            src="<?php echo esc_url($ec_map_embed); ?>"
+            title="Map showing EC Landscaping at 3754 N Higley Rd, Suite 2, Ogden, Utah"
+            class="absolute inset-0 h-full w-full border-0"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+        </div>
+
+        <!-- Las dos distancias siguen siendo información que el mapa no da:
+             muestra dónde está el patio, no hasta dónde llega la cuadrilla. -->
+        <dl class="mt-6 flex flex-wrap gap-x-10 gap-y-4 text-sm">
+          <div>
+            <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/45">Yard</dt>
+            <dd class="mt-1 text-ink">
+              <a
+                href="<?php echo esc_url($ec_map_href); ?>"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-forest"
+              >3754 N Higley Rd, Ogden</a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/45">Standard radius</dt>
+            <dd class="mt-1 tabular-nums text-ink">50 miles</dd>
+          </div>
+          <div>
+            <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/45">Large installs</dt>
+            <dd class="mt-1 tabular-nums text-ink">Up to 90 miles</dd>
+          </div>
+        </dl>
       </div>
 
-      <div class="grid gap-8 sm:grid-cols-2">
-        <div>
-          <h3 class="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Core cities</h3>
-          <ul class="flex flex-col gap-2">
-            <?php foreach ($service_cities as $city) : ?>
-              <li class="text-sm text-ink"><?php echo esc_html($city); ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-        <div>
-          <h3 class="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Counties</h3>
-          <ul class="flex flex-col gap-2">
-            <?php foreach ($service_counties as $county) : ?>
-              <li class="text-sm text-ink"><?php echo esc_html($county); ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
+      <!-- ── Columna derecha: dónde, en dos niveles ──
+           Los condados van en tipografía display y las ciudades en fichas
+           debajo. La jerarquía no es decorativa: un GC piensa por condado
+           —permisos, distrito de agua, jurisdicción— y un property manager
+           piensa por ciudad. El bloque responde a los dos sin repetirse. -->
+      <div>
+        <h3 class="mb-5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Counties served</h3>
+        <ul class="border-t border-ink/10">
+          <?php foreach ($service_counties as $county) : ?>
+            <li class="flex items-baseline justify-between gap-6 border-b border-ink/10 py-4">
+              <span class="font-display text-2xl font-bold tracking-tight text-ink sm:text-[1.75rem]">
+                <?php echo esc_html($county); ?>
+              </span>
+              <span class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/40">County · Utah</span>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+
+        <h3 class="mb-5 mt-12 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Core cities</h3>
+        <ul class="flex flex-wrap gap-2">
+          <?php foreach ($service_cities as $city) : ?>
+            <li class="rounded-full border border-ink/15 bg-white px-4 py-2 text-sm text-ink">
+              <?php echo esc_html($city); ?>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+
+        <p class="mt-8 text-sm text-ink/60">
+          Not on the list? Call the yard —
+          <a href="tel:+13852403907" class="font-medium text-ink underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-forest">(385) 240-3907</a>
+        </p>
       </div>
     </div>
   </div>
@@ -533,49 +848,77 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <!-- ═══════════════════════ 11 · FAQ ═══════════════════════ -->
 <section class="bg-bone lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <h2 class="ec-shine max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-      Questions estimators actually ask.
-    </h2>
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
 
-    <!-- <details> nativo: acordeón accesible sin una línea de JavaScript. -->
-    <div class="mt-10 max-w-4xl">
-      <?php foreach ($faqs as $faq) : ?>
-        <details class="group border-b border-ink/10">
-          <summary class="flex cursor-pointer items-center justify-between gap-6 py-5 text-base font-medium text-ink marker:content-none [&::-webkit-details-marker]:hidden">
-            <?php echo esc_html($faq['q']); ?>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 shrink-0 text-ember transition-transform duration-200 group-open:rotate-45 motion-reduce:transition-none">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          </summary>
-          <p class="pb-6 pr-10 text-sm leading-relaxed text-ink/70">
-            <?php echo esc_html($faq['a']); ?>
-          </p>
-        </details>
-      <?php endforeach; ?>
+      <!-- Encabezado pegajoso: el acordeón crece al abrirse y sin sticky el
+           título se va de pantalla justo cuando el usuario está leyendo la
+           respuesta más larga. self-start es lo que impide que la columna
+           se estire y anule el sticky. -->
+      <div class="lg:sticky lg:top-[calc(var(--header-offset)+3rem)] lg:self-start">
+        <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">FAQ</p>
+        <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+          Questions estimators actually ask.
+        </h2>
+
+        <!-- La página ya no tiene bloque de CTA final, así que este es el
+             último punto de contacto antes del footer. -->
+        <p class="mt-6 max-w-sm text-base leading-relaxed text-ink/70">
+          Not covered here? Ask the estimator directly — you’ll get the owner or the person who priced your job, not a call center.
+        </p>
+        <a
+          href="tel:+13852403907"
+          class="mt-6 inline-flex items-center gap-2.5 text-lg font-semibold tabular-nums text-ink underline decoration-ember decoration-2 underline-offset-8 transition-colors hover:text-forest focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember"
+        >
+          (385) 240-3907
+        </a>
+      </div>
+
+      <!-- <details> nativo: acordeón accesible sin una línea de JavaScript. -->
+      <div>
+        <?php foreach ($faqs as $faq) : ?>
+          <details class="group border-b border-ink/10 first:border-t first:border-ink/10">
+            <summary class="flex cursor-pointer list-none items-start justify-between gap-6 py-6 marker:content-none [&::-webkit-details-marker]:hidden">
+              <span class="font-display text-lg font-bold leading-snug tracking-tight text-ink transition-colors group-hover:text-forest group-open:text-forest sm:text-xl">
+                <?php echo esc_html($faq['q']); ?>
+              </span>
+              <!-- El signo gira 45° al abrir: el mismo glifo hace de más y de
+                   cruz, así que el estado se lee sin cambiar de ícono. -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-ember transition-transform duration-200 group-open:rotate-45 motion-reduce:transition-none">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </summary>
+            <!-- Filete ember a la izquierda de la respuesta: ata visualmente
+                 el texto abierto con el ícono que lo abrió. -->
+            <p class="mb-6 border-l-2 border-ember pl-5 text-[0.95rem] leading-relaxed text-ink/70">
+              <?php echo esc_html($faq['a']); ?>
+            </p>
+          </details>
+        <?php endforeach; ?>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════ 12 · CTA FINAL + FORMULARIO ═══════════════ -->
-<section id="request-a-bid" class="bg-ink text-bone lg:flex lg:min-h-svh lg:items-start">
-  <div class="w-full grid gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-16 lg:px-10 lg:py-24">
-    <div>
-      <h2 class="ec-shine ec-shine--light font-display text-4xl leading-tight font-bold tracking-tight text-bone sm:text-5xl">
-        Send us the plans.
-      </h2>
-      <p class="mt-6 max-w-lg text-lg leading-relaxed text-bone/75">
-        Tell us the site, the scope and the date. You’ll hear back from the owner or the estimator — not a call center.
-      </p>
-      <p class="mt-8 text-sm text-bone/60">
-        Prefer to talk it through?
-        <a href="tel:+13852403907" class="ml-1 font-medium text-bone underline decoration-ember decoration-2 underline-offset-4">(385) 240-3907</a>
-      </p>
-    </div>
-
-    <!-- El formulario es el componente React ContactForm. -->
-    <div id="ec-contact-form"></div>
-  </div>
-</section>
+<?php
+/* Schema FAQPage generado del mismo array $faqs. Es la clase de marcado que
+   Google usa para los resultados enriquecidos de preguntas, y sale gratis:
+   una fuente, dos salidas, imposible que se desincronicen. */
+$faq_schema = array(
+  '@context'   => 'https://schema.org',
+  '@type'      => 'FAQPage',
+  'mainEntity' => array_map(
+    function ($faq) {
+      return array(
+        '@type'          => 'Question',
+        'name'           => $faq['q'],
+        'acceptedAnswer' => array('@type' => 'Answer', 'text' => $faq['a']),
+      );
+    },
+    $faqs
+  ),
+);
+?>
+<script type="application/ld+json"><?php echo wp_json_encode($faq_schema); ?></script>
 
 <script>
   /* Un solo manejador para todos los [data-bg-video] de la página.
@@ -649,6 +992,211 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
     }, { threshold: 0.35 });
 
     Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
+  })();
+  (function () {
+    /* Revelado por scroll. Genérico: observa cualquier [data-reveal] de la
+       página, así que colgarlo de otro bloque no pide tocar este script.
+
+       Si .ec-reveal no está en <html>, es porque el usuario pidió menos
+       movimiento o porque el script de arranque no corrió: en ninguno de los
+       dos casos hay nada oculto que revelar, así que se sale de una.
+
+       unobserve al revelar: es una entrada, no un efecto de ida y vuelta.
+       Volver a subir no debería re-esconder texto que ya se leyó. */
+    if (!document.documentElement.classList.contains('ec-reveal')) return;
+
+    var items = document.querySelectorAll('[data-reveal]');
+    if (!items.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(items, function (el) { el.classList.add('is-revealed'); });
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-revealed');
+        io.unobserve(entry.target);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    Array.prototype.forEach.call(items, function (el) { io.observe(el); });
+  })();
+  (function () {
+    /* Marquee: desplazamiento continuo sobre un contenedor con scroll nativo.
+       El JS empuja scrollLeft frame a frame en vez de animar un transform, y
+       esa es la diferencia que importa: el dedo, la rueda y el teclado siguen
+       operando la pista mientras se mueve.
+
+       Genérico por [data-carousel]: sirve para cualquier otro bloque que
+       quiera el mismo patrón sin tocar este código. */
+    var carousels = document.querySelectorAll('[data-carousel]');
+    if (!carousels.length) return;
+
+    var mqReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    Array.prototype.forEach.call(carousels, function (root) {
+      var track = root.querySelector('[data-carousel-track]');
+      if (!track) return;
+
+      var prev = root.querySelector('[data-carousel-prev]');
+      var next = root.querySelector('[data-carousel-next]');
+
+      /* Un "paso" es el ancho de una tarjeta más el gap. Se mide en vivo y no
+         se guarda: el ancho es responsive (80vw / 23rem / 25rem) y guardarlo
+         dejaría el paso desfasado al rotar el teléfono o redimensionar. */
+      function step() {
+        var first = track.firstElementChild;
+        if (!first) return track.clientWidth;
+        var second = first.nextElementSibling;
+        return second
+          ? second.getBoundingClientRect().left - first.getBoundingClientRect().left
+          : first.getBoundingClientRect().width;
+      }
+
+      var isMarquee = root.hasAttribute('data-marquee');
+
+      /* Ancho de un ciclo: la distancia entre la primera tarjeta y su clon.
+         Antes esto era scrollWidth/2, y estaba mal — scrollWidth incluye el
+         padding lateral de la pista, así que la mitad no cae en el clon sino
+         unos píxeles antes y el bucle se iba corriendo en cada vuelta.
+
+         Se cachea porque offsetLeft fuerza layout y esto se consulta en cada
+         frame. Se invalida al redimensionar y al terminar de cargar. */
+      var cycle = 0;
+
+      function cycleWidth() {
+        if (!isMarquee) return 0;
+        if (cycle) return cycle;
+        var items = track.children;
+        var count = Math.floor(items.length / 2);
+        if (count < 1) return 0;
+        cycle = items[count].offsetLeft - items[0].offsetLeft;
+        return cycle;
+      }
+
+      window.addEventListener('resize', function () { cycle = 0; }, { passive: true });
+      window.addEventListener('load', function () { cycle = 0; });
+
+      function normalize() {
+        var c = cycleWidth();
+        if (c > 0 && track.scrollLeft >= c) track.scrollLeft -= c;
+      }
+
+      /* Ida y vuelta con las flechas. Antes de retroceder desde el arranque se
+         salta al clon: sin esto el navegador topa en 0 y la flecha izquierda
+         se siente muerta durante el primer ciclo. */
+      function nudge(dir) {
+        var c = cycleWidth();
+        if (dir < 0 && c > 0 && track.scrollLeft < step()) track.scrollLeft += c;
+        track.scrollBy({ left: dir * step(), behavior: 'smooth' });
+      }
+
+      if (prev) prev.addEventListener('click', function () { nudge(-1); });
+      if (next) next.addEventListener('click', function () { nudge(1); });
+
+      track.addEventListener('scroll', normalize, { passive: true });
+
+      // Sin marquee, queda un carrusel manual y esto termina aquí.
+      if (!isMarquee) return;
+
+      /* Velocidad en px/s y no en px/frame: a 120 Hz un incremento fijo por
+         frame corre al doble. */
+      var SPEED = 26;
+      var paused = false;
+      var resumeTimer = null;
+      var last = null;
+      var frame = null;
+
+      function pause() {
+        paused = true;
+        if (resumeTimer) window.clearTimeout(resumeTimer);
+      }
+
+      /* La reanudación es diferida: si se retoma apenas se suelta el dedo, el
+         movimiento arranca encima del gesto y se lee como un tirón. */
+      function resumeSoon(delay) {
+        if (resumeTimer) window.clearTimeout(resumeTimer);
+        resumeTimer = window.setTimeout(function () {
+          paused = false;
+          last = null;
+        }, delay || 1200);
+      }
+
+      // Pausa mientras se lee o se manipula. Un marquee que no se detiene al
+      // pasar el mouse obliga a perseguir el texto para terminar de leerlo.
+      root.addEventListener('mouseenter', pause);
+      root.addEventListener('mouseleave', function () { resumeSoon(300); });
+      root.addEventListener('focusin', pause);
+      root.addEventListener('focusout', function () { resumeSoon(600); });
+      track.addEventListener('pointerdown', pause);
+      track.addEventListener('wheel', function () { pause(); resumeSoon(); }, { passive: true });
+      track.addEventListener('touchstart', pause, { passive: true });
+      track.addEventListener('touchend', function () { resumeSoon(); }, { passive: true });
+      window.addEventListener('pointerup', function () { if (paused) resumeSoon(); });
+
+      // Fuera de pantalla no hay nada que animar: sin esto el rAF sigue
+      // corriendo toda la página y se nota en batería.
+      var onScreen = true;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          onScreen = entries[0].isIntersecting;
+        }, { threshold: 0 }).observe(root);
+      }
+
+      /* Posición en punto flotante propia. Este es el arreglo del marquee que
+         no se movía: a 26 px/s cada frame avanza ~0.43 px, y varios motores
+         redondean scrollLeft a entero al escribirlo. Con `scrollLeft += 0.43`
+         el valor volvía al mismo entero una y otra vez y el resultado neto
+         era cero — no lento, quieto.
+
+         Llevando el acumulador aparte, la fracción sobrevive entre frames y
+         solo se pierde al pintar. Se resincroniza en cada reanudación, que es
+         lo que mantiene coherente la posición después de un gesto manual. */
+      var pos = track.scrollLeft;
+
+      function tick(now) {
+        frame = window.requestAnimationFrame(tick);
+        if (paused || !onScreen || document.hidden) { last = now; return; }
+        if (last === null) { last = now; pos = track.scrollLeft; return; }
+        // Se descarta cualquier salto mayor a 100 ms (pestaña en segundo
+        // plano): de lo contrario el marquee reaparece varios ciclos adelante.
+        var dt = Math.min(now - last, 100);
+        last = now;
+
+        var c = cycleWidth();
+        pos += (SPEED * dt) / 1000;
+        if (c > 0 && pos >= c) pos -= c;
+        track.scrollLeft = pos;
+      }
+
+      function enable() {
+        if (frame) return;
+        last = null;
+        frame = window.requestAnimationFrame(tick);
+      }
+
+      function disable() {
+        if (!frame) return;
+        window.cancelAnimationFrame(frame);
+        frame = null;
+      }
+
+      /* prefers-reduced-motion se consulta en vivo, no solo al cargar: si se
+         activa desde el sistema con la página abierta, el marquee para. */
+      function applyMotionPreference() {
+        if (mqReduce && mqReduce.matches) disable();
+        else enable();
+      }
+
+      if (mqReduce) {
+        if (mqReduce.addEventListener) mqReduce.addEventListener('change', applyMotionPreference);
+        else if (mqReduce.addListener) mqReduce.addListener(applyMotionPreference);
+      }
+
+      applyMotionPreference();
+    });
   })();
 </script>
 
