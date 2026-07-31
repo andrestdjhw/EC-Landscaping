@@ -27,9 +27,13 @@ mount("#ec-navbar", Navbar)
 mount("#ec-footer", Footer)
 mount("#ec-floating-actions", FloatingActions)
 
-// El modal se monta vacío y se dibuja solo al abrirse. Vive en footer.php
-// para que esté disponible en todas las plantillas, no solo en la landing.
-mount("#ec-contact-modal", ContactForm)
+// Dos instancias del mismo componente. Cada nodo existe solo en su plantilla,
+// así que en el resto del sitio mount() no lo encuentra y no monta nada.
+//
+// El modal global se retiró: su trabajo lo hace la página /contact, y los CTA
+// navegan hacia allá en lugar de abrir un diálogo.
+mount("#ec-hero-form", ContactForm)
+mount("#ec-contact-form", ContactForm)
 
 // Pendiente de la misma tanda:
 // mount("#ec-chatbot", Chatbot)

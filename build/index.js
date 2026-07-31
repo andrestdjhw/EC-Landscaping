@@ -19,22 +19,39 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /**
- * ContactForm — modal de "Request a bid" · EC Landscaping
+ * ContactForm — "Request a bid" · EC Landscaping
  *
- * Se abre interceptando cualquier <a href="#request-a-bid"> de la página.
- * Esa decisión es la que evita tocar Navbar.js, Footer.js y header.php: los
- * tres ya apuntan a esa ancla y siguen funcionando sin cambios. El bloque 12
- * se eliminó, así que esos enlaces no llevaban a ninguna parte — ahora abren
- * el modal.
+ * Un componente, tres usos, combinando cuatro props:
  *
- * También escucha el evento 'ec:open-bid' por si más adelante hace falta
- * abrirlo desde otro lado (el chatbot, por ejemplo) sin un enlace de por medio.
+ *   Hero          variant="inline"  persistent  density="compact"
+ *                 inlineMinWidth="(min-width: 1280px)"
+ *                 Siempre visible en la columna derecha del hero. Por debajo
+ *                 del umbral no hay sitio, así que cae a modal y el CTA del
+ *                 hero vuelve a ser un disparador.
  *
- * Props (desde footer.php vía data-props):
- *   endpoint   URL del REST route que recibe el envío
- *   nonce      nonce de wp_rest, va en la cabecera X-WP-Nonce
- *   phone      teléfono visible, para la salida alterna y el estado de éxito
- *   trigger    selector de los disparadores. Default: a[href="#request-a-bid"]
+ *   Página /contact  variant="inline" persistent density="comfortable"
+ *                 Sin umbral: la página es suya, no compite con nada.
+ *
+ *   (sin uso hoy)  variant="modal"
+ *                 El modal global se retiró: su trabajo lo hace /contact.
+ *                 La rama sigue en el archivo, a una prop de distancia.
+ *
+ * Props:
+ *   variant         "inline" | "modal"
+ *   persistent      inline: se dibuja siempre, sin disparador ni botón de
+ *                   cerrar. El disparador, si existe, pasa a enfocar el primer
+ *                   campo en lugar de abrir.
+ *   density         "compact" | "comfortable" — decide padding y columnas.
+ *                   No se deriva del viewport: las variantes sm: de Tailwind
+ *                   miden la ventana, no el contenedor, y el panel del hero
+ *                   mide 27rem dentro de una ventana de 1280+.
+ *   inlineMinWidth  media query. Por debajo, la variante inline cae a modal.
+ *                   null = nunca cae.
+ *   trigger         selector de los disparadores. Vacío o null = la
+ *                   instancia no intercepta clics y los enlaces navegan.
+ *   endpoint        URL del REST route que recibe el envío
+ *   nonce           nonce de wp_rest, viaja en la cabecera X-WP-Nonce
+ *   phone           teléfono visible
  */
 
 const SCOPES = ["Landscape installation", "Hardscape & concrete", "Grounds maintenance & snow", "Water-wise retrofit", "More than one of these"];
@@ -53,6 +70,7 @@ const EMPTY = {
   // rellena todo lo que encuentra. Si viene con algo, el servidor descarta.
   website: ""
 };
+const ANIM_MS = 220;
 function validate(values) {
   const errors = {};
   if (!values.name.trim()) errors.name = "Tell us who you are.";
@@ -87,17 +105,55 @@ function Field({
     })]
   });
 }
-const controlClass = ["w-full rounded-md border bg-white/[0.04] px-3.5 py-2.5 text-sm text-bone", "placeholder:text-bone/30", "transition-colors duration-150", "focus:border-ember focus:bg-white/[0.07] focus:outline-none"].join(" ");
+const controlBase = ["w-full rounded-md border bg-white/[0.04] px-3.5 py-2.5 text-sm text-bone", "placeholder:text-bone/30", "transition-colors duration-150", "focus:border-ember focus:bg-white/[0.07] focus:outline-none"].join(" ");
 function control(hasError) {
-  return `${controlClass} ${hasError ? "border-ember" : "border-white/12"}`;
+  return `${controlBase} ${hasError ? "border-ember" : "border-white/12"}`;
+}
+
+/* ── Media query como hook ──
+   Se escucha el cambio, no solo el valor inicial: si alguien redimensiona la
+   ventana con el panel abierto, tiene que convertirse en modal en lugar de
+   quedar montado encima del titular. */
+function useMediaQuery(query) {
+  const [matches, setMatches] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(() => {
+    // Sin consulta, siempre coincide: es la forma de decir "no hay umbral"
+    // sin ramificar en el sitio donde se usa.
+    if (!query) return true;
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia(query).matches;
+  });
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!query || !window.matchMedia) return;
+    const mq = window.matchMedia(query);
+    const onChange = event => setMatches(event.matches);
+    setMatches(mq.matches);
+    if (mq.addEventListener) mq.addEventListener("change", onChange);else mq.addListener(onChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", onChange);else mq.removeListener(onChange);
+    };
+  }, [query]);
+  return matches;
 }
 function ContactForm({
+  variant = "modal",
+  persistent = false,
+  density = "comfortable",
+  inlineMinWidth = null,
+  trigger = null,
   endpoint = "/wp-json/ec/v1/bid",
   nonce = "",
-  phone = "(385) 240-3907",
-  trigger = 'a[href="#request-a-bid"]'
+  phone = "(385) 240-3907"
 }) {
-  const [open, setOpen] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const wideEnough = useMediaQuery(inlineMinWidth);
+
+  // Persistente por debajo del umbral: no hay panel y tampoco hay modal al
+  // que caer. El componente se aparta —ni renderiza ni intercepta clics— y
+  // el CTA se comporta como el enlace que es, navegando a /contact.
+  const standDown = variant === "inline" && persistent && !wideEnough;
+  const asModal = variant !== "inline" || !wideEnough && !persistent;
+  const alwaysOn = persistent && !standDown;
+  const [mounted, setMounted] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(alwaysOn);
+  const [entered, setEntered] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(alwaysOn);
   const [values, setValues] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(EMPTY);
   const [errors, setErrors] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({});
   const [status, setStatus] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("idle"); // idle | sending | sent | failed
@@ -105,29 +161,78 @@ function ContactForm({
   const panelRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   const firstFieldRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   const returnFocusTo = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  const telHref = `tel:+1${phone.replace(/\D/g, "")}`;
-  const close = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
-    setOpen(false);
-    // Devolver el foco al elemento que abrió el modal. Sin esto, quien navega
-    // con teclado vuelve al principio del documento y tiene que rehacer todo
-    // el recorrido para llegar a donde estaba.
-    if (returnFocusTo.current && returnFocusTo.current.focus) {
-      returnFocusTo.current.focus();
-    }
-  }, []);
+  const closeTimer = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
 
-  /* ── Disparadores ── */
+  // Al cruzar el umbral en un redimensionado, el panel tiene que aparecer o
+  // desaparecer solo. Sin esto queda montado como modal, o desmontado en una
+  // ventana que ya tiene sitio para él.
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (alwaysOn) {
+      setMounted(true);
+      setEntered(true);
+    }
+  }, [alwaysOn]);
+  const telHref = `tel:+1${phone.replace(/\D/g, "")}`;
+  const reduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const close = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
+    // Un panel permanente no se cierra. Sin esta guarda, Escape lo desmontaría
+    // y no habría forma de recuperarlo sin recargar.
+    if (alwaysOn) return;
+    setEntered(false);
+    // Se desmonta después de la transición de salida, no durante: quitar el
+    // nodo en el primer frame haría que el panel desaparezca de golpe y la
+    // animación de cierre no se vea nunca.
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => {
+      setMounted(false);
+      if (returnFocusTo.current && returnFocusTo.current.focus) {
+        returnFocusTo.current.focus();
+      }
+    }, reduced ? 0 : ANIM_MS);
+  }, [reduced, alwaysOn]);
+
+  /* ── Disparadores ──
+     Con el panel permanente el formulario ya está en pantalla, así que el CTA
+     no tiene nada que abrir: lleva el foco al primer campo. El botón sigue
+     sirviendo —es lo que la gente busca con la vista— pero ahora señala en
+     lugar de revelar. */
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    // Sin panel y sin modal no hay nada que hacer con el clic: dejar que el
+    // enlace navegue es exactamente el comportamiento correcto.
+    if (standDown) return;
+
+    // trigger vacío = esta instancia no intercepta nada. Es lo que usa el
+    // hero: sus CTA tienen que llevar a /contact como cualquier otro enlace,
+    // aunque el formulario esté visible al lado.
+    if (!trigger) return;
+    const focusFirst = () => {
+      if (!firstFieldRef.current) return;
+      firstFieldRef.current.focus();
+      firstFieldRef.current.scrollIntoView({
+        block: "nearest",
+        behavior: reduced ? "auto" : "smooth"
+      });
+    };
     const onClick = event => {
       const link = event.target.closest(trigger);
       if (!link) return;
       event.preventDefault();
+      if (alwaysOn) {
+        focusFirst();
+        return;
+      }
       returnFocusTo.current = link;
-      setOpen(true);
+      if (closeTimer.current) window.clearTimeout(closeTimer.current);
+      setMounted(true);
     };
     const onEvent = () => {
+      if (alwaysOn) {
+        focusFirst();
+        return;
+      }
       returnFocusTo.current = document.activeElement;
-      setOpen(true);
+      if (closeTimer.current) window.clearTimeout(closeTimer.current);
+      setMounted(true);
     };
     document.addEventListener("click", onClick);
     document.addEventListener("ec:open-bid", onEvent);
@@ -135,21 +240,32 @@ function ContactForm({
       document.removeEventListener("click", onClick);
       document.removeEventListener("ec:open-bid", onEvent);
     };
-  }, [trigger]);
+  }, [trigger, alwaysOn, reduced, standDown]);
 
-  /* ── Bloqueo de scroll, Escape y trampa de foco ──
-     Un diálogo modal que deja escapar el Tab no es modal: el lector de
-     pantalla sigue leyendo la página de atrás como si nada. */
+  /* ── Entrada: montar en un frame, animar en el siguiente ──
+     Si se aplicara el estado final en el mismo frame del montaje, el
+     navegador no tendría un estado inicial contra el que interpolar y no
+     habría transición. */
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    if (!open) return;
+    if (!mounted) return;
+    const raf = window.requestAnimationFrame(() => setEntered(true));
+    return () => window.cancelAnimationFrame(raf);
+  }, [mounted]);
+
+  /* ── Escape, foco y bloqueo de scroll ──
+     El bloqueo y la trampa de foco son exclusivos del modal. El panel del
+     hero no es modal: la página sigue siendo suya, se puede scrollear y
+     tabular fuera del formulario sin cerrarlo. */
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!mounted) return;
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (asModal) document.body.style.overflow = "hidden";
     const onKey = event => {
       if (event.key === "Escape") {
         close();
         return;
       }
-      if (event.key !== "Tab" || !panelRef.current) return;
+      if (!asModal || event.key !== "Tab" || !panelRef.current) return;
       const focusables = panelRef.current.querySelectorAll('a[href], button:not([disabled]), input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])');
       if (!focusables.length) return;
       const first = focusables[0];
@@ -166,15 +282,22 @@ function ContactForm({
 
     // El foco entra al primer campo, no al panel: se puede empezar a escribir
     // sin un tabulador de por medio.
+    //
+    // Salvo cuando es permanente: ahí el formulario no fue invocado por nadie,
+    // así que robarle el foco al cargar la página secuestraría el teclado y
+    // saltaría el scroll al panel antes de que se lea el titular.
     const raf = window.requestAnimationFrame(() => {
-      if (firstFieldRef.current) firstFieldRef.current.focus();
+      if (!alwaysOn && firstFieldRef.current) firstFieldRef.current.focus();
     });
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKey);
       window.cancelAnimationFrame(raf);
     };
-  }, [open, close, status]);
+  }, [mounted, asModal, alwaysOn, close, status]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => () => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+  }, []);
   const set = key => event => {
     const {
       value
@@ -220,269 +343,314 @@ function ContactForm({
       setStatus("failed");
     }
   };
-  if (!open) return null;
+  if (standDown || !mounted) return null;
+
+  // La densidad viene por prop, no del viewport: las variantes sm: de Tailwind
+  // miden la ventana, no el contenedor, y el panel del hero mide 27rem dentro
+  // de una ventana de 1280+. Un modal siempre es cómodo; el hero, compacto.
+  const compact = asModal ? false : density === "compact";
+  const padX = compact ? "px-5" : "px-6 sm:px-8";
+  const gridCols = compact ? "grid-cols-2 gap-4" : "gap-5 sm:grid-cols-2";
+  const spanFull = compact ? "col-span-2" : "sm:col-span-2";
+  const body = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+      className: `flex items-start justify-between gap-4 border-b border-white/10 ${padX} ${compact ? "py-4" : "py-5"}`,
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        children: [!compact && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+          className: "mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ember",
+          children: "Request a bid"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h2", {
+          id: "ec-bid-title",
+          className: `font-display font-bold tracking-tight text-bone ${compact ? "text-xl" : "text-2xl sm:text-3xl"}`,
+          children: "Send us the plans."
+        })]
+      }), !alwaysOn && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+        type: "button",
+        onClick: close,
+        "aria-label": "Close",
+        className: "-mr-2 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-bone/60 transition-colors hover:bg-white/10 hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "1.6",
+          strokeLinecap: "round",
+          "aria-hidden": "true",
+          className: "h-5 w-5",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+            d: "M6 6l12 12M18 6L6 18"
+          })
+        })
+      })]
+    }), status === "sent" ?
+    /*#__PURE__*/
+    /* ── Éxito ──
+       No se cierra solo a los tres segundos: el usuario acaba de entregar
+       los datos de un proyecto y merece leer que llegaron. */
+    (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+      className: `${padX} py-12 text-center`,
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+        className: "mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-ember/15",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "1.8",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          "aria-hidden": "true",
+          className: "h-6 w-6 text-ember",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+            d: "m5 13 4 4L19 7"
+          })
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+        className: "font-display text-xl font-bold tracking-tight text-bone",
+        children: "Got it. We\u2019ll be in touch."
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+        className: "mx-auto mt-3 max-w-sm text-sm leading-relaxed text-bone/70",
+        children: "You\u2019ll hear back from the owner or the estimator. If it\u2019s urgent, call the yard."
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+        href: telHref,
+        className: "mt-6 inline-block text-lg font-semibold tabular-nums text-bone underline decoration-ember decoration-2 underline-offset-8",
+        children: phone
+      })]
+    }) :
+    /*#__PURE__*/
+    /* El cuerpo scrollea, la cabecera y el pie se quedan fijos: ni en un
+       teléfono ni en el panel del hero entra el formulario completo, y el
+       botón de enviar no puede quedar enterrado al final del scroll. */
+    (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("form", {
+      onSubmit: submit,
+      noValidate: true,
+      className: "flex min-h-0 flex-1 flex-col",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: `grid min-h-0 flex-1 overflow-y-auto ${padX} ${gridCols} ${compact ? "py-5" : "py-6"}`,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-name",
+          label: "Name",
+          error: errors.name,
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+            ref: firstFieldRef,
+            id: "ec-name",
+            type: "text",
+            autoComplete: "name",
+            value: values.name,
+            onChange: set("name"),
+            "aria-invalid": !!errors.name,
+            "aria-describedby": errors.name ? "ec-name-error" : undefined,
+            className: control(errors.name)
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-company",
+          label: "Company",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+            id: "ec-company",
+            type: "text",
+            autoComplete: "organization",
+            value: values.company,
+            onChange: set("company"),
+            className: control(false)
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-email",
+          label: "Email",
+          error: errors.email,
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+            id: "ec-email",
+            type: "email",
+            autoComplete: "email",
+            value: values.email,
+            onChange: set("email"),
+            "aria-invalid": !!errors.email,
+            "aria-describedby": errors.email ? "ec-email-error" : undefined,
+            className: control(errors.email)
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-phone",
+          label: "Phone",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+            id: "ec-phone",
+            type: "tel",
+            autoComplete: "tel",
+            value: values.phone,
+            onChange: set("phone"),
+            className: control(false)
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-buyer",
+          label: "You are",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("select", {
+            id: "ec-buyer",
+            value: values.buyer,
+            onChange: set("buyer"),
+            className: control(false),
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
+              value: "",
+              children: "Select one"
+            }), BUYERS.map(option => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
+              value: option,
+              className: "bg-ink",
+              children: option
+            }, option))]
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-scope",
+          label: "Scope",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("select", {
+            id: "ec-scope",
+            value: values.scope,
+            onChange: set("scope"),
+            className: control(false),
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
+              value: "",
+              children: "Select one"
+            }), SCOPES.map(option => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
+              value: option,
+              className: "bg-ink",
+              children: option
+            }, option))]
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-site",
+          label: "Site location",
+          error: errors.site,
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+            id: "ec-site",
+            type: "text",
+            placeholder: compact ? "City or address" : "City, or the project address",
+            value: values.site,
+            onChange: set("site"),
+            "aria-invalid": !!errors.site,
+            "aria-describedby": errors.site ? "ec-site-error" : undefined,
+            className: control(errors.site)
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-date",
+          label: "Target date",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+            id: "ec-date",
+            type: "date",
+            value: values.date,
+            onChange: set("date"),
+            className: `${control(false)} [color-scheme:dark]`
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
+          id: "ec-details",
+          label: "Scope and schedule",
+          error: errors.details,
+          className: spanFull,
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("textarea", {
+            id: "ec-details",
+            rows: compact ? 3 : 4,
+            placeholder: compact ? "Site, scope and target date." : "What’s the site, what’s the scope, and when do you need it done?",
+            value: values.details,
+            onChange: set("details"),
+            "aria-invalid": !!errors.details,
+            "aria-describedby": errors.details ? "ec-details-error" : undefined,
+            className: `${control(errors.details)} resize-y`
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+          className: "absolute left-[-9999px]",
+          "aria-hidden": "true",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("label", {
+            htmlFor: "ec-website",
+            children: "Website"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+            id: "ec-website",
+            type: "text",
+            tabIndex: -1,
+            autoComplete: "off",
+            value: values.website,
+            onChange: set("website")
+          })]
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: `shrink-0 border-t border-white/10 ${padX} ${compact ? "py-4" : "py-5"}`,
+        children: [status === "failed" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
+          role: "alert",
+          className: "mb-4 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-bone",
+          children: ["That didn\u2019t go through. Try again, or call us at", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+            href: telHref,
+            className: "font-medium underline decoration-ember decoration-2 underline-offset-4",
+            children: phone
+          }), "."]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+          className: compact ? "flex flex-col gap-3" : "flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("button", {
+            type: "submit",
+            disabled: status === "sending",
+            className: ["cta-relief group inline-flex items-center justify-center gap-2.5 rounded-full border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6", "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink whitespace-nowrap", "transition-all duration-200 ease-out", "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px", "active:translate-y-0 active:shadow-none", "disabled:pointer-events-none disabled:opacity-60", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", compact ? "order-first w-full" : ""].join(" "),
+            children: [status === "sending" ? "Sending…" : "Send it", status !== "sending" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "1.6",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              "aria-hidden": "true",
+              className: "h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+                d: "M5 12h13M13 6l6 6-6 6"
+              })
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
+            className: `text-xs leading-relaxed text-bone/50 ${compact ? "text-center" : ""}`,
+            children: ["Prefer to talk it through?", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+              href: telHref,
+              className: "whitespace-nowrap font-medium text-bone/80 underline decoration-ember decoration-2 underline-offset-4",
+              children: phone
+            })]
+          })]
+        })]
+      })]
+    })]
+  });
+
+  /* ── Variante inline: panel dentro del hero ──
+     Entra desplazándose desde la derecha. No lleva velo ni role="dialog":
+     no bloquea la página, así que anunciarlo como diálogo modal sería
+     mentirle al lector de pantalla. Va como región con nombre. */
+  if (!asModal) {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      ref: panelRef,
+      role: "region",
+      "aria-labelledby": "ec-bid-title",
+      className: ["pointer-events-auto flex max-h-full w-full flex-col overflow-hidden rounded-xl", "bg-ink/95 text-bone shadow-2xl shadow-ink/40 ring-1 ring-white/12 backdrop-blur-md",
+      // Permanente no anima: el panel no entra desde ningún lado, ya
+      // estaba ahí cuando cargó la página.
+      alwaysOn ? "" : ["transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"].join(" ")].join(" "),
+      style: alwaysOn ? undefined : {
+        transitionDuration: `${ANIM_MS}ms`
+      },
+      children: body
+    });
+  }
+
+  /* ── Variante modal ──
+     Hoy ninguna instancia la usa: el modal global se retiró y su trabajo lo
+     hace la página /contact. Se conserva porque sigue estando a una prop de
+     distancia —variant="modal" en cualquier nodo de montaje— y borrarla
+     costaría más que mantenerla. Si en tres meses sigue sin usarse, sacala. */
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
     className: "fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-6",
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-      className: "absolute inset-0 bg-ink/80 backdrop-blur-sm",
+      className: ["absolute inset-0 bg-ink/80 backdrop-blur-sm", "transition-opacity ease-out motion-reduce:transition-none", entered ? "opacity-100" : "opacity-0"].join(" "),
+      style: {
+        transitionDuration: `${ANIM_MS}ms`
+      },
       onClick: close,
       "aria-hidden": "true"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
       ref: panelRef,
       role: "dialog",
       "aria-modal": "true",
       "aria-labelledby": "ec-bid-title",
-      className: "relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "flex items-start justify-between gap-6 border-b border-white/10 px-6 py-5 sm:px-8",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-            className: "mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ember",
-            children: "Request a bid"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h2", {
-            id: "ec-bid-title",
-            className: "font-display text-2xl font-bold tracking-tight text-bone sm:text-3xl",
-            children: "Send us the plans."
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
-          type: "button",
-          onClick: close,
-          "aria-label": "Close",
-          className: "-mr-2 -mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-bone/60 transition-colors hover:bg-white/10 hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: "1.6",
-            strokeLinecap: "round",
-            "aria-hidden": "true",
-            className: "h-5 w-5",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-              d: "M6 6l12 12M18 6L6 18"
-            })
-          })
-        })]
-      }), status === "sent" ?
-      /*#__PURE__*/
-      /* ── Éxito ──
-         No se cierra solo a los tres segundos: el usuario acaba de
-         entregar los datos de un proyecto y merece leer que llegaron. */
-      (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "px-6 py-12 text-center sm:px-8",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-          className: "mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-ember/15",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: "1.8",
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            "aria-hidden": "true",
-            className: "h-6 w-6 text-ember",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-              d: "m5 13 4 4L19 7"
-            })
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-          className: "font-display text-xl font-bold tracking-tight text-bone",
-          children: "Got it. We\u2019ll be in touch."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-          className: "mx-auto mt-3 max-w-sm text-sm leading-relaxed text-bone/70",
-          children: "You\u2019ll hear back from the owner or the estimator. If it\u2019s urgent, call the yard."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-          href: telHref,
-          className: "mt-6 inline-block text-lg font-semibold tabular-nums text-bone underline decoration-ember decoration-2 underline-offset-8",
-          children: phone
-        })]
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("form", {
-          onSubmit: submit,
-          noValidate: true,
-          className: "flex min-h-0 flex-1 flex-col",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-            className: "grid min-h-0 flex-1 gap-5 overflow-y-auto px-6 py-6 sm:grid-cols-2 sm:px-8",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-name",
-              label: "Name",
-              error: errors.name,
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-                ref: firstFieldRef,
-                id: "ec-name",
-                type: "text",
-                autoComplete: "name",
-                value: values.name,
-                onChange: set("name"),
-                "aria-invalid": !!errors.name,
-                "aria-describedby": errors.name ? "ec-name-error" : undefined,
-                className: control(errors.name)
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-company",
-              label: "Company",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-                id: "ec-company",
-                type: "text",
-                autoComplete: "organization",
-                value: values.company,
-                onChange: set("company"),
-                className: control(false)
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-email",
-              label: "Email",
-              error: errors.email,
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-                id: "ec-email",
-                type: "email",
-                autoComplete: "email",
-                value: values.email,
-                onChange: set("email"),
-                "aria-invalid": !!errors.email,
-                "aria-describedby": errors.email ? "ec-email-error" : undefined,
-                className: control(errors.email)
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-phone",
-              label: "Phone",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-                id: "ec-phone",
-                type: "tel",
-                autoComplete: "tel",
-                value: values.phone,
-                onChange: set("phone"),
-                className: control(false)
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-buyer",
-              label: "You are",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("select", {
-                id: "ec-buyer",
-                value: values.buyer,
-                onChange: set("buyer"),
-                className: control(false),
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
-                  value: "",
-                  children: "Select one"
-                }), BUYERS.map(option => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
-                  value: option,
-                  className: "bg-ink",
-                  children: option
-                }, option))]
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-scope",
-              label: "Scope",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("select", {
-                id: "ec-scope",
-                value: values.scope,
-                onChange: set("scope"),
-                className: control(false),
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
-                  value: "",
-                  children: "Select one"
-                }), SCOPES.map(option => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
-                  value: option,
-                  className: "bg-ink",
-                  children: option
-                }, option))]
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-site",
-              label: "Site location",
-              error: errors.site,
-              className: "sm:col-span-2",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-                id: "ec-site",
-                type: "text",
-                placeholder: "City, or the project address",
-                value: values.site,
-                onChange: set("site"),
-                "aria-invalid": !!errors.site,
-                "aria-describedby": errors.site ? "ec-site-error" : undefined,
-                className: control(errors.site)
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-date",
-              label: "Target date",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-                id: "ec-date",
-                type: "date",
-                value: values.date,
-                onChange: set("date"),
-                className: `${control(false)} [color-scheme:dark]`
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Field, {
-              id: "ec-details",
-              label: "Scope and schedule",
-              error: errors.details,
-              className: "sm:col-span-2",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("textarea", {
-                id: "ec-details",
-                rows: 4,
-                placeholder: "What\u2019s the site, what\u2019s the scope, and when do you need it done?",
-                value: values.details,
-                onChange: set("details"),
-                "aria-invalid": !!errors.details,
-                "aria-describedby": errors.details ? "ec-details-error" : undefined,
-                className: `${control(errors.details)} resize-y`
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-              className: "absolute left-[-9999px]",
-              "aria-hidden": "true",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("label", {
-                htmlFor: "ec-website",
-                children: "Website"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-                id: "ec-website",
-                type: "text",
-                tabIndex: -1,
-                autoComplete: "off",
-                value: values.website,
-                onChange: set("website")
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-            className: "shrink-0 border-t border-white/10 px-6 py-5 sm:px-8",
-            children: [status === "failed" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
-              role: "alert",
-              className: "mb-4 rounded-md border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-bone",
-              children: ["That didn\u2019t go through. Try again, or call us at", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-                href: telHref,
-                className: "font-medium underline decoration-ember decoration-2 underline-offset-4",
-                children: phone
-              }), "."]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-              className: "flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
-                className: "text-xs leading-relaxed text-bone/50",
-                children: ["Prefer to talk it through?", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-                  href: telHref,
-                  className: "font-medium text-bone/80 underline decoration-ember decoration-2 underline-offset-4",
-                  children: phone
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("button", {
-                type: "submit",
-                disabled: status === "sending",
-                className: ["cta-relief group inline-flex items-center justify-center gap-2.5 rounded-full border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6", "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink", "transition-all duration-200 ease-out", "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px", "active:translate-y-0 active:shadow-none", "disabled:pointer-events-none disabled:opacity-60", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none"].join(" "),
-                children: [status === "sending" ? "Sending…" : "Send it", status !== "sending" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
-                  viewBox: "0 0 24 24",
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeWidth: "1.6",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round",
-                  "aria-hidden": "true",
-                  className: "h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-                    d: "M5 12h13M13 6l6 6-6 6"
-                  })
-                })]
-              })]
-            })]
-          })]
-        })
-      })]
+      className: ["relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl", "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl", "transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"].join(" "),
+      style: {
+        transitionDuration: `${ANIM_MS}ms`
+      },
+      children: body
     })]
   });
 }
@@ -651,6 +819,10 @@ __webpack_require__.r(__webpack_exports__);
  *   theme       "light" (default, fondo bone) | "dark" (fondo ink)
  *   socials     [{ network, href }] — network: facebook | instagram | google
  *               | linkedin | youtube. Vacío = no se renderiza la fila.
+ *   columns     [{ title, links: [{ label, href, cta }] }]
+ *               cta: true marca el enlace con data-bid-cta, que es lo que
+ *               ContactForm escucha. En /contact eso enfoca el formulario en
+ *               lugar de recargar la página contra sí misma.
  */
 
 const DEFAULT_COLUMNS = [{
@@ -676,12 +848,13 @@ const DEFAULT_COLUMNS = [{
   links: [{
     label: "About EC",
     href: "/about"
-  }, {
-    label: "Residential",
-    href: "/residential"
-  }, {
+  },
+  // El enlace a residencial se retiró: el sitio es de landscaping
+  // comercial y no expone esa salida.
+  {
     label: "Request a bid",
-    href: "#request-a-bid"
+    href: "/contact",
+    cta: true
   }]
 }, {
   title: "Legal",
@@ -862,6 +1035,9 @@ function Footer({
             children: column.links.map(link => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
                 href: link.href,
+                ...(link.cta ? {
+                  "data-bid-cta": ""
+                } : {}),
                 className: `${linkTone} text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`,
                 children: link.label
               })
@@ -934,9 +1110,20 @@ __webpack_require__.r(__webpack_exports__);
  *                     hace falta subir la versión en positivo.
  *   phone             Teléfono en formato display.  ej. "(385) 240-3907"
  *   license           Línea de licencia.            ej. "UT 1106462255001 · S330"
- *   links             [{ label, href }]
+ *   links             [{ label, href, activeId, children }]
+ *                     children: [{ label, href }] convierte la entrada en un
+ *                     desplegable. El padre pasa a ser <button> y no <a>: un
+ *                     elemento que navega y despliega a la vez deja al lector
+ *                     de pantalla sin saber qué hace Enter.
+ *                     activeId: id de sección para el scrollspy cuando el href
+ *                     del padre ya no es un ancla.
  *   bidHref           Destino del CTA principal.
- *   residentialHref   Destino del enlace secundario a residencial.
+ *   residentialHref   Destino del enlace secundario a residencial. Si no llega,
+ *                     el enlace no se renderiza — ni en la franja de utilidad ni
+ *                     en el panel móvil. Hoy header.php no lo manda: el sitio es
+ *                     de landscaping comercial y no expone salida a residencial.
+ *                     El markup se conserva para que restituirlo sea agregar la
+ *                     prop, sin tocar este archivo.
  *   theme             "dark" (default) | "light"
  *   ctaStyle          "ember" (default) | "soft"
  *                     "soft" es el estilo neumórfico de Uiverse; pide theme="light"
@@ -947,11 +1134,27 @@ const DEFAULT_LINKS = [{
   label: "Commercial",
   href: "#commercial"
 }, {
-  label: "Capabilities",
-  href: "#capabilities"
-}, {
   label: "Projects",
   href: "#projects"
+}, {
+  label: "Capabilities",
+  activeId: "#capabilities",
+  children: [{
+    label: "All capabilities",
+    href: "/capabilities"
+  }, {
+    label: "Commercial landscape installation",
+    href: "/landscape-installation"
+  }, {
+    label: "Hardscape & concrete",
+    href: "/hardscape-concrete"
+  }, {
+    label: "Grounds maintenance, irrigation & snow",
+    href: "/grounds-maintenance"
+  }, {
+    label: "Water-wise retrofits",
+    href: "/water-wise-retrofits"
+  }]
 }, {
   label: "Credentials",
   href: "#credentials"
@@ -984,7 +1187,10 @@ function useDocked(threshold = 24) {
 function useActiveSection(links) {
   const [active, setActive] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    const ids = links.map(l => l.href).filter(h => h.startsWith("#")).map(h => h.slice(1));
+    // activeId cubre las entradas cuyo href ya no es un ancla — el padre de
+    // un desplegable, por ejemplo — pero que siguen correspondiendo a una
+    // sección de la landing.
+    const ids = links.map(l => l.activeId || l.href).filter(h => typeof h === "string" && h.startsWith("#")).map(h => h.slice(1)).concat(links.map(l => l.activeId).filter(Boolean));
     const nodes = ids.map(id => document.getElementById(id)).filter(Boolean);
     if (!nodes.length || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(entries => {
@@ -1045,6 +1251,13 @@ const PinIcon = props => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MOD
     cy: "10",
     r: "2.5"
   })]
+});
+const ChevronIcon = props => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+  ...iconProps,
+  ...props,
+  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+    d: "m6 9 6 6 6-6"
+  })
 });
 
 /**
@@ -1114,13 +1327,110 @@ function BidButton({
   };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
     href: href,
-    onClick: onClick,
+    onClick: onClick
+    // Todos los CTA de bid llevan este atributo. ContactForm lo escucha:
+    // donde hay formulario en pantalla intercepta y enfoca; donde no,
+    // el enlace navega a /contact como cualquier otro.
+    ,
+    "data-bid-cta": "",
     className: ["group inline-flex items-center justify-center gap-2.5 rounded-full border-2", "text-[0.8125rem] font-medium uppercase tracking-[0.4px]", "transition-all duration-200 ease-out", "active:translate-y-0 active:shadow-none", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", skins[skin], sizes[size], className].join(" "),
     children: ["Request a Bid", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
       ...iconProps,
       className: "h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
         d: "M5 12h13M13 6l6 6-6 6"
+      })
+    })]
+  });
+}
+
+/**
+ * NavDropdown — entrada de menú con submenú.
+ *
+ * Abre con hover y con foco, porque son dos formas distintas de llegar y
+ * ninguna debería quedar fuera. El cierre por hover lleva un retardo corto:
+ * sin él, el desplegable se cierra en el hueco entre el botón y el panel
+ * mientras el mouse baja.
+ */
+function NavDropdown({
+  link,
+  isActive,
+  linkBase,
+  linkActive,
+  isLight
+}) {
+  const [open, setOpen] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const wrapRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const buttonRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const timer = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const cancelClose = () => {
+    if (timer.current) window.clearTimeout(timer.current);
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    timer.current = window.setTimeout(() => setOpen(false), 160);
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => () => cancelClose(), []);
+
+  // Clic afuera y Escape. Escape además devuelve el foco al botón: si no, el
+  // teclado queda huérfano en medio del documento.
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!open) return;
+    const onDocClick = event => {
+      if (wrapRef.current && !wrapRef.current.contains(event.target)) setOpen(false);
+    };
+    const onKey = event => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      if (buttonRef.current) buttonRef.current.focus();
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  const panelId = `nav-menu-${link.label.replace(/\s+/g, "-").toLowerCase()}`;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("li", {
+    ref: wrapRef,
+    className: "relative",
+    onMouseEnter: () => {
+      cancelClose();
+      setOpen(true);
+    },
+    onMouseLeave: scheduleClose,
+    onFocus: () => {
+      cancelClose();
+      setOpen(true);
+    },
+    onBlur: scheduleClose,
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("button", {
+      ref: buttonRef,
+      type: "button",
+      "aria-expanded": open,
+      "aria-controls": panelId,
+      onClick: () => setOpen(v => !v),
+      className: ["relative flex items-center gap-1.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.13em] transition-colors", "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember", isActive ? linkActive : linkBase].join(" "),
+      children: [link.label, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(ChevronIcon, {
+        className: ["h-3 w-3 shrink-0 transition-transform duration-200 motion-reduce:transition-none", open ? "rotate-180" : ""].join(" ")
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+        "aria-hidden": "true",
+        className: ["absolute -bottom-0.5 left-0 h-0.5 w-full origin-left bg-ember", "transition-transform duration-200 motion-reduce:transition-none", isActive ? "scale-x-100" : "scale-x-0"].join(" ")
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      id: panelId,
+      hidden: !open,
+      className: "absolute left-0 top-full z-10 pt-3",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
+        className: ["min-w-[16rem] overflow-hidden rounded-lg py-2 shadow-xl shadow-ink/20 backdrop-blur-md", isLight ? "bg-white/95 ring-1 ring-mist" : "bg-ink/95 ring-1 ring-white/10"].join(" "),
+        children: link.children.map(child => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+            href: child.href,
+            className: ["block px-5 py-2.5 text-sm transition-colors", "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ember", isLight ? "text-ink/75 hover:bg-bone hover:text-ink" : "text-bone/75 hover:bg-white/[0.07] hover:text-bone"].join(" "),
+            children: child.label
+          })
+        }, child.href))
       })
     })]
   });
@@ -1148,8 +1458,10 @@ function Navbar({
   mapsHref = "https://www.google.com/maps/search/?api=1&query=3754+N+Higley+Rd+Suite+2+Ogden+UT+84404",
   license = "UT License 1106462255001 · S330",
   links = DEFAULT_LINKS,
-  bidHref = "#request-a-bid",
-  residentialHref = "/residential",
+  bidHref = "/contact",
+  // null y no "/residential": el enlace es opt-in por prop. Ver la nota de
+  // arriba — el sitio es comercial y hoy no expone salida a residencial.
+  residentialHref = null,
   theme = "dark",
   ctaStyle = "ember"
 }) {
@@ -1219,7 +1531,7 @@ function Navbar({
               srLabel: `Open ${address} in Google Maps`,
               href: mapsHref,
               external: true
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
+            }), residentialHref && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
               href: residentialHref,
               className: "ml-1 hidden text-[0.68rem] font-medium uppercase tracking-[0.14em] text-bone/45 transition-colors hover:text-bone/90 lg:inline",
               children: ["Residential ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
@@ -1247,8 +1559,18 @@ function Navbar({
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
             className: "hidden items-center gap-7 lg:flex",
             children: links.map(link => {
-              const id = link.href.startsWith("#") ? link.href.slice(1) : null;
-              const isActive = id && id === active;
+              const anchor = link.activeId || (typeof link.href === "string" && link.href.startsWith("#") ? link.href : null);
+              const id = anchor ? anchor.replace(/^#/, "") : null;
+              const isActive = !!id && id === active;
+              if (link.children && link.children.length) {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(NavDropdown, {
+                  link: link,
+                  isActive: isActive,
+                  linkBase: linkBase,
+                  linkActive: linkActive,
+                  isLight: isLight
+                }, link.label);
+              }
               return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
                   href: link.href,
@@ -1318,13 +1640,29 @@ function Navbar({
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("ul", {
           className: "flex flex-col divide-y divide-white/10",
           children: [links.map(link => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+            children: link.children && link.children.length ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+              className: "py-4",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+                className: "font-display text-2xl font-bold tracking-tight text-bone/50",
+                children: link.label
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
+                className: "mt-3 flex flex-col gap-1 border-l border-white/15 pl-4",
+                children: link.children.map(child => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+                    href: child.href,
+                    onClick: () => setOpen(false),
+                    className: "block py-2 text-base font-medium text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+                    children: child.label
+                  })
+                }, child.href))
+              })]
+            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
               href: link.href,
               onClick: () => setOpen(false),
               className: "block py-4 font-display text-2xl font-bold tracking-tight text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
               children: link.label
             })
-          }, link.href)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
+          }, link.label)), residentialHref && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
               href: residentialHref,
               onClick: () => setOpen(false),
@@ -1400,6 +1738,7 @@ function Navbar({
         children: ["Call ", phone]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
         href: bidHref,
+        "data-bid-cta": "",
         className: "bg-ember py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink",
         children: "Request a Bid"
       })]
@@ -1655,9 +1994,13 @@ mount("#ec-navbar", _scripts_Navbar__WEBPACK_IMPORTED_MODULE_2__["default"]);
 mount("#ec-footer", _scripts_Footer__WEBPACK_IMPORTED_MODULE_3__["default"]);
 mount("#ec-floating-actions", _scripts_FloatingActions__WEBPACK_IMPORTED_MODULE_4__["default"]);
 
-// El modal se monta vacío y se dibuja solo al abrirse. Vive en footer.php
-// para que esté disponible en todas las plantillas, no solo en la landing.
-mount("#ec-contact-modal", _scripts_ContactForm__WEBPACK_IMPORTED_MODULE_5__["default"]);
+// Dos instancias del mismo componente. Cada nodo existe solo en su plantilla,
+// así que en el resto del sitio mount() no lo encuentra y no monta nada.
+//
+// El modal global se retiró: su trabajo lo hace la página /contact, y los CTA
+// navegan hacia allá en lugar de abrir un diálogo.
+mount("#ec-hero-form", _scripts_ContactForm__WEBPACK_IMPORTED_MODULE_5__["default"]);
+mount("#ec-contact-form", _scripts_ContactForm__WEBPACK_IMPORTED_MODULE_5__["default"]);
 
 // Pendiente de la misma tanda:
 // mount("#ec-chatbot", Chatbot)

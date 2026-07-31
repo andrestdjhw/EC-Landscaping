@@ -32,16 +32,50 @@
       'address'         => '3754 N Higley Rd, Suite 2 · Ogden, UT',
       'mapsHref'        => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode('3754 N Higley Rd Suite 2, Ogden, UT 84404'),
       'license'         => 'UT License 1106462255001 · S330',
-      'bidHref'         => '#request-a-bid',
-      'residentialHref' => home_url('/residential'),
+      // Todos los CTA del sitio llevan a /contact. El modal global se retiró.
+      'bidHref'         => home_url('/contact'),
       'theme'           => 'dark',
-      // El orden replica el orden de los bloques en home-template.php: la
-      // prueba (Projects) va antes que las capacidades, por lo que el menú
-      // tiene que leerse en la misma secuencia que la página.
+
+      /**
+       * residentialHref se deja fuera a propósito: el sitio es de landscaping
+       * comercial y no expone salida a residencial.
+       *
+       * Esto revierte una decisión del brief, que pedía el enlace en jerarquía
+       * secundaria (Bloque 00). Se implementa quitando la prop y no borrando el
+       * markup del componente, así que restituirlo es agregar de nuevo esta
+       * línea — sin tocar Navbar.js:
+       *
+       *   'residentialHref' => home_url('/residential'),
+       */
+
+      /**
+       * El orden replica el orden de los bloques en home-template.php: la
+       * prueba (Projects) va antes que las capacidades, por lo que el menú
+       * tiene que leerse en la misma secuencia que la página.
+       *
+       * Capabilities es un desplegable: cada capacidad tiene página propia,
+       * servidas todas por service-template.php. Los slugs de abajo tienen
+       * que coincidir con las claves de $ec_services en esa plantilla y con
+       * los slugs reales de las páginas en el admin — tres lugares que se
+       * mueven juntos.
+       *
+       * activeId conserva el resaltado del scrollspy en la landing: el padre
+       * ya no tiene href de ancla, pero sigue correspondiendo a #capabilities.
+       */
       'links'           => array(
-        array('label' => 'Commercial',   'href' => '#commercial'),
-        array('label' => 'Projects',     'href' => '#projects'),
-        array('label' => 'Capabilities', 'href' => '#capabilities'),
+        array('label' => 'Commercial', 'href' => '#commercial'),
+        array('label' => 'Projects',   'href' => '#projects'),
+        array(
+          'label'    => 'Capabilities',
+          'activeId' => '#capabilities',
+          'children' => array(
+            array('label' => 'All capabilities',                     'href' => home_url('/capabilities')),
+            array('label' => 'Commercial landscape installation',    'href' => home_url('/landscape-installation')),
+            array('label' => 'Hardscape & concrete',                 'href' => home_url('/hardscape-concrete')),
+            array('label' => 'Grounds maintenance, irrigation & snow','href' => home_url('/grounds-maintenance')),
+            array('label' => 'Water-wise retrofits',                 'href' => home_url('/water-wise-retrofits')),
+          ),
+        ),
         array('label' => 'Credentials',  'href' => '#credentials'),
         array('label' => 'Service Area', 'href' => '#service-area'),
       ),

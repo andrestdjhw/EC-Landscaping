@@ -20,6 +20,10 @@ import React from "react"
  *   theme       "light" (default, fondo bone) | "dark" (fondo ink)
  *   socials     [{ network, href }] — network: facebook | instagram | google
  *               | linkedin | youtube. Vacío = no se renderiza la fila.
+ *   columns     [{ title, links: [{ label, href, cta }] }]
+ *               cta: true marca el enlace con data-bid-cta, que es lo que
+ *               ContactForm escucha. En /contact eso enfoca el formulario en
+ *               lugar de recargar la página contra sí misma.
  */
 
 const DEFAULT_COLUMNS = [
@@ -37,8 +41,9 @@ const DEFAULT_COLUMNS = [
     title: "Company",
     links: [
       { label: "About EC", href: "/about" },
-      { label: "Residential", href: "/residential" },
-      { label: "Request a bid", href: "#request-a-bid" },
+      // El enlace a residencial se retiró: el sitio es de landscaping
+      // comercial y no expone esa salida.
+      { label: "Request a bid", href: "/contact", cta: true },
     ],
   },
   {
@@ -198,6 +203,7 @@ export default function Footer({
                   <li key={link.href + link.label}>
                     <a
                       href={link.href}
+                      {...(link.cta ? { "data-bid-cta": "" } : {})}
                       className={`${linkTone} text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`}
                     >
                       {link.label}

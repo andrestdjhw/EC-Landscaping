@@ -209,18 +209,17 @@ $faqs = array(
   // firmes que diez con huecos.
 );
 
-/* OJO — ancla huérfana. El bloque 12 (#request-a-bid) se eliminó, así que este
-   href ya no apunta a nada: el CTA del hero hace clic y no pasa nada.
+/* Todos los CTA de la página apuntan a /contact. El modal global se retiró y
+   la página de contacto ocupa su lugar.
 
-   Lo mismo en otros dos lugares, que están fuera de este archivo:
-     · header.php  → 'bidHref' => '#request-a-bid'  (alimenta el botón del
-       navbar, el del panel móvil y el de la barra inferior fija)
-     · src/scripts/Footer.js → DEFAULT_COLUMNS, "Request a bid"
+   En el hero, cuando hay sitio para el panel (xl+), el componente intercepta
+   el clic y enfoca el primer campo en lugar de navegar: el formulario ya está
+   a la vista y recargar para llegar al mismo sitio sería absurdo. Por debajo
+   de xl no hay panel, el componente se aparta y el enlace navega.
 
-   Se deja sin cambiar a propósito: inventar un destino sería peor que dejarlo
-   visible. Cuando se defina —una página /contact, un tel:, o el formulario
-   reubicado en otro bloque— hay que corregir los tres. */
-$bid_href = '#request-a-bid';
+   El atributo data-bid-cta es lo que marca esos enlaces. Está también en
+   Navbar.js y Footer.js. */
+$bid_href = home_url('/contact');
 $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 ?>
 
@@ -280,8 +279,14 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 
   <!-- El padding-top reserva el alto del header, que ahora flota encima en
        lugar de empujar la página. min-h en svh y no vh: en móvil, vh incluye
-       la barra de direcciones y el hero salta cuando aparece o desaparece. -->
-  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+2rem)] sm:px-8 lg:h-full lg:min-h-0 lg:px-10 lg:pb-12 lg:pt-[calc(var(--header-offset)+1rem)]">
+       la barra de direcciones y el hero salta cuando aparece o desaparece.
+
+       Desde xl el hero es una rejilla de dos columnas reales, no un texto con
+       un panel flotando encima. El formulario dejó de ser una capa que aparece
+       al hacer clic: ahora está siempre, así que necesita ocupar su espacio en
+       el layout. Con position:absolute el titular no sabría que hay algo a su
+       derecha y a 1280px exactos se tocarían. -->
+  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+2rem)] sm:px-8 lg:h-full lg:min-h-0 lg:px-10 lg:pb-12 lg:pt-[calc(var(--header-offset)+1rem)] xl:grid xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-center xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_30rem]">
     <div class="max-w-3xl">
       <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">
         <?php echo esc_html($hero['eyebrow']); ?>
@@ -294,15 +299,33 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       </p>
 
       <div class="mt-9 flex flex-wrap items-center gap-4">
-        <a
-          href="<?php echo esc_url($bid_href); ?>"
-          class="cta-relief-light group inline-flex items-center gap-2.5 rounded-full border-2 border-white/60 bg-ember py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
-        >
-          Request a bid
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none">
-            <path d="M5 12h13M13 6l6 6-6 6" />
-          </svg>
-        </a>
+        <!-- Los pulsos van en hermanos detrás del botón, no en su box-shadow.
+             El relieve del CTA (cta-relief-light) ya ocupa esa propiedad y
+             animarla encima haría que las dos se pisen: el bisel latiría junto
+             con el anillo. Elementos aparte dejan cada cosa en su capa.
+
+             Son dos con medio ciclo de desfase, de modo que siempre hay un
+             anillo saliendo mientras el otro se apaga. Con uno solo el efecto
+             se lee como un parpadeo intermitente en lugar de una emisión
+             continua.
+
+             `group` vive en el envoltorio, no en el <a>: así los pulsos —que
+             son hermanos del botón— pueden reaccionar al hover. El área es la
+             misma, así que la flecha del botón sigue animando igual. -->
+        <span class="group relative inline-flex">
+          <span class="ec-cta-pulse absolute inset-0 rounded-full transition-opacity duration-200 group-hover:opacity-0" aria-hidden="true"></span>
+          <span class="ec-cta-pulse ec-cta-pulse--delayed absolute inset-0 rounded-full transition-opacity duration-200 group-hover:opacity-0" aria-hidden="true"></span>
+          <a
+            href="<?php echo esc_url($bid_href); ?>"
+            data-bid-cta
+            class="cta-relief-light relative inline-flex items-center gap-2.5 rounded-full border-2 border-white/60 bg-ember py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
+          >
+            Request a bid
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none">
+              <path d="M5 12h13M13 6l6 6-6 6" />
+            </svg>
+          </a>
+        </span>
 
         <?php if ($deck_href) : ?>
           <a href="<?php echo esc_url($deck_href); ?>" class="text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink/75 underline decoration-forest decoration-2 underline-offset-8 transition-colors hover:text-ink">
@@ -315,6 +338,42 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
         <?php echo esc_html($hero['micro']); ?>
       </p>
     </div>
+
+    <?php
+    /**
+     * Formulario del hero. Permanente: se dibuja al cargar, sin clic.
+     *
+     * Se muestra desde xl. Por debajo la rejilla vuelve a una sola columna y
+     * el componente cae a modal — el CTA del hero recupera su papel de
+     * disparador. El umbral está en dos lugares que tienen que moverse
+     * juntos: la clase xl:block de este nodo y la prop inlineMinWidth.
+     *
+     * Sin trigger: esta instancia no intercepta ningún clic. Los botones
+     * "Request a Bid" de esta página —el del hero, el del navbar, el de la
+     * barra inferior en móvil y el del footer— navegan a /contact, esté el
+     * panel visible o no.
+     *
+     * Antes interceptaba y llevaba el foco al campo del hero. Se quitó: un
+     * botón que dice lo mismo en toda la página tiene que hacer lo mismo en
+     * toda la página, y que a veces navegue y a veces desplace es justo la
+     * clase de inconsistencia que hace desconfiar de un CTA.
+     */
+    $ec_hero_form_props = array(
+      'variant'        => 'inline',
+      'persistent'     => true,
+      'density'        => 'compact',
+      'inlineMinWidth' => '(min-width: 1280px)',
+      'endpoint'       => esc_url_raw(rest_url('ec/v1/bid')),
+      'nonce'          => wp_create_nonce('wp_rest'),
+      'phone'          => '(385) 240-3907',
+    );
+    ?>
+
+    <div
+      id="ec-hero-form"
+      class="hidden max-h-[calc(100svh-var(--header-offset)-8rem)] xl:block"
+      data-props="<?php echo esc_attr(wp_json_encode($ec_hero_form_props)); ?>"
+    ></div>
   </div>
 </section>
 

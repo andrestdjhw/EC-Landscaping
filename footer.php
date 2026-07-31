@@ -58,30 +58,17 @@
 
     <?php
     /**
-     * Modal de "Request a bid".
+     * Acá vivía el nodo de montaje del modal de "Request a bid".
      *
-     * Va en el footer y no en la plantilla de la landing a propósito: el CTA
-     * aparece en el navbar, que está en todas las páginas. Si el modal viviera
-     * en home-template.php, el botón funcionaría en la portada y no haría nada
-     * en /residential.
+     * Se retiró: los CTA ahora navegan a la página /contact, que lleva el
+     * mismo componente en modo permanente. El diálogo global dejaba dos
+     * caminos hacia el mismo formulario y ninguno de los dos era una URL que
+     * se pudiera enlazar, compartir o medir por separado.
      *
-     * El componente no dibuja nada hasta que se abre, así que su costo en el
-     * resto de las páginas es un nodo vacío.
-     *
-     * El nonce es de la API REST y viaja en la cabecera X-WP-Nonce. Sin él,
-     * el endpoint responde 403 a los envíos de visitantes ya identificados.
+     * El componente conserva la variante modal, así que restituirlo es un div
+     * con data-props y variant="modal" — pero no hay nada montado hoy.
      */
-    $ec_modal_props = array(
-      'endpoint' => esc_url_raw(rest_url('ec/v1/bid')),
-      'nonce'    => wp_create_nonce('wp_rest'),
-      'phone'    => $ec_footer_props['phone'],
-    );
     ?>
-
-    <div
-      id="ec-contact-modal"
-      data-props="<?php echo esc_attr(wp_json_encode($ec_modal_props)); ?>"
-    ></div>
 
     <?php wp_footer(); ?>
   </body>

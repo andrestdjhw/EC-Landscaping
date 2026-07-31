@@ -14,9 +14,20 @@ import React, { useEffect, useRef, useState } from "react"
  *                     hace falta subir la versión en positivo.
  *   phone             Teléfono en formato display.  ej. "(385) 240-3907"
  *   license           Línea de licencia.            ej. "UT 1106462255001 · S330"
- *   links             [{ label, href }]
+ *   links             [{ label, href, activeId, children }]
+ *                     children: [{ label, href }] convierte la entrada en un
+ *                     desplegable. El padre pasa a ser <button> y no <a>: un
+ *                     elemento que navega y despliega a la vez deja al lector
+ *                     de pantalla sin saber qué hace Enter.
+ *                     activeId: id de sección para el scrollspy cuando el href
+ *                     del padre ya no es un ancla.
  *   bidHref           Destino del CTA principal.
- *   residentialHref   Destino del enlace secundario a residencial.
+ *   residentialHref   Destino del enlace secundario a residencial. Si no llega,
+ *                     el enlace no se renderiza — ni en la franja de utilidad ni
+ *                     en el panel móvil. Hoy header.php no lo manda: el sitio es
+ *                     de landscaping comercial y no expone salida a residencial.
+ *                     El markup se conserva para que restituirlo sea agregar la
+ *                     prop, sin tocar este archivo.
  *   theme             "dark" (default) | "light"
  *   ctaStyle          "ember" (default) | "soft"
  *                     "soft" es el estilo neumórfico de Uiverse; pide theme="light"
@@ -25,8 +36,18 @@ import React, { useEffect, useRef, useState } from "react"
 
 const DEFAULT_LINKS = [
   { label: "Commercial", href: "#commercial" },
-  { label: "Capabilities", href: "#capabilities" },
   { label: "Projects", href: "#projects" },
+  {
+    label: "Capabilities",
+    activeId: "#capabilities",
+    children: [
+      { label: "All capabilities", href: "/capabilities" },
+      { label: "Commercial landscape installation", href: "/landscape-installation" },
+      { label: "Hardscape & concrete", href: "/hardscape-concrete" },
+      { label: "Grounds maintenance, irrigation & snow", href: "/grounds-maintenance" },
+      { label: "Water-wise retrofits", href: "/water-wise-retrofits" },
+    ],
+  },
   { label: "Credentials", href: "#credentials" },
   { label: "Service Area", href: "#service-area" },
 ]
@@ -55,7 +76,14 @@ function useDocked(threshold = 24) {
 function useActiveSection(links) {
   const [active, setActive] = useState(null)
   useEffect(() => {
-    const ids = links.map(l => l.href).filter(h => h.startsWith("#")).map(h => h.slice(1))
+    // activeId cubre las entradas cuyo href ya no es un ancla — el padre de
+    // un desplegable, por ejemplo — pero que siguen correspondiendo a una
+    // sección de la landing.
+    const ids = links
+      .map(l => l.activeId || l.href)
+      .filter(h => typeof h === "string" && h.startsWith("#"))
+      .map(h => h.slice(1))
+      .concat(links.map(l => l.activeId).filter(Boolean))
     const nodes = ids.map(id => document.getElementById(id)).filter(Boolean)
     if (!nodes.length || !("IntersectionObserver" in window)) return
     const observer = new IntersectionObserver(
@@ -106,6 +134,12 @@ const PinIcon = props => (
   <svg {...iconProps} {...props}>
     <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" />
     <circle cx="12" cy="10" r="2.5" />
+  </svg>
+)
+
+const ChevronIcon = props => (
+  <svg {...iconProps} {...props}>
+    <path d="m6 9 6 6 6-6" />
   </svg>
 )
 
@@ -179,6 +213,10 @@ function BidButton({ href, onClick, skin = "ember", size = "sm", className = "" 
     <a
       href={href}
       onClick={onClick}
+      // Todos los CTA de bid llevan este atributo. ContactForm lo escucha:
+      // donde hay formulario en pantalla intercepta y enfoca; donde no,
+      // el enlace navega a /contact como cualquier otro.
+      data-bid-cta=""
       className={[
         "group inline-flex items-center justify-center gap-2.5 rounded-full border-2",
         "text-[0.8125rem] font-medium uppercase tracking-[0.4px]",
@@ -199,6 +237,126 @@ function BidButton({ href, onClick, skin = "ember", size = "sm", className = "" 
         <path d="M5 12h13M13 6l6 6-6 6" />
       </svg>
     </a>
+  )
+}
+
+/**
+ * NavDropdown — entrada de menú con submenú.
+ *
+ * Abre con hover y con foco, porque son dos formas distintas de llegar y
+ * ninguna debería quedar fuera. El cierre por hover lleva un retardo corto:
+ * sin él, el desplegable se cierra en el hueco entre el botón y el panel
+ * mientras el mouse baja.
+ */
+function NavDropdown({ link, isActive, linkBase, linkActive, isLight }) {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef(null)
+  const buttonRef = useRef(null)
+  const timer = useRef(null)
+
+  const cancelClose = () => {
+    if (timer.current) window.clearTimeout(timer.current)
+  }
+  const scheduleClose = () => {
+    cancelClose()
+    timer.current = window.setTimeout(() => setOpen(false), 160)
+  }
+
+  useEffect(() => () => cancelClose(), [])
+
+  // Clic afuera y Escape. Escape además devuelve el foco al botón: si no, el
+  // teclado queda huérfano en medio del documento.
+  useEffect(() => {
+    if (!open) return
+    const onDocClick = event => {
+      if (wrapRef.current && !wrapRef.current.contains(event.target)) setOpen(false)
+    }
+    const onKey = event => {
+      if (event.key !== "Escape") return
+      setOpen(false)
+      if (buttonRef.current) buttonRef.current.focus()
+    }
+    document.addEventListener("mousedown", onDocClick)
+    document.addEventListener("keydown", onKey)
+    return () => {
+      document.removeEventListener("mousedown", onDocClick)
+      document.removeEventListener("keydown", onKey)
+    }
+  }, [open])
+
+  const panelId = `nav-menu-${link.label.replace(/\s+/g, "-").toLowerCase()}`
+
+  return (
+    <li
+      ref={wrapRef}
+      className="relative"
+      onMouseEnter={() => { cancelClose(); setOpen(true) }}
+      onMouseLeave={scheduleClose}
+      onFocus={() => { cancelClose(); setOpen(true) }}
+      onBlur={scheduleClose}
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen(v => !v)}
+        className={[
+          "relative flex items-center gap-1.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.13em] transition-colors",
+          "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember",
+          isActive ? linkActive : linkBase,
+        ].join(" ")}
+      >
+        {link.label}
+        <ChevronIcon
+          className={[
+            "h-3 w-3 shrink-0 transition-transform duration-200 motion-reduce:transition-none",
+            open ? "rotate-180" : "",
+          ].join(" ")}
+        />
+        <span
+          aria-hidden="true"
+          className={[
+            "absolute -bottom-0.5 left-0 h-0.5 w-full origin-left bg-ember",
+            "transition-transform duration-200 motion-reduce:transition-none",
+            isActive ? "scale-x-100" : "scale-x-0",
+          ].join(" ")}
+        />
+      </button>
+
+      {/* pt-3 en el contenedor y no margin en el panel: el padding es zona
+          sensible al hover, así que el mouse cruza el hueco sin salirse del
+          <li> y el menú no se cierra a mitad de camino. */}
+      <div
+        id={panelId}
+        hidden={!open}
+        className="absolute left-0 top-full z-10 pt-3"
+      >
+        <ul
+          className={[
+            "min-w-[16rem] overflow-hidden rounded-lg py-2 shadow-xl shadow-ink/20 backdrop-blur-md",
+            isLight ? "bg-white/95 ring-1 ring-mist" : "bg-ink/95 ring-1 ring-white/10",
+          ].join(" ")}
+        >
+          {link.children.map(child => (
+            <li key={child.href}>
+              <a
+                href={child.href}
+                className={[
+                  "block px-5 py-2.5 text-sm transition-colors",
+                  "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ember",
+                  isLight
+                    ? "text-ink/75 hover:bg-bone hover:text-ink"
+                    : "text-bone/75 hover:bg-white/[0.07] hover:text-bone",
+                ].join(" ")}
+              >
+                {child.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </li>
   )
 }
 
@@ -224,8 +382,10 @@ export default function Navbar({
   mapsHref = "https://www.google.com/maps/search/?api=1&query=3754+N+Higley+Rd+Suite+2+Ogden+UT+84404",
   license = "UT License 1106462255001 · S330",
   links = DEFAULT_LINKS,
-  bidHref = "#request-a-bid",
-  residentialHref = "/residential",
+  bidHref = "/contact",
+  // null y no "/residential": el enlace es opt-in por prop. Ver la nota de
+  // arriba — el sitio es comercial y hoy no expone salida a residencial.
+  residentialHref = null,
   theme = "dark",
   ctaStyle = "ember",
 }) {
@@ -317,12 +477,14 @@ export default function Navbar({
                 href={mapsHref}
                 external
               />
-              <a
-                href={residentialHref}
-                className="ml-1 hidden text-[0.68rem] font-medium uppercase tracking-[0.14em] text-bone/45 transition-colors hover:text-bone/90 lg:inline"
-              >
-                Residential <span aria-hidden="true">→</span>
-              </a>
+              {residentialHref && (
+                <a
+                  href={residentialHref}
+                  className="ml-1 hidden text-[0.68rem] font-medium uppercase tracking-[0.14em] text-bone/45 transition-colors hover:text-bone/90 lg:inline"
+                >
+                  Residential <span aria-hidden="true">→</span>
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -357,8 +519,23 @@ export default function Navbar({
             {/* Enlaces — escritorio */}
             <ul className="hidden items-center gap-7 lg:flex">
               {links.map(link => {
-                const id = link.href.startsWith("#") ? link.href.slice(1) : null
-                const isActive = id && id === active
+                const anchor = link.activeId || (typeof link.href === "string" && link.href.startsWith("#") ? link.href : null)
+                const id = anchor ? anchor.replace(/^#/, "") : null
+                const isActive = !!id && id === active
+
+                if (link.children && link.children.length) {
+                  return (
+                    <NavDropdown
+                      key={link.label}
+                      link={link}
+                      isActive={isActive}
+                      linkBase={linkBase}
+                      linkActive={linkActive}
+                      isLight={isLight}
+                    />
+                  )
+                }
+
                 return (
                   <li key={link.href}>
                     <a
@@ -450,25 +627,52 @@ export default function Navbar({
         <nav aria-label="Primary mobile" className="flex-1 overflow-y-auto px-5 py-6">
           <ul className="flex flex-col divide-y divide-white/10">
             {links.map(link => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="block py-4 font-display text-2xl font-bold tracking-tight text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
-                >
-                  {link.label}
-                </a>
+              <li key={link.label}>
+                {/* En el panel móvil el submenú no se despliega: se muestra
+                    entero, indentado. Una pantalla chica ya obliga a abrir un
+                    menú; obligar a abrir un segundo nivel dentro es cobrar dos
+                    veces por el mismo destino. */}
+                {link.children && link.children.length ? (
+                  <div className="py-4">
+                    <p className="font-display text-2xl font-bold tracking-tight text-bone/50">
+                      {link.label}
+                    </p>
+                    <ul className="mt-3 flex flex-col gap-1 border-l border-white/15 pl-4">
+                      {link.children.map(child => (
+                        <li key={child.href}>
+                          <a
+                            href={child.href}
+                            onClick={() => setOpen(false)}
+                            className="block py-2 text-base font-medium text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+                          >
+                            {child.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <a
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className="block py-4 font-display text-2xl font-bold tracking-tight text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+                  >
+                    {link.label}
+                  </a>
+                )}
               </li>
             ))}
-            <li>
-              <a
-                href={residentialHref}
-                onClick={() => setOpen(false)}
-                className="block py-4 text-sm font-semibold uppercase tracking-[0.14em] text-bone/50"
-              >
-                Residential <span aria-hidden="true">→</span>
-              </a>
-            </li>
+            {residentialHref && (
+              <li>
+                <a
+                  href={residentialHref}
+                  onClick={() => setOpen(false)}
+                  className="block py-4 text-sm font-semibold uppercase tracking-[0.14em] text-bone/50"
+                >
+                  Residential <span aria-hidden="true">→</span>
+                </a>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -524,6 +728,7 @@ export default function Navbar({
           </a>
           <a
             href={bidHref}
+            data-bid-cta=""
             className="bg-ember py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink"
           >
             Request a Bid
