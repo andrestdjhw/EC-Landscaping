@@ -59,12 +59,20 @@
        * los slugs reales de las páginas en el admin — tres lugares que se
        * mueven juntos.
        *
-       * activeId conserva el resaltado del scrollspy en la landing: el padre
-       * ya no tiene href de ancla, pero sigue correspondiendo a #capabilities.
+       * Los href son absolutos, no anclas sueltas. Un '#projects' pelado no
+       * lleva a ninguna parte desde /contact o desde una página de capacidad:
+       * el navegador busca esa sección en la página actual, no la encuentra y
+       * no hace nada. Con home_url('/#projects') carga la home y salta.
+       *
+       * En la propia home no recarga: el navegador reconoce que la URL es la
+       * misma y trata el fragmento como salto interno.
+       *
+       * activeId conserva el resaltado del scrollspy: el padre del desplegable
+       * no tiene href de sección, pero corresponde a #capabilities.
        */
       'links'           => array(
-        array('label' => 'Commercial', 'href' => '#commercial'),
-        array('label' => 'Projects',   'href' => '#projects'),
+        array('label' => 'Commercial', 'href' => home_url('/#commercial')),
+        array('label' => 'Projects',   'href' => home_url('/#projects')),
         array(
           'label'    => 'Capabilities',
           'activeId' => '#capabilities',
@@ -76,8 +84,8 @@
             array('label' => 'Water-wise retrofits',                 'href' => home_url('/water-wise-retrofits')),
           ),
         ),
-        array('label' => 'Credentials',  'href' => '#credentials'),
-        array('label' => 'Service Area', 'href' => '#service-area'),
+        array('label' => 'Credentials',  'href' => home_url('/#credentials')),
+        array('label' => 'Service Area', 'href' => home_url('/#service-area')),
       ),
     );
     ?>

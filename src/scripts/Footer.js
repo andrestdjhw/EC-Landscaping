@@ -26,15 +26,19 @@ import React from "react"
  *               lugar de recargar la página contra sí misma.
  */
 
+// Raíz-relativos, nunca anclas sueltas: el footer sale en todas las páginas y
+// un "#projects" pelado no lleva a ninguna parte fuera de la home.
+// footer.php los reemplaza por home_url(), que además aguanta una instalación
+// en subdirectorio.
 const DEFAULT_COLUMNS = [
   {
     title: "Commercial",
     links: [
-      { label: "Commercial overview", href: "#commercial" },
-      { label: "Capabilities", href: "#capabilities" },
-      { label: "Projects", href: "#projects" },
-      { label: "Credentials", href: "#credentials" },
-      { label: "Service area", href: "#service-area" },
+      { label: "Commercial overview", href: "/#commercial" },
+      { label: "Capabilities", href: "/capabilities" },
+      { label: "Projects", href: "/#projects" },
+      { label: "Credentials", href: "/#credentials" },
+      { label: "Service area", href: "/#service-area" },
     ],
   },
   {

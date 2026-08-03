@@ -23,6 +23,42 @@
       'counties'       => 'Serving Weber, Davis, Morgan and Box Elder counties',
       'year'           => (int) current_time('Y'),
 
+      /**
+       * Los enlaces se arman con home_url() y no con anclas sueltas. El footer
+       * sale en todas las páginas: un '#projects' pelado funciona en la home y
+       * no hace nada en /contact ni en una página de capacidad.
+       *
+       * cta => true marca el enlace con data-bid-cta, que es lo que escucha
+       * ContactForm para enfocar el formulario en vez de recargar /contact
+       * contra sí misma.
+       */
+      'columns'        => array(
+        array(
+          'title' => 'Commercial',
+          'links' => array(
+            array('label' => 'Commercial overview', 'href' => home_url('/#commercial')),
+            array('label' => 'Capabilities',        'href' => home_url('/capabilities')),
+            array('label' => 'Projects',            'href' => home_url('/#projects')),
+            array('label' => 'Credentials',         'href' => home_url('/#credentials')),
+            array('label' => 'Service area',        'href' => home_url('/#service-area')),
+          ),
+        ),
+        array(
+          'title' => 'Company',
+          'links' => array(
+            array('label' => 'About EC',      'href' => home_url('/about')),
+            array('label' => 'Request a bid', 'href' => home_url('/contact'), 'cta' => true),
+          ),
+        ),
+        array(
+          'title' => 'Legal',
+          'links' => array(
+            array('label' => 'Privacy policy',   'href' => home_url('/privacy-policy')),
+            array('label' => 'Terms of service', 'href' => home_url('/terms-of-service')),
+          ),
+        ),
+      ),
+
       // Vacío hasta que el cliente entregue los accesos y las URLs
       // definitivas (Pendiente 13). Con el array vacío la fila de redes
       // simplemente no se renderiza: mejor eso que enlaces muertos.

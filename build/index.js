@@ -825,23 +825,28 @@ __webpack_require__.r(__webpack_exports__);
  *               lugar de recargar la página contra sí misma.
  */
 
+// Raíz-relativos, nunca anclas sueltas: el footer sale en todas las páginas y
+// un "#projects" pelado no lleva a ninguna parte fuera de la home.
+// footer.php los reemplaza por home_url(), que además aguanta una instalación
+// en subdirectorio.
+
 const DEFAULT_COLUMNS = [{
   title: "Commercial",
   links: [{
     label: "Commercial overview",
-    href: "#commercial"
+    href: "/#commercial"
   }, {
     label: "Capabilities",
-    href: "#capabilities"
+    href: "/capabilities"
   }, {
     label: "Projects",
-    href: "#projects"
+    href: "/#projects"
   }, {
     label: "Credentials",
-    href: "#credentials"
+    href: "/#credentials"
   }, {
     label: "Service area",
-    href: "#service-area"
+    href: "/#service-area"
   }]
 }, {
   title: "Company",
@@ -1130,12 +1135,16 @@ __webpack_require__.r(__webpack_exports__);
  *                     porque su resplandor blanco necesita superficie clara.
  */
 
+// Raíz-relativos y no anclas sueltas: así el menú funciona desde cualquier
+// página. header.php los reemplaza por home_url(), que además aguanta una
+// instalación en subdirectorio.
+
 const DEFAULT_LINKS = [{
   label: "Commercial",
-  href: "#commercial"
+  href: "/#commercial"
 }, {
   label: "Projects",
-  href: "#projects"
+  href: "/#projects"
 }, {
   label: "Capabilities",
   activeId: "#capabilities",
@@ -1157,11 +1166,27 @@ const DEFAULT_LINKS = [{
   }]
 }, {
   label: "Credentials",
-  href: "#credentials"
+  href: "/#credentials"
 }, {
   label: "Service Area",
-  href: "#service-area"
+  href: "/#service-area"
 }];
+
+/**
+ * Devuelve el id de sección de un href, venga como "#projects", "/#projects"
+ * o "https://sitio.com/#projects".
+ *
+ * Los enlaces del menú tienen que ser absolutos para funcionar desde /contact
+ * o desde una página de capacidad — un "#projects" suelto no lleva a ninguna
+ * parte fuera de la home. Pero el scrollspy sigue necesitando el id pelado,
+ * así que se extrae acá en vez de asumir que el href empieza con #.
+ */
+function fragmentOf(value) {
+  if (typeof value !== "string") return null;
+  const hash = value.indexOf("#");
+  if (hash === -1) return null;
+  return value.slice(hash + 1) || null;
+}
 function useDocked(threshold = 24) {
   const [docked, setDocked] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
@@ -1187,10 +1212,10 @@ function useDocked(threshold = 24) {
 function useActiveSection(links) {
   const [active, setActive] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    // activeId cubre las entradas cuyo href ya no es un ancla — el padre de
-    // un desplegable, por ejemplo — pero que siguen correspondiendo a una
-    // sección de la landing.
-    const ids = links.map(l => l.activeId || l.href).filter(h => typeof h === "string" && h.startsWith("#")).map(h => h.slice(1)).concat(links.map(l => l.activeId).filter(Boolean));
+    // activeId cubre las entradas cuyo href ya no apunta a una sección — el
+    // padre de un desplegable, por ejemplo — pero que siguen correspondiendo
+    // a un bloque de la landing.
+    const ids = links.map(l => fragmentOf(l.activeId || l.href)).filter(Boolean);
     const nodes = ids.map(id => document.getElementById(id)).filter(Boolean);
     if (!nodes.length || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(entries => {
@@ -1559,8 +1584,7 @@ function Navbar({
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
             className: "hidden items-center gap-7 lg:flex",
             children: links.map(link => {
-              const anchor = link.activeId || (typeof link.href === "string" && link.href.startsWith("#") ? link.href : null);
-              const id = anchor ? anchor.replace(/^#/, "") : null;
+              const id = fragmentOf(link.activeId || link.href);
               const isActive = !!id && id === active;
               if (link.children && link.children.length) {
                 return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(NavDropdown, {
