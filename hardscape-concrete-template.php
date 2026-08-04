@@ -33,13 +33,91 @@ $ec_lede  = 'Retaining walls, paver plazas and walkways, flat and stamped concre
 $ec_image = $ec_media . 'HardscapeConcrete-scaled.webp';
 $ec_alt   = 'Retaining wall and paver hardscape under construction';
 
+/* ═════════════════════════════════════════════════════════════════
+   IMÁGENES DE LAS TARJETAS DE ALCANCE
+
+   Una variable por tarjeta, para cambiar una foto sin buscarla entre el
+   markup. Se arman desde $ec_media_scope y no con la URL pegada entera:
+   así sobreviven la migración de ec-landscaping.local a producción.
+
+   Vaciar cualquiera de estas cadenas deja esa tarjeta solo con texto — la
+   sección no se rompe, que es lo que permite ir reemplazando fotos de a
+   una cuando lleguen las de obra propia.
+   ═════════════════════════════════════════════════════════════════ */
+
+// Carpeta de la biblioteca donde se subieron. Ajustar el mes si va a otra.
+$ec_media_scope = $ec_uploads['baseurl'] . '/2026/08/';
+
+$ec_img_walls    = $ec_media_scope . 'RetainingWalls-scaled.jpg';
+$ec_img_pavers   = $ec_media_scope . 'PaverPlazas-scaled.jpg';
+$ec_img_flatwork = $ec_media_scope . 'FlatStampedConcrete-scaled.jpg';
+$ec_img_curbing  = $ec_media_scope . 'CurbingSiteWalls-scaled.jpg';
+$ec_img_pooldeck = $ec_media_scope . 'PoolDecks-scaled.jpg';
+
+/* Ojo con el nombre del archivo: en la biblioteca está subido como
+   "SelfPermormedLicence" — con la r y la m cambiadas de lugar en
+   "Performed", y "Licence" en vez de "License". Se escribe acá tal cual
+   está en el servidor, porque la URL tiene que coincidir con el archivo,
+   no con la ortografía. Si algún día se renombra en la biblioteca, esta
+   línea es la que hay que corregir. */
+$ec_img_crew     = $ec_media_scope . 'SelfPermormedLicence-scaled.jpg';
+
+
+/* ─────────────────────────────────────────────────────────────────
+   ALCANCE — título, cuerpo e imagen por tarjeta.
+
+   Los títulos son el lede del bloque 05 partido en puntos: nada nuevo.
+   Los cuerpos SÍ son copy nuevo y ninguno pasó por Eunice.
+
+   Misma regla que en landscape: describir el trabajo y el riesgo que le
+   quita de encima al comprador, nunca prometer un procedimiento que el
+   deck no respalde. Por eso no hay resistencias, ni espesores, ni años de
+   garantía — eso sale del capability deck cuando exista.
+
+   Nota sobre "Pool decks": el término solo evoca casa, y esta es una
+   página comercial. El cuerpo lo ancla en multifamiliar y hotelería, que
+   es donde EC los construye. Si el cliente confirma que no hace ese tipo
+   de obra, la tarjeta sale entera.
+   ───────────────────────────────────────────────────────────────── */
 $ec_scope = array(
-  'Retaining walls',
-  'Paver plazas and walkways',
-  'Flat and stamped concrete',
-  'Curbing and site walls',
-  'Pool decks',
-  'Self-performed under our own concrete and masonry license',
+  array(
+    'title' => 'Retaining walls',
+    'body'  => 'Block and poured walls, built with the drainage behind them — which is what actually decides whether a wall is still straight in ten years.',
+    'image' => $ec_img_walls,
+    'alt'   => 'Segmental block retaining wall under construction',
+  ),
+  array(
+    'title' => 'Paver plazas and walkways',
+    'body'  => 'Base preparation, compaction and edge restraint done properly. Paver work fails from what is underneath it, not from the pavers.',
+    'image' => $ec_img_pavers,
+    'alt'   => 'Pavers being installed over a compacted base',
+  ),
+  array(
+    'title' => 'Flat and stamped concrete',
+    'body'  => 'Sidewalks, pads, aprons and decorative flatwork. Formed, poured and finished by our crew, with the joints laid out on purpose instead of wherever the truck stopped.',
+    'image' => $ec_img_flatwork,
+    'alt'   => 'Crew finishing freshly poured stamped concrete',
+  ),
+  array(
+    'title' => 'Curbing and site walls',
+    'body'  => 'The details that decide how a parking lot reads: curb and gutter, islands, sitting walls and the transitions between them. Set to the civil plan.',
+    'image' => $ec_img_curbing,
+    'alt'   => 'Concrete curb and gutter being formed in a commercial parking lot',
+  ),
+  array(
+    'title' => 'Pool decks',
+    'body'  => 'Multifamily and hospitality decks, where finish, drainage and the transition to the coping get decided before the pour instead of patched afterwards.',
+    'image' => $ec_img_pooldeck,
+    'alt'   => 'Concrete pool deck under construction at a multifamily property',
+  ),
+  array(
+    // Textual del bloque 08: "Concrete & masonry — Self-performed,
+    // EC Hardscape and Concrete". Es la credencial de esta página.
+    'title' => 'Self-performed under our own license',
+    'body'  => 'EC Hardscape and Concrete is our own crew and our own license. The concrete scope does not get handed to a sub and marked up on the way to you.',
+    'image' => $ec_img_crew,
+    'alt'   => 'Concrete crew working on a commercial site',
+  ),
 );
 
 $ec_built_for = array(
@@ -172,7 +250,15 @@ $ec_tel_href = 'tel:+13852403907';
           What&rsquo;s in scope.
         </h2>
         <p class="mt-5 text-base leading-relaxed text-ink/70">
-          Self-performed with our own crew and our own equipment.
+          Self-performed with our own crew and our own equipment. This is the scope most landscape contractors in the corridor hand to a sub.
+        </p>
+
+        <!-- Cierre de columna. Ancla la sección con la credencial en lugar de
+             dejar la última línea colgando de lo que mida la lista. Es la
+             pregunta número uno del FAQ de esta página, así que conviene que
+             esté respondida antes de que alguien tenga que buscarla. -->
+        <p class="mt-10 border-l-2 border-ember pl-5 text-sm leading-relaxed text-ink/70">
+          One license covers landscape, hardscape and concrete — so the wall, the flatwork and the planting are all the same contractor, on the same schedule.
         </p>
       </div>
 
@@ -191,14 +277,37 @@ $ec_tel_href = 'tel:+13852403907';
            El JS no usa clases de Tailwind para el modo apilado — aplica
            estilos en línea. Así el efecto no depende de que una clase nueva
            haya entrado al build. -->
-      <div data-cardswap data-delay="4200" data-dist-x="46" data-dist-y="54" data-skew="6">
+      <div data-cardswap data-delay="4200" data-dist-x="42" data-dist-y="38" data-skew="6">
         <ul class="grid gap-px self-start bg-slate-200 sm:grid-cols-2" data-cardswap-list>
           <?php foreach ($ec_scope as $item) : ?>
-            <li class="flex items-start gap-3 bg-breeze-100 px-6 py-5" data-cardswap-card>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0 text-ember">
-                <path d="m5 13 4 4L19 7" />
-              </svg>
-              <span class="text-sm leading-relaxed text-ink" data-cardswap-text><?php echo esc_html($item); ?></span>
+            <li class="flex flex-col overflow-hidden bg-breeze-100" data-cardswap-card>
+              <?php if (!empty($item['image'])) : ?>
+                <!-- 16/9 y no 4/3: la tarjeta ya lleva título y dos líneas de
+                     cuerpo, y con una imagen más alta el stack apilado supera
+                     el alto de la pantalla. -->
+                <img
+                  src="<?php echo esc_url($item['image']); ?>"
+                  alt="<?php echo esc_attr($item['alt']); ?>"
+                  class="aspect-[16/9] w-full shrink-0 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  data-cardswap-media
+                />
+              <?php endif; ?>
+
+              <div class="flex flex-1 items-start gap-4 px-6 py-6" data-cardswap-content>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-ember">
+                  <path d="m5 13 4 4L19 7" />
+                </svg>
+                <div>
+                  <h3 class="font-display text-base font-bold leading-snug tracking-tight text-ink" data-cardswap-title>
+                    <?php echo esc_html($item['title']); ?>
+                  </h3>
+                  <p class="mt-2 text-sm leading-relaxed text-ink/70" data-cardswap-body>
+                    <?php echo esc_html($item['body']); ?>
+                  </p>
+                </div>
+              </div>
             </li>
           <?php endforeach; ?>
         </ul>
