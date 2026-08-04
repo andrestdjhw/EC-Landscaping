@@ -33,13 +33,89 @@ $ec_lede  = 'Annual contracts covering mowing, fertilization, pruning, spring st
 $ec_image = $ec_media . 'GroundsMaintenance-scaled.webp';
 $ec_alt   = 'Grounds maintenance on a commercial property';
 
+/* ═════════════════════════════════════════════════════════════════
+   IMÁGENES DE LAS TARJETAS DE ALCANCE
+
+   Una variable por tarjeta, para cambiar una foto sin buscarla entre el
+   markup. Se arman desde $ec_media_scope y no con la URL pegada entera:
+   así sobreviven la migración de ec-landscaping.local a producción.
+
+   Vaciar cualquiera de estas cadenas deja esa tarjeta solo con texto — la
+   sección no se rompe, que es lo que permite ir reemplazando fotos de a
+   una cuando lleguen las de obra propia.
+   ═════════════════════════════════════════════════════════════════ */
+
+// Carpeta de la biblioteca donde se subieron. Ajustar el mes si va a otra.
+$ec_media_scope = $ec_uploads['baseurl'] . '/2026/08/';
+
+$ec_img_mowing   = $ec_media_scope . 'MowingFertilization-scaled.jpg';
+$ec_img_startup  = $ec_media_scope . 'SpringStartup-scaled.jpg';
+
+// .jpeg y no .jpg: es la única de las seis que se subió con esa extensión.
+// La URL tiene que coincidir con el archivo, así que se respeta tal cual.
+$ec_img_smart    = $ec_media_scope . 'SmartIrrigation-scaled.jpeg';
+
+$ec_img_winter   = $ec_media_scope . 'FallWinterization-scaled.jpg';
+$ec_img_snow     = $ec_media_scope . 'SnowIceManagement-scaled.jpg';
+$ec_img_contract = $ec_media_scope . 'AnnualContractors-scaled.jpg';
+
+
+/* ─────────────────────────────────────────────────────────────────
+   ALCANCE — título, cuerpo e imagen por tarjeta.
+
+   Los títulos son el lede del bloque 05 partido en puntos: nada nuevo.
+   Los cuerpos SÍ son copy nuevo y ninguno pasó por Eunice.
+
+   Misma regla que en las otras capacidades: describir el trabajo y el
+   riesgo que le quita de encima al comprador, nunca prometer un
+   procedimiento que el deck no respalde. Por eso no hay frecuencias de
+   corte, ni tiempos de respuesta ante nevada, ni umbrales de pulgadas —
+   todo eso es contractual y sale del capability deck, no de acá.
+
+   El comprador de esta capacidad es el property manager del bloque 03, y
+   su frase aprobada ("One contract. Grounds, irrigation and snow. Twelve
+   months...") es la que ordena las seis tarjetas.
+   ───────────────────────────────────────────────────────────────── */
 $ec_scope = array(
-  'Mowing, fertilization and pruning',
-  'Spring startup',
-  'Smart irrigation management',
-  'Fall winterization',
-  'Snow and ice management',
-  'Annual contracts — one vendor, twelve months',
+  array(
+    'title' => 'Mowing, fertilization and pruning',
+    'body'  => 'The half of the job everyone sees. Cut on a schedule your tenants can set their watch by, fed on a program that matches the season, and pruned before it turns into a complaint.',
+    'image' => $ec_img_mowing,
+    'alt'   => 'Maintenance crew mowing at a commercial property',
+  ),
+  array(
+    'title' => 'Spring startup',
+    'body'  => 'Controllers, valves and heads checked and adjusted before the first hot week — not after the first brown patch shows up in front of the entrance.',
+    'image' => $ec_img_startup,
+    'alt'   => 'Irrigation technician adjusting a sprinkler head',
+  ),
+  array(
+    'title' => 'Smart irrigation management',
+    'body'  => 'Programmed and adjusted through the season instead of set once in April. On a Northern Utah property water is one of the largest line items, and it gets managed like one.',
+    'image' => $ec_img_smart,
+    'alt'   => 'Technician programming a smart irrigation controller',
+  ),
+  array(
+    'title' => 'Fall winterization',
+    'body'  => 'Systems blown out and shut down before the first hard freeze. A cracked main in November gets paid for twice: once in parts, and once in the spring spent chasing it.',
+    'image' => $ec_img_winter,
+    'alt'   => 'Irrigation system being blown out for winter',
+  ),
+  array(
+    'title' => 'Snow and ice management',
+    'body'  => 'Written into the annual contract, not bid separately in October when every plow in the corridor is already committed. Same crew that already knows where your drains and curbs are.',
+    'image' => $ec_img_snow,
+    'alt'   => 'Plow clearing snow from a commercial parking lot',
+  ),
+  array(
+    // "One contract. Grounds, irrigation and snow. Twelve months of
+    // coverage under one vendor and one point of contact" — bloque 03,
+    // aprobado. Esta tarjeta es esa promesa.
+    'title' => 'Annual contracts — one vendor, twelve months',
+    'body'  => 'One contract and one point of contact covering grounds, irrigation and snow. Twelve months of coverage with no gap in it where a second vendor has to be found and onboarded.',
+    'image' => $ec_img_contract,
+    'alt'   => 'Grounds maintenance crew and equipment at a commercial site',
+  ),
 );
 
 $ec_built_for = array(
@@ -172,7 +248,13 @@ $ec_tel_href = 'tel:+13852403907';
           What&rsquo;s in scope.
         </h2>
         <p class="mt-5 text-base leading-relaxed text-ink/70">
-          Self-performed with our own crew and our own equipment.
+          Self-performed with our own crew and our own equipment. Twelve months of it, not eight.
+        </p>
+
+        <!-- Cierre de columna. Ancla la sección con una afirmación en lugar de
+             dejar la última línea colgando de lo que mida la lista. -->
+        <p class="mt-10 border-l-2 border-ember pl-5 text-sm leading-relaxed text-ink/70">
+          The same crew on your property in July and in January — which is the only way the person plowing your lot already knows where the curbs are.
         </p>
       </div>
 
@@ -191,14 +273,37 @@ $ec_tel_href = 'tel:+13852403907';
            El JS no usa clases de Tailwind para el modo apilado — aplica
            estilos en línea. Así el efecto no depende de que una clase nueva
            haya entrado al build. -->
-      <div data-cardswap data-delay="4200" data-dist-x="46" data-dist-y="54" data-skew="6">
+      <div data-cardswap data-delay="4200" data-dist-x="42" data-dist-y="38" data-skew="6">
         <ul class="grid gap-px self-start bg-slate-200 sm:grid-cols-2" data-cardswap-list>
           <?php foreach ($ec_scope as $item) : ?>
-            <li class="flex items-start gap-3 bg-breeze-100 px-6 py-5" data-cardswap-card>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0 text-ember">
-                <path d="m5 13 4 4L19 7" />
-              </svg>
-              <span class="text-sm leading-relaxed text-ink" data-cardswap-text><?php echo esc_html($item); ?></span>
+            <li class="flex flex-col overflow-hidden bg-breeze-100" data-cardswap-card>
+              <?php if (!empty($item['image'])) : ?>
+                <!-- 16/9 y no 4/3: la tarjeta ya lleva título y dos líneas de
+                     cuerpo, y con una imagen más alta el stack apilado supera
+                     el alto de la pantalla. -->
+                <img
+                  src="<?php echo esc_url($item['image']); ?>"
+                  alt="<?php echo esc_attr($item['alt']); ?>"
+                  class="aspect-[16/9] w-full shrink-0 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  data-cardswap-media
+                />
+              <?php endif; ?>
+
+              <div class="flex flex-1 items-start gap-4 px-6 py-6" data-cardswap-content>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-ember">
+                  <path d="m5 13 4 4L19 7" />
+                </svg>
+                <div>
+                  <h3 class="font-display text-base font-bold leading-snug tracking-tight text-ink" data-cardswap-title>
+                    <?php echo esc_html($item['title']); ?>
+                  </h3>
+                  <p class="mt-2 text-sm leading-relaxed text-ink/70" data-cardswap-body>
+                    <?php echo esc_html($item['body']); ?>
+                  </p>
+                </div>
+              </div>
             </li>
           <?php endforeach; ?>
         </ul>

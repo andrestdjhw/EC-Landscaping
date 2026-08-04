@@ -33,11 +33,82 @@ $ec_lede  = 'Turf conversion, drip and smart controllers, native and adapted pla
 $ec_image = $ec_media . 'WaterWiseRetrofits-scaled.webp';
 $ec_alt   = 'Drought-tolerant planting with drip irrigation on a commercial property';
 
+/* ═════════════════════════════════════════════════════════════════
+   IMÁGENES DE LAS TARJETAS DE ALCANCE
+
+   Una variable por tarjeta, para cambiar una foto sin buscarla entre el
+   markup. Se arman desde $ec_media_scope y no con la URL pegada entera:
+   así sobreviven la migración de ec-landscaping.local a producción.
+
+   Vaciar cualquiera de estas cadenas deja esa tarjeta solo con texto — la
+   sección no se rompe.
+   ═════════════════════════════════════════════════════════════════ */
+
+// Carpeta de la biblioteca donde se subieron. Ajustar el mes si va a otra.
+$ec_media_scope = $ec_uploads['baseurl'] . '/2026/08/';
+
+// Prompt: "turf removal xeriscape conversion landscaping"
+$ec_img_turf        = '';
+
+// Prompt: "drip irrigation tubing garden bed installation"
+$ec_img_drip        = '';
+
+// Prompt: "smart irrigation controller wall mounted"
+$ec_img_controllers = '';
+
+// Prompt: "drought tolerant native plants commercial landscape"
+$ec_img_natives     = '';
+
+// Prompt: "landscape architect plans blueprint site"
+$ec_img_design      = '';
+
+
+/* ─────────────────────────────────────────────────────────────────
+   ALCANCE — título, cuerpo e imagen por tarjeta.
+
+   Cinco tarjetas y no cuatro: el lede del bloque 05 dice "drip and smart
+   controllers", que son dos cosas distintas —tubería enterrada y un
+   aparato en la pared— y las junté en un solo punto cuando partí el
+   párrafo. Separarlas no agrega nada al alcance, solo deja de esconder
+   una dentro de otra. Y de paso el mazo apilado deja de verse chato, que
+   con cuatro tarjetas era el otro problema.
+
+   Los cuerpos son copy nuevo y ninguno pasó por Eunice. Sin porcentajes
+   de ahorro de agua, sin montos de rebate y sin nombrar al distrito: el
+   Pendiente 06 sigue sin verificar y esas cifras no se publican hasta que
+   Weber Basin las confirme.
+   ───────────────────────────────────────────────────────────────── */
 $ec_scope = array(
-  'Turf conversion',
-  'Drip and smart controllers',
-  'Native and adapted plantings',
-  'Design to local water district requirements',
+  array(
+    'title' => 'Turf conversion',
+    'body'  => 'Taking out the grass nobody walks on and replacing it with planting that still reads as landscape. The savings come from the area you convert, not from letting the rest go brown.',
+    'image' => $ec_img_turf,
+    'alt'   => 'Turf being removed and replaced with drought-tolerant planting',
+  ),
+  array(
+    'title' => 'Drip irrigation',
+    'body'  => 'Water delivered at the root instead of thrown through the air, where an August afternoon in this corridor takes its share before it ever lands.',
+    'image' => $ec_img_drip,
+    'alt'   => 'Drip irrigation tubing and emitters in a planting bed',
+  ),
+  array(
+    'title' => 'Smart controllers',
+    'body'  => 'Controllers that adjust to the weather instead of running the same program in May and in September, and that a property manager can check without walking the site.',
+    'image' => $ec_img_controllers,
+    'alt'   => 'Wall-mounted smart irrigation controller',
+  ),
+  array(
+    'title' => 'Native and adapted plantings',
+    'body'  => 'Species that survive a Weber County winter and an August with no rain, chosen so the property still looks maintained in the shoulder seasons and not just in June.',
+    'image' => $ec_img_natives,
+    'alt'   => 'Drought-tolerant native planting at a commercial property',
+  ),
+  array(
+    'title' => 'Design to local water district requirements',
+    'body'  => 'Every district in the corridor sets its own rules. We design to the ones that apply to your site from the start, so the plan does not come back for a second round of revisions.',
+    'image' => $ec_img_design,
+    'alt'   => 'Landscape plans being reviewed on site',
+  ),
 );
 
 $ec_built_for = array(
@@ -170,7 +241,13 @@ $ec_tel_href = 'tel:+13852403907';
           What&rsquo;s in scope.
         </h2>
         <p class="mt-5 text-base leading-relaxed text-ink/70">
-          Self-performed with our own crew and our own equipment.
+          Self-performed with our own crew and our own equipment, from the turf removal to the controller on the wall.
+        </p>
+
+        <!-- Cierre de columna. Ancla la sección con una afirmación en lugar de
+             dejar la última línea colgando de lo que mida la lista. -->
+        <p class="mt-10 border-l-2 border-ember pl-5 text-sm leading-relaxed text-ink/70">
+          Water-wise does not have to mean a gravel lot. Every conversion we build is still meant to read as a landscape.
         </p>
       </div>
 
@@ -189,14 +266,37 @@ $ec_tel_href = 'tel:+13852403907';
            El JS no usa clases de Tailwind para el modo apilado — aplica
            estilos en línea. Así el efecto no depende de que una clase nueva
            haya entrado al build. -->
-      <div data-cardswap data-delay="4200" data-dist-x="46" data-dist-y="54" data-skew="6">
+      <div data-cardswap data-delay="4200" data-dist-x="42" data-dist-y="38" data-skew="6">
         <ul class="grid gap-px self-start bg-slate-200 sm:grid-cols-2" data-cardswap-list>
           <?php foreach ($ec_scope as $item) : ?>
-            <li class="flex items-start gap-3 bg-breeze-100 px-6 py-5" data-cardswap-card>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0 text-ember">
-                <path d="m5 13 4 4L19 7" />
-              </svg>
-              <span class="text-sm leading-relaxed text-ink" data-cardswap-text><?php echo esc_html($item); ?></span>
+            <li class="flex flex-col overflow-hidden bg-breeze-100" data-cardswap-card>
+              <?php if (!empty($item['image'])) : ?>
+                <!-- 16/9 y no 4/3: la tarjeta ya lleva título y dos líneas de
+                     cuerpo, y con una imagen más alta el stack apilado supera
+                     el alto de la pantalla. -->
+                <img
+                  src="<?php echo esc_url($item['image']); ?>"
+                  alt="<?php echo esc_attr($item['alt']); ?>"
+                  class="aspect-[16/9] w-full shrink-0 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  data-cardswap-media
+                />
+              <?php endif; ?>
+
+              <div class="flex flex-1 items-start gap-4 px-6 py-6" data-cardswap-content>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-ember">
+                  <path d="m5 13 4 4L19 7" />
+                </svg>
+                <div>
+                  <h3 class="font-display text-base font-bold leading-snug tracking-tight text-ink" data-cardswap-title>
+                    <?php echo esc_html($item['title']); ?>
+                  </h3>
+                  <p class="mt-2 text-sm leading-relaxed text-ink/70" data-cardswap-body>
+                    <?php echo esc_html($item['body']); ?>
+                  </p>
+                </div>
+              </div>
             </li>
           <?php endforeach; ?>
         </ul>
