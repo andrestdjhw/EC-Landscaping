@@ -47,20 +47,17 @@ $ec_alt   = 'Drought-tolerant planting with drip irrigation on a commercial prop
 // Carpeta de la biblioteca donde se subieron. Ajustar el mes si va a otra.
 $ec_media_scope = $ec_uploads['baseurl'] . '/2026/08/';
 
-// Prompt: "turf removal xeriscape conversion landscaping"
-$ec_img_turf        = '';
+$ec_img_turf        = $ec_media_scope . 'TurfConversion-scaled.jpg';
 
-// Prompt: "drip irrigation tubing garden bed installation"
-$ec_img_drip        = '';
+/* Ojo con el nombre: en la biblioteca está subido como "DripIrritgation",
+   con una t de más. Se escribe acá tal cual está en el servidor, porque la
+   URL tiene que coincidir con el archivo y no con la ortografía. Si algún
+   día se renombra, esta línea es la que hay que corregir. */
+$ec_img_drip        = $ec_media_scope . 'DripIrritgation-scaled.jpg';
 
-// Prompt: "smart irrigation controller wall mounted"
-$ec_img_controllers = '';
-
-// Prompt: "drought tolerant native plants commercial landscape"
-$ec_img_natives     = '';
-
-// Prompt: "landscape architect plans blueprint site"
-$ec_img_design      = '';
+$ec_img_controllers = $ec_media_scope . 'SmartControllers-scaled.jpg';
+$ec_img_natives     = $ec_media_scope . 'NativeAdaptedPlanting-scaled.jpg';
+$ec_img_design      = $ec_media_scope . 'DesignWaterDistrictRequirements-scaled.jpg';
 
 
 /* ─────────────────────────────────────────────────────────────────
