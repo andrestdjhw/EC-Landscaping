@@ -509,7 +509,7 @@ export default function ContactForm({
               >
                 <option value="">Select one</option>
                 {BUYERS.map(option => (
-                  <option key={option} value={option} className="bg-ink">
+                  <option key={option} value={option} className="bg-umber">
                     {option}
                   </option>
                 ))}
@@ -525,7 +525,7 @@ export default function ContactForm({
               >
                 <option value="">Select one</option>
                 {SCOPES.map(option => (
-                  <option key={option} value={option} className="bg-ink">
+                  <option key={option} value={option} className="bg-umber">
                     {option}
                   </option>
                 ))}
@@ -653,7 +653,7 @@ export default function ContactForm({
         aria-labelledby="ec-bid-title"
         className={[
           "pointer-events-auto flex max-h-full w-full flex-col overflow-hidden rounded-xl",
-          "bg-ink/95 text-bone shadow-2xl shadow-ink/40 ring-1 ring-white/12 backdrop-blur-md",
+          "bg-umber/95 text-bone shadow-2xl shadow-sand/40 ring-1 ring-white/12 backdrop-blur-md",
           // Permanente no anima: el panel no entra desde ningún lado, ya
           // estaba ahí cuando cargó la página.
           alwaysOn
@@ -698,7 +698,7 @@ export default function ContactForm({
         aria-labelledby="ec-bid-title"
         className={[
           "relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl",
-          "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl",
+          "bg-umber text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl",
           "transition-[opacity,transform] ease-out motion-reduce:transition-none",
           entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
         ].join(" ")}

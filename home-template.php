@@ -273,7 +273,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
        Gradiente explícito en lugar de utilidad de Tailwind para no depender
        del renombre de bg-gradient-* a bg-linear-* en v4. -->
   <div
-    class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,#F7F7F5_0%,rgba(247,247,245,0.95)_34%,rgba(247,247,245,0.6)_62%,rgba(247,247,245,0.3)_100%)]"
+    class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,#ECEAE9_0%,rgba(236,234,233,0.95)_34%,rgba(236,234,233,0.6)_62%,rgba(236,234,233,0.3)_100%)]"
     aria-hidden="true"
   ></div>
 
@@ -286,7 +286,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
        al hacer clic: ahora está siempre, así que necesita ocupar su espacio en
        el layout. Con position:absolute el titular no sabría que hay algo a su
        derecha y a 1280px exactos se tocarían. -->
-  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+2rem)] sm:px-8 lg:h-full lg:min-h-0 lg:px-10 lg:pb-12 lg:pt-[calc(var(--header-offset)+1rem)] xl:grid xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-center xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_30rem]">
+  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+1rem)] sm:px-8 lg:h-full lg:min-h-0 lg:px-10 lg:pb-12 lg:pt-[var(--header-offset)] xl:grid xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-center xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_30rem]">
     <div class="max-w-3xl">
       <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">
         <?php echo esc_html($hero['eyebrow']); ?>
@@ -378,11 +378,11 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════ 02 · BARRA DE PRUEBA ═══════════════ -->
-<!-- Se queda oscura a propósito. Sobre bone, el naranja de las cifras cae a
-     2.9:1: habría que repintarlas de verde o de negro y las cifras dejarían
-     de ser lo primero que se ve. Como banda oscura bajo un hero claro cumple
-     dos funciones: mantiene el contraste del dato y separa el hero del
-     bloque 03, que también es claro. -->
+<!-- Se queda oscura a propósito. EMBER sobre SAND da 4.39:1, que a este
+     tamaño de cifra sobra; sobre el claro de BREEZE caería a 4.08:1 y habría
+     que repintarlas de verde o de negro — y las cifras dejarían de ser lo
+     primero que se ve. Como banda oscura bajo un hero claro cumple además una
+     segunda función: separa el hero del bloque 03, que también es claro. -->
 <section class="bg-ink lg:shrink-0">
   <dl class="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
     <?php foreach ($proof_bar as $item) : ?>
@@ -442,7 +442,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
          Ojo: asume dos filas, que es lo que dan 5 clusters en la rejilla de 6.
          Si el array pasa a 7 o más, la tercera fila cae en auto y hay que
          agregar la pista aquí. -->
-    <ul class="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-6 lg:grid-rows-[minmax(0,1fr)_minmax(0,1.3fr)]">
+    <ul class="mt-12 grid gap-px bg-slate-200 sm:grid-cols-2 lg:grid-cols-6 lg:grid-rows-[minmax(0,1fr)_minmax(0,1.3fr)]">
       <?php foreach ($clusters as $i => $cluster) :
         // 2 sobrantes → mitad y mitad. 1 sobrante → ancho completo.
         $ec_span = 'lg:col-span-2';
@@ -458,7 +458,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
           <!-- Sin translate en hover: con gap-px, levantar la placa abriría
                una franja de ink/10 de 2px bajo la tarjeta. El relieve solo
                vende el volumen igual de bien. -->
-          <div class="bevel-tile flex-1 bg-bone p-7 transition-[box-shadow,background-color] duration-300 ease-out hover:bevel-tile-raised hover:bg-white motion-reduce:transition-none">
+          <div class="bevel-tile flex-1 bg-bone p-7 transition-[box-shadow,background-color] duration-300 ease-out hover:bevel-tile-raised hover:bg-breeze-100 motion-reduce:transition-none">
             <h3 class="font-display text-lg font-bold tracking-tight text-ink">
               <?php echo esc_html($cluster['title']); ?>
             </h3>
@@ -502,7 +502,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
   ></video>
 
   <div
-    class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(18,20,15,0.92)_0%,rgba(18,20,15,0.86)_45%,rgba(18,20,15,0.8)_100%)]"
+    class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(13,15,16,0.92)_0%,rgba(13,15,16,0.86)_45%,rgba(13,15,16,0.8)_100%)]"
     aria-hidden="true"
   ></div>
 
@@ -562,7 +562,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════════ 05 · CAPACIDADES ═══════════════════════ -->
-<section id="capabilities" class="bg-white lg:flex lg:min-h-svh lg:items-start">
+<section id="capabilities" class="bg-breeze-100 lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Capabilities</p>
@@ -599,7 +599,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
             type="button"
             data-carousel-prev
             aria-label="Previous capability"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4">
               <path d="M19 12H6M11 6l-6 6 6 6" />
@@ -609,7 +609,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
             type="button"
             data-carousel-next
             aria-label="Next capability"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4">
               <path d="M5 12h13M13 6l6 6-6 6" />
@@ -647,7 +647,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
               class="w-[80vw] shrink-0 sm:w-[23rem] lg:w-[25rem]"
               <?php echo $ec_clone ? 'aria-hidden="true"' : ''; ?>
             >
-              <article class="flex h-full flex-col overflow-hidden rounded-lg bg-bone ring-1 ring-ink/10 transition-shadow duration-300 hover:shadow-xl hover:shadow-ink/10 motion-reduce:transition-none">
+              <article class="flex h-full flex-col overflow-hidden rounded-lg bg-bone ring-1 ring-slate-200 transition-shadow duration-300 hover:shadow-xl hover:shadow-ink/10 motion-reduce:transition-none">
 
                 <?php if (!empty($item['image'])) : ?>
                   <img
@@ -661,7 +661,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                   <!-- Respaldo: si una imagen se cae en la migración, la tarjeta
                        queda con un panel liso en verde de marca en lugar de un
                        ícono de imagen rota. Barato de mantener, así que se queda. -->
-                  <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#3A5A4A_0%,#2C4638_100%)]" aria-hidden="true"></div>
+                  <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#4F5341_0%,#3A3D30_100%)]" aria-hidden="true"></div>
                 <?php endif; ?>
 
                 <div class="flex flex-1 flex-col border-t-2 border-forest p-7">
@@ -693,7 +693,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 
     <ol class="mt-12 flex flex-col">
       <?php foreach ($process as $step) : ?>
-        <li class="grid gap-4 border-t border-ink/10 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
+        <li class="grid gap-4 border-t border-slate-200 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
           <span class="font-display text-2xl font-bold tracking-tight text-ember tabular-nums">
             <?php echo esc_html($step['n']); ?>
           </span>
@@ -710,7 +710,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 08 · CREDENCIALES ═══════════════════ -->
-<section id="credentials" class="bg-white lg:grid lg:min-h-svh lg:grid-cols-2 lg:items-stretch">
+<section id="credentials" class="bg-breeze-100 lg:grid lg:min-h-svh lg:grid-cols-2 lg:items-stretch">
 
   <!-- Columna izquierda: encabezado y tabla, montados sobre una placa
        biselada. El padding exterior es el margen de la página y hace de aire
@@ -740,7 +740,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
            se lee como marketing. Para un GC eso importa. -->
       <dl class="mt-12">
         <?php foreach ($credentials as $row) : ?>
-          <div class="grid gap-1 border-b border-ink/10 py-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-8">
+          <div class="grid gap-1 border-b border-slate-200 py-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-8">
             <dt class="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">
               <?php echo esc_html($row['label']); ?>
             </dt>
@@ -808,7 +808,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
              loading=lazy no es cosmético — sin eso el iframe arrastra el
              JavaScript de Maps en la carga inicial de una página que ya trae
              dos videos. -->
-        <div class="relative mt-10 aspect-[4/3] w-full overflow-hidden rounded-lg bg-ink/5 ring-1 ring-ink/10 sm:aspect-[3/2]">
+        <div class="relative mt-10 aspect-[4/3] w-full overflow-hidden rounded-lg bg-ink/5 ring-1 ring-slate-200 sm:aspect-[3/2]">
           <iframe
             src="<?php echo esc_url($ec_map_embed); ?>"
             title="Map showing EC Landscaping at 3754 N Higley Rd, Suite 2, Ogden, Utah"
@@ -851,9 +851,9 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
            piensa por ciudad. El bloque responde a los dos sin repetirse. -->
       <div>
         <h3 class="mb-5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Counties served</h3>
-        <ul class="border-t border-ink/10">
+        <ul class="border-t border-slate-200">
           <?php foreach ($service_counties as $county) : ?>
-            <li class="flex items-baseline justify-between gap-6 border-b border-ink/10 py-4">
+            <li class="flex items-baseline justify-between gap-6 border-b border-slate-200 py-4">
               <span class="font-display text-2xl font-bold tracking-tight text-ink sm:text-[1.75rem]">
                 <?php echo esc_html($county); ?>
               </span>
@@ -865,7 +865,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
         <h3 class="mb-5 mt-12 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Core cities</h3>
         <ul class="flex flex-wrap gap-2">
           <?php foreach ($service_cities as $city) : ?>
-            <li class="rounded-full border border-ink/15 bg-white px-4 py-2 text-sm text-ink">
+            <li class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-ink">
               <?php echo esc_html($city); ?>
             </li>
           <?php endforeach; ?>
@@ -882,7 +882,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 
 <!-- ═══════════════════ 10 · REPUTACIÓN ═══════════════════ -->
 <?php if (!empty($reviews)) : ?>
-  <section class="bg-white lg:flex lg:min-h-svh lg:items-start">
+  <section class="bg-breeze-100 lg:flex lg:min-h-svh lg:items-start">
     <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
       <h2 class="ec-shine max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         <?php echo esc_html($review_summary['rating']); ?> stars.
@@ -935,7 +935,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       <!-- <details> nativo: acordeón accesible sin una línea de JavaScript. -->
       <div>
         <?php foreach ($faqs as $faq) : ?>
-          <details class="group border-b border-ink/10 first:border-t first:border-ink/10">
+          <details class="group border-b border-slate-200 first:border-t first:border-slate-200">
             <summary class="flex cursor-pointer list-none items-start justify-between gap-6 py-6 marker:content-none [&::-webkit-details-marker]:hidden">
               <span class="font-display text-lg font-bold leading-snug tracking-tight text-ink transition-colors group-hover:text-forest group-open:text-forest sm:text-xl">
                 <?php echo esc_html($faq['q']); ?>

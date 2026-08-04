@@ -1,406 +1,360 @@
+/* ══════════════════════════════════════════════════════════════════
+   EC Landscaping — src/index.css
+   ══════════════════════════════════════════════════════════════════
+
+   ATENCIÓN antes de reemplazar el tuyo:
+
+   Este archivo está RECONSTRUIDO. Nunca vi el original — en el gitingest
+   llegó como [Binary file] — así que lo armé al revés: inventariando cada
+   clase, cada utilidad y cada variable que las siete plantillas y los tres
+   componentes dan por existentes, y escribiendo una definición para cada
+   una.
+
+   Eso significa dos cosas:
+
+     1. Todo lo que el proyecto USA está acá. Nada va a quedar sin definir.
+     2. Los VALORES de las utilidades visuales (biseles, relieves, destello)
+        son mi lectura de la intención, no los tuyos. Si el original tenía
+        una curva de sombra afinada a mano, se pierde.
+
+   Por eso: hacé un diff contra el tuyo antes de reemplazarlo. Si el tuyo
+   tiene algo que acá no está, lo que falta es de tu lado y hay que traerlo.
+   Lo que sí es fiable y podés tomar tal cual es el bloque @theme — esos
+   valores salen muestreados de la lámina de marca.
+   ══════════════════════════════════════════════════════════════════ */
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* Tailwind v4 detecta fuentes solo, pero en un tema de WordPress conviene
-   declararlas: si no, las clases que solo existen en los .php se purgan. */
-@source "../*.php";
-@source "../parts/**/*.php";
-@source "../template-parts/**/*.php";
-@source "./**/*.{js,jsx}";
+/* Tailwind v4 escanea el directorio de este archivo hacia abajo. Las
+   plantillas viven en la raíz del tema, un nivel arriba, así que sin esto
+   ninguna clase escrita en un .php llega al build — que es exactamente el
+   síntoma de "compilé y el botón salió sin estilo".
+
+   Incluye .php y .js: el markup está repartido entre los dos. */
+@source "../**/*.php";
+@source "./**/*.js";
+
+
+/* ══════════════════════════════════════════════════════════════════
+   1 · PALETA
+   Valores muestreados de la lámina "Paleta de color" de la propuesta
+   de branding, píxel a píxel.
+   ══════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ── Paleta (Parte 3 del brief) ────────────────────────────────
-     ink    = casi negro, base institucional
-     forest = verde de marca, el que ya usa el sitio en vivo
-     ember  = naranja, EXCLUSIVO para acción. Si no es clickeable, no es ember.
-     bone   = blanco roto para lectura larga                        */
-  --color-ink: #12140f;
-  --color-ink-soft: #1e211b;
-  --color-forest: #3a5a4a;
-  --color-forest-600: #2e4a3c;
-  --color-ember: #e2711d;
-  --color-ember-600: #c55f13;
-  --color-bone: #f7f7f5;
-  --color-mist: #e4e6e1;
 
-  /* ── Tipografía ───────────────────────────────────────────────
-     Display: grotesca apretada y de peso alto.
-     Body: la misma familia en 400. Cargar por wp_enqueue_style.   */
-  --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* ── Tipografía ──
+     Display: Archivo, solo 600/700. Body: Inter.
+     Las familias se cargan desde functions.php con wp_enqueue_style. */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Archivo", var(--font-sans);
 
-  /* Radios contenidos: 6px máximo en superficies grandes. */
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  /* ── SAND · el casi-negro de las bandas oscuras ── */
+  --color-sand:     #0D0F10;
+  --color-sand-400: #3D3F40;
+  --color-sand-300: #6E6F70;
+  --color-sand-200: #9E9F9F;
+  --color-sand-100: #CFCFCF;
+
+  /* ── UMBER · dark cálido, un escalón por encima de SAND ── */
+  --color-umber:     #302F2D;
+  --color-umber-400: #595957;
+  --color-umber-300: #838281;
+  --color-umber-200: #ACACAB;
+  --color-umber-100: #D6D5D5;
+
+  /* ── SLATE · el verde apagado de la sierra ── */
+  --color-slate:     #4F5341;
+  --color-slate-400: #727567;
+  --color-slate-300: #95988D;
+  --color-slate-200: #B9BAB3;
+  --color-slate-100: #DCDDD9;
+
+  /* ── EMBER · el único momento de calidez ── */
+  --color-ember:     #A36C48;
+  --color-ember-400: #B5896D;
+  --color-ember-300: #C8A791;
+  --color-ember-200: #DAC4B6;
+  --color-ember-100: #EDE2DB;
+
+  /* Pasos oscuros que la lámina no trae: su rampa solo va hacia el claro y
+     el hover de un botón necesita ir hacia el oscuro. ember-600 es además
+     la superficie que resolvería el contraste del CTA — ver la nota final. */
+  --color-ember-600: #8A5B3C;
+  --color-ember-700: #7A4F35;
+
+  /* ── BREEZE · el claro. Nunca blanco puro: no está en la paleta ── */
+  --color-breeze:     #ECEAE9;
+  --color-breeze-300: #F0EEED;
+  --color-breeze-200: #F4F2F2;
+  --color-breeze-100: #F7F7F6;
+
+  /* ── Alias semánticos ──
+     Los nombres que usan las plantillas y los componentes. Esta capa es lo
+     que hace que un cambio de paleta toque un archivo y no diez: ninguna
+     clase de Tailwind del proyecto cambia, solo cambia a qué apunta. */
+  --color-ink:    var(--color-sand);
+  --color-bone:   var(--color-breeze);
+  --color-forest: var(--color-slate);
+  --color-mist:   var(--color-breeze-300);
 }
 
-/* ── CTA en relieve ───────────────────────────────────────────────
-   Adaptación de la referencia de Uiverse (barisdogansutcu): se conserva la
-   mecánica —píldora, doble sombra opuesta, colapso en :active— y se remapea
-   el color a la paleta EC. El azul original no existe en la marca y sobre la
-   barra casi negra leería como un botón importado de otro sitio.
-   El naranja va en el stop oscuro para que el blanco encima pase contraste AA. */
-.cta-relief {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #ffffff;
-  background-color: #b8560f;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  border-radius: 40px;
-  padding: 13px 24px 13px 26px;
-  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
-  box-shadow:
-    -4px -2px 14px 0 rgba(255, 255, 255, 0.1),
-    4px 2px 16px 0 rgba(226, 113, 29, 0.42);
-}
 
-.cta-relief:hover {
-  background-color: #c55f13;
-  border-color: rgba(255, 255, 255, 0.28);
-  box-shadow:
-    -2px -1px 8px 0 rgba(255, 255, 255, 0.14),
-    2px 1px 9px 0 rgba(226, 113, 29, 0.5);
-}
+/* ══════════════════════════════════════════════════════════════════
+   2 · BASE
+   ══════════════════════════════════════════════════════════════════ */
 
-.cta-relief:active {
-  box-shadow: none;
-  transform: translateY(1px);
-}
+@layer base {
 
-/* Puerto fiel de la referencia, tal cual la enviaste. Sirve para comparar
-   en pantalla: se activa con ctaStyle="soft" en header.php.
-   Nota: #7e97b8 sobre #e0e8ef da ~2.4:1 de contraste y no pasa WCAG AA. */
-.cta-soft {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: #7e97b8;
-  background-color: #e0e8ef;
-  border: 2px solid rgba(255, 255, 255, 0.333);
-  border-radius: 40px;
-  padding: 16px 24px 16px 28px;
-  transition: 0.2s;
-  box-shadow:
-    -4px -2px 16px 0 #ffffff,
-    4px 2px 16px 0 rgba(95, 157, 231, 0.48);
-}
+  :root {
+    /* Alto que ocupa el header fijo. Lo consumen el padding-top del body en
+       las páginas interiores, el del hero en la landing, el sticky del
+       encabezado del FAQ y el max-h del panel del formulario.
 
-.cta-soft:hover {
-  color: #516d91;
-  background-color: #e5edf5;
-  box-shadow:
-    -2px -1px 8px 0 #ffffff,
-    2px 1px 8px 0 rgba(95, 157, 231, 0.48);
-}
+       El número NO es estético, es la suma de las clases de Navbar.js en
+       estado no acoplado — que es el peor caso, porque al hacer scroll la
+       franja de utilidad colapsa y el header encoge. Reservar el alto
+       acoplado dejaría el contenido debajo de la barra hasta el primer
+       scroll.
 
-.cta-soft:active {
-  box-shadow: none;
-}
+       Móvil, 121px:
+         franja  py-1.5 x2 + placa py-1.5 x2 + icono h-4 + borde = 41
+         barra   pt-4 del wrapper + py-4 x2 + logo h-8           = 80
 
-.cta-relief:focus-visible,
-.cta-soft:focus-visible {
-  outline: 2px solid var(--color-ember);
-  outline-offset: 3px;
-}
+       Escritorio, 137px: igual, pero la barra la manda el CTA
+         (py-3 x2 + texto 13px + border-2 x2 = 48) en lugar del logo.
 
-@media (prefers-reduced-motion: reduce) {
-  .cta-relief,
-  .cta-soft {
-    transition: none;
+       Los valores van redondeados hacia arriba: 0.5rem de holgura es
+       invisible, 20px de falta son el titular tapado por la barra. */
+    --header-offset: 8rem;
   }
-  .cta-relief:active {
-    transform: none;
+
+  @media (min-width: 1024px) {
+    :root {
+      --header-offset: 9rem;
+    }
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  body {
+    background-color: var(--color-bone);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* El header es fixed y flota encima de la página. La compensación NO se
+     hace acá con un padding-top en el <body>, y esa es una decisión, no un
+     olvido: cada plantilla reserva su propio espacio en la primera sección.
+
+     El motivo es la landing. Su hero pasa por detrás del header a propósito
+     —el video llega hasta arriba de todo—, así que un padding global habría
+     que anularlo justo para la página más importante del sitio. Antes eso se
+     resolvía con la clase .ec-immersive-hero desde functions.php; ahora no
+     hace falta la excepción porque no hay regla general que excepcionar.
+
+     Las plantillas interiores usan:
+       pt-[calc(var(--header-offset)+2rem)] lg:pt-[calc(var(--header-offset)+3rem)]
+
+     La clase .ec-immersive-hero sigue llegando desde functions.php y ya no
+     hace nada. Queda sin efecto a propósito: es un gancho útil si algún día
+     una plantilla necesita distinguirse por el tipo de hero. */
+
+  /* En móvil hay una barra fija abajo con Call y Request a Bid. Sin esta
+     reserva, tapa las últimas líneas del footer. 3.5rem es su alto. */
+  @media (max-width: 1023px) {
+    body { padding-bottom: 3.5rem; }
+  }
+
+  /* Los enlaces del navbar y del footer apuntan a home_url('/#projects'),
+     así que al llegar desde otra página el navegador salta al fragmento
+     antes de que la barra fija se asiente y el encabezado queda tapado.
+     Esto le reserva el espacio a cualquier destino de ancla. */
+  [id] {
+    scroll-margin-top: calc(var(--header-offset) + 1rem);
+  }
+
+  /* Un contenedor con scroll horizontal y tabindex="0" —las pistas de los
+     carruseles— recibe foco al tabular. El anillo por defecto del navegador
+     es inconsistente entre motores; el proyecto usa focus-visible:outline
+     explícito, así que acá solo se limpia el default. */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
-/* ── Relieve del CTA ──────────────────────────────────────────────
-   Adaptado del botón de barisdogansutcu (Uiverse). Se conserva la mecánica:
-   dos halos opuestos —luz arriba-izquierda, color abajo-derecha— que se
-   contraen en hover y desaparecen en :active, así el botón se hunde.
 
-   Variante `ember`: la misma física traducida a la paleta de marca.
-   Variante `soft`: los valores literales del original, para comparar.  */
-@utility cta-relief {
-  box-shadow:
-    -4px -2px 16px 0 rgba(255, 255, 255, 0.12),
-    4px 2px 20px 0 rgba(226, 113, 29, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
-}
+/* ══════════════════════════════════════════════════════════════════
+   3 · RELIEVE
+   Biseles y halos. La lógica es siempre la misma: luz arriba-izquierda,
+   sombra abajo-derecha, y en :active se invierte para que el elemento se
+   hunda en lugar de levantarse.
+   ══════════════════════════════════════════════════════════════════ */
 
-@utility cta-relief-tight {
-  box-shadow:
-    -2px -1px 8px 0 rgba(255, 255, 255, 0.16),
-    2px 1px 10px 0 rgba(226, 113, 29, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.32);
-}
-
-@utility cta-soft {
-  box-shadow:
-    -4px -2px 16px 0 #ffffff,
-    4px 2px 16px 0 rgb(95 157 231 / 48%);
-}
-
-/* Variante para superficies claras (hero en bone). El halo blanco de
-   `cta-relief` es invisible sobre fondo claro y deja solo el halo naranja
-   suelto, que se lee como una mancha. Aquí la luz se sustituye por una
-   sombra ambiental gris y el halo de color baja de intensidad. */
-@utility cta-relief-light {
-  box-shadow:
-    -3px -2px 12px 0 rgba(255, 255, 255, 0.9),
-    4px 4px 18px 0 rgba(18, 20, 15, 0.16),
-    2px 2px 14px 0 rgba(226, 113, 29, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
-@utility cta-relief-light-tight {
-  box-shadow:
-    -2px -1px 6px 0 rgba(255, 255, 255, 0.9),
-    2px 2px 9px 0 rgba(18, 20, 15, 0.2),
-    1px 1px 7px 0 rgba(226, 113, 29, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-@utility cta-soft-tight {
-  box-shadow:
-    -2px -1px 8px 0 #ffffff,
-    2px 1px 8px 0 rgb(95 157 231 / 48%);
-}
-
-/* ── Bisel para las placas de contacto ────────────────────────────
-   Dos sombras internas simulan luz desde arriba y sombra abajo. En reposo
-   las placas son planas; el bisel aparece solo en hover, y en :active se
-   invierte para que el botón se sienta hundido. */
+/* ── Placas de contacto del navbar y de FloatingActions ──
+   Planas en reposo, biseladas en hover. Sobre superficie oscura, así que
+   la luz es blanco translúcido y la sombra es negro. */
 @utility bevel {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
-    0 1px 2px rgba(0, 0, 0, 0.45);
+    inset 1px 1px 0 rgba(255, 255, 255, 0.14),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.28);
 }
 
 @utility bevel-pressed {
   box-shadow:
-    inset 0 2px 3px rgba(0, 0, 0, 0.6),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    inset 1px 1px 3px rgba(0, 0, 0, 0.45),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.06);
 }
 
-/* ── Botón CTA ─────────────────────────────────────────────────────
-   Dos variantes. Ambas toman la mecánica del estilo de Uiverse: sombra
-   suave a dos luces en reposo, sombra más corta en hover (el botón se
-   acerca a la superficie) y sombra anulada en :active. */
-@layer components {
-  /* Variante por defecto: la mecánica suave en tonos ember, legible
-     sobre la barra oscura. */
-  .cta-ember {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: #ffffff;
-    background-color: var(--color-ember);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 999px;
-    padding: 14px 26px;
-    transition: 0.2s;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.3),
-      0 4px 16px rgb(226 113 29 / 38%);
-  }
-
-  .cta-ember:hover {
-    background-color: var(--color-ember-600);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.24),
-      0 2px 8px rgb(226 113 29 / 52%);
-  }
-
-  .cta-ember:active {
-    box-shadow: inset 0 2px 5px rgb(0 0 0 / 35%);
-    transform: translateY(1px);
-  }
-
-  /* Variante soft: el estilo de Uiverse portado. Necesita superficie
-     clara — sobre la barra oscura el resplandor blanco lee como halo.
-     Único cambio: el color de texto en reposo pasa de #7e97b8 a #43597a.
-     El original daba 2.3:1 de contraste sobre #e0e8ef y no pasa AA. */
-  .cta-soft {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: #43597a;
-    background-color: #e0e8ef;
-    border: 2px solid rgba(255, 255, 255, 0.333);
-    border-radius: 40px;
-    padding: 16px 28px 16px 24px;
-    transition: 0.2s;
-    box-shadow:
-      -4px -2px 16px 0px #ffffff,
-      4px 2px 16px 0px rgb(95 157 231 / 48%);
-  }
-
-  .cta-soft:hover {
-    color: #354762;
-    background-color: #e5edf5;
-    box-shadow:
-      -2px -1px 8px 0px #ffffff,
-      2px 1px 8px 0px rgb(95 157 231 / 48%);
-  }
-
-  .cta-soft:active {
-    box-shadow: none;
-  }
-
-  .cta-ember:focus-visible,
-  .cta-soft:focus-visible {
-    outline: 2px solid var(--color-ember);
-    outline-offset: 3px;
-  }
+/* ── Tarjetas del bloque 03 y placa de credenciales ──
+   Sobre superficie CLARA: la luz es blanco opaco y la sombra es ink muy
+   diluido. Un bisel blanco sobre blanco no se ve, por eso las tarjetas van
+   sobre bone y no sobre breeze-100. */
+@utility bevel-tile {
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.95),
+    inset -1px -1px 0 rgba(13, 15, 16, 0.08),
+    inset 0 -16px 24px -20px rgba(13, 15, 16, 0.22),
+    0 1px 1px rgba(13, 15, 16, 0.03);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cta-ember,
-  .cta-soft {
-    transition: none;
-  }
-  .cta-ember:active {
-    transform: none;
-  }
+@utility bevel-tile-raised {
+  box-shadow:
+    inset 1px 1px 0 rgb(255, 255, 255),
+    inset -1px -1px 0 rgba(13, 15, 16, 0.11),
+    inset 0 -20px 28px -20px rgba(13, 15, 16, 0.3),
+    0 12px 24px -14px rgba(13, 15, 16, 0.3);
 }
 
-/* ── Destello de titular ──────────────────────────────────────────
-   Barrido único al entrar en pantalla, nunca en bucle. Un brillo que se
-   repite sin parar es contenido en movimiento permanente: incumple el
-   criterio 2.2.2 de WCAG (pausar, detener, ocultar) y, en una página cuyo
-   trabajo es que un estimador la tome en serio, lee como banner.
+/* ── CTA sobre superficie OSCURA (navbar, banda de cierre, formulario) ──
+   Doble halo concéntrico que se contrae en hover: el botón parece acercarse.
+   En :active el proyecto aplica shadow-none, así que el halo desaparece y
+   la píldora queda pegada al fondo. */
+@utility cta-relief {
+  box-shadow:
+    0 0 0 4px rgba(163, 108, 72, 0.22),
+    0 0 0 9px rgba(163, 108, 72, 0.10),
+    0 6px 16px -6px rgba(13, 15, 16, 0.55);
+}
 
-   El color base define el estado en reposo, así que el contraste real del
-   titular nunca depende de la animación. El realce solo aparece en una
-   banda estrecha y en movimiento; en el gris elegido son 4.5:1 sobre bone
-   incluso en su punto más claro.
+@utility cta-relief-tight {
+  box-shadow:
+    0 0 0 2px rgba(163, 108, 72, 0.3),
+    0 0 0 5px rgba(163, 108, 72, 0.14),
+    0 10px 20px -8px rgba(13, 15, 16, 0.6);
+}
 
-   El texto se vuelve transparente ÚNICAMENTE dentro del @supports: sin esa
-   guarda, un navegador sin background-clip:text dejaría todos los
-   titulares invisibles. */
+/* ── CTA sobre superficie CLARA (hero) ──
+   Mismo mecanismo, pero el halo exterior es blanco: sobre bone, un halo
+   ember del mismo tono que el botón lo empasta en vez de separarlo. */
+@utility cta-relief-light {
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.7),
+    0 0 0 9px rgba(163, 108, 72, 0.16),
+    0 6px 16px -8px rgba(13, 15, 16, 0.3);
+}
+
+@utility cta-relief-light-tight {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.85),
+    0 0 0 5px rgba(163, 108, 72, 0.22),
+    0 10px 20px -10px rgba(13, 15, 16, 0.35);
+}
+
+/* ── Skin "soft" del BidButton ──
+   Los valores literales del botón original de Uiverse, en azul claro. Hoy
+   ninguna instancia lo usa (ctaStyle siempre es "ember") y queda fuera de
+   la paleta de marca a propósito: es una alternativa, no una variante.
+   Si en tres meses sigue sin usarse, se puede borrar junto con el skin. */
+@utility cta-soft {
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.55),
+    0 0 0 9px rgba(126, 151, 184, 0.18),
+    0 6px 14px -6px rgba(81, 109, 145, 0.35);
+}
+
+@utility cta-soft-tight {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.75),
+    0 0 0 5px rgba(126, 151, 184, 0.24),
+    0 10px 18px -8px rgba(81, 109, 145, 0.4);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   4 · DESTELLO DE TITULARES
+   .ec-shine se dispara una vez por titular al entrar en pantalla; el
+   IIFE de las plantillas le agrega .is-shining y deja de observarlo.
+   ══════════════════════════════════════════════════════════════════ */
+
 .ec-shine {
-  --shine-base: #12140f;
-  --shine-hl: #6b7280;
+  /* background-clip: text necesita un fondo. En reposo es el color sólido
+     del titular, así que sin JS —o con reduced-motion— el texto se ve
+     exactamente igual que cualquier otro. */
+  background-image: linear-gradient(
+    100deg,
+    currentColor 0%,
+    currentColor 40%,
+    rgba(163, 108, 72, 0.85) 50%,
+    currentColor 60%,
+    currentColor 100%
+  );
+  background-size: 250% 100%;
+  background-position: 150% 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
+.ec-shine.is-shining {
+  animation: ec-shine 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Sobre fondo oscuro el destello va en claro, no en ember: un naranja
+   apagado sobre bone es un brillo; sobre ink es una mancha. */
 .ec-shine--light {
-  --shine-base: #f7f7f5;
-  --shine-hl: #ffffff;
+  background-image: linear-gradient(
+    100deg,
+    currentColor 0%,
+    currentColor 40%,
+    rgba(255, 255, 255, 0.9) 50%,
+    currentColor 60%,
+    currentColor 100%
+  );
 }
 
-@supports ((background-clip: text) or (-webkit-background-clip: text)) {
-  .ec-shine {
-    background-image: linear-gradient(
-      100deg,
-      var(--shine-base) 0%,
-      var(--shine-base) 42%,
-      var(--shine-hl) 50%,
-      var(--shine-base) 58%,
-      var(--shine-base) 100%
-    );
-    background-size: 280% 100%;
-    /* Con background-size mayor que el elemento, cualquier posición entre 0%
-       y 100% lo cubre por completo. Salirse de ese rango (130%, -30%) deja
-       zonas sin gradiente detrás, y como el texto es transparente, esas
-       letras desaparecen. El repeat-x es el cinturón de seguridad: los dos
-       extremos del gradiente son el color base, así que si algo quedara
-       descubierto, se rellena con el color sólido en vez de con nada. */
-    background-position: 100% 0;
-    background-repeat: repeat-x;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
+@keyframes ec-shine {
+  from { background-position: 150% 0; }
+  to   { background-position: -50% 0; }
+}
 
+@media (prefers-reduced-motion: reduce) {
+  .ec-shine,
   .ec-shine.is-shining {
-    animation: ec-shine-sweep 1100ms ease-out 1 forwards;
-  }
-}
-
-@keyframes ec-shine-sweep {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: 0% 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ec-shine {
-    animation: none !important;
     background-image: none;
-    color: var(--shine-base);
+    animation: none;
   }
 }
 
-/* El header es fixed: por defecto se compensa su altura para que el contenido
-   no quede debajo. Ajustar si cambia la altura de la franja de utilidad. */
-:root {
-  --header-offset: 8.5rem;
-}
 
-body {
-  padding-top: var(--header-offset);
-}
-
-/* Hero inmersivo: la página arranca en el borde superior del viewport y el
-   header flota encima. La clase la añade functions.php cuando la página usa
-   la plantilla Landing Comercial — no se puede quitar el padding globalmente
-   o el blog y las entradas quedarían con el primer párrafo bajo el header.
-   El hero se reserva el espacio él mismo con su propio padding-top. */
-body.ec-immersive-hero {
-  padding-top: 0;
-}
-
-/* La barra inferior fija en móvil tapa el final de la página. */
-@media (max-width: 1023px) {
-  body {
-    padding-bottom: 3.5rem;
-  }
-}
-
-/* Los anclas del navbar no deben quedar debajo del header acoplado. */
-[id] {
-  scroll-margin-top: 5.5rem;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
+/* ══════════════════════════════════════════════════════════════════
+   5 · REVELADO POR SCROLL
+   El estado oculto cuelga de .ec-reveal, que un script inline pone en
+   <html> antes de que se pinte nada. Sin JS —o con reduced-motion— la
+   clase nunca se agrega y el contenido se ve tal cual: nunca se esconde
+   texto apostando a que corra un script.
+   ══════════════════════════════════════════════════════════════════ */
 
 .ec-reveal [data-reveal] {
   opacity: 0;
@@ -408,6 +362,8 @@ html {
   transition:
     opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* --reveal-i lo escribe el PHP por elemento: así la cascada se ordena
+     sola sin una clase por posición. */
   transition-delay: calc(var(--reveal-i, 0) * 65ms);
 }
 
@@ -417,22 +373,98 @@ html {
 }
 
 
-/* ── Bisel de las tarjetas ────────────────────────────────────────
-   Luz arriba-izquierda, sombra abajo-derecha: la placa se lee levantada
-   del plano bone. La sombra proyectada es mínima a propósito — la rejilla
-   son filetes de 1px y una sombra grande se los come. */
-@utility bevel-tile {
-  box-shadow:
-    inset 1px 1px 0 rgba(255, 255, 255, 0.95),
-    inset -1px -1px 0 rgba(18, 20, 15, 0.08),
-    inset 0 -16px 24px -20px rgba(18, 20, 15, 0.22),
-    0 1px 1px rgba(18, 20, 15, 0.03);
+/* ══════════════════════════════════════════════════════════════════
+   6 · PULSOS DEL CTA DEL HERO
+   Dos anillos con medio ciclo de desfase: siempre hay uno saliendo
+   mientras el otro se apaga. Con uno solo se lee como parpadeo.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* El anillo sale por `spread` del box-shadow, no por transform: scale. En
+   una píldora ancha, escalar deforma la onda —crece más a los lados que
+   arriba y abajo—; el spread mantiene el mismo grosor en todo el contorno.
+
+   Se apaga en el 70% y no en el 100%: eso deja un respiro entre pulsos.
+   Sin la pausa se lee como un motor, no como una llamada.
+
+   El color es EMBER. Al ser más oscuro que el naranja anterior, el anillo
+   se lee menos sobre el hero claro: si queda flojo, subir el 0.55 antes
+   que agrandar el spread. */
+@keyframes ec-cta-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(163, 108, 72, 0.55); }
+  70%  { box-shadow: 0 0 0 18px rgba(163, 108, 72, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(163, 108, 72, 0); }
 }
 
-@utility bevel-tile-raised {
-  box-shadow:
-    inset 1px 1px 0 rgb(255, 255, 255),
-    inset -1px -1px 0 rgba(18, 20, 15, 0.11),
-    inset 0 -20px 28px -20px rgba(18, 20, 15, 0.3),
-    0 12px 24px -14px rgba(18, 20, 15, 0.3);
+.ec-cta-pulse {
+  animation: ec-cta-pulse 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
+
+.ec-cta-pulse--delayed {
+  animation-delay: 1.2s;
+}
+
+/* Sin movimiento el botón conserva un anillo fijo: la preferencia pide
+   menos animación, no menos jerarquía. */
+@media (prefers-reduced-motion: reduce) {
+  .ec-cta-pulse {
+    animation: none;
+    box-shadow: 0 0 0 4px rgba(163, 108, 72, 0.2);
+  }
+  .ec-cta-pulse--delayed {
+    box-shadow: none;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   7 · PROSE
+   El contenido del editor de WordPress, en las plantillas que lo
+   imprimen. Solo se reencauzan los colores; el resto lo pone el plugin
+   de typography.
+   ══════════════════════════════════════════════════════════════════ */
+
+.prose {
+  --tw-prose-body: color-mix(in oklab, var(--color-ink) 80%, transparent);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-lead: color-mix(in oklab, var(--color-ink) 70%, transparent);
+  --tw-prose-links: var(--color-ink);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-counters: var(--color-ember);
+  --tw-prose-bullets: var(--color-ember);
+  --tw-prose-hr: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --tw-prose-quotes: var(--color-ink);
+  --tw-prose-quote-borders: var(--color-ember);
+  --tw-prose-captions: color-mix(in oklab, var(--color-ink) 50%, transparent);
+}
+
+.prose :where(h1, h2, h3, h4):not(:where([class~="not-prose"] *)) {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   NOTA DE CONTRASTE — leer antes de tocar el CTA
+
+   EMBER (#A36C48) es bastante más oscuro que el naranja anterior
+   (#E2711D), así que los números cambiaron y no todos para bien:
+
+     texto ink sobre EMBER ......... 4.39:1
+     texto blanco sobre EMBER ...... 4.38:1
+     texto bone sobre EMBER ........ 3.65:1
+
+   Las tres quedan por debajo del 4.5:1 que pide AA para texto de 13px,
+   que es el tamaño del CTA. Ninguna elección de color de texto lo salva:
+   el problema es la luminancia del fondo.
+
+   Por eso existe --color-ember-600 (#8A5B3C): ahí el texto blanco da
+   5.77:1 y bone da 4.81:1. Es el mismo terracota, un paso más oscuro.
+
+   NO está aplicado. Cambiar la superficie del CTA toca los botones de
+   siete plantillas y tres componentes, y es una decisión de marca — el
+   botón deja de ser exactamente el EMBER de la lámina.
+
+   El otro punto flojo: EMBER como texto chico sobre claro da 4.08:1 (los
+   "View capability →" de 0.7rem). Mejora sobre el 2.9:1 del naranja
+   anterior, pero sigue corto. --color-ember-700 lo resolvería.
+   ══════════════════════════════════════════════════════════════════ */

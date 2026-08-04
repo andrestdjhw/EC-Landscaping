@@ -56,7 +56,17 @@ $ec_what_happens = array(
 ?>
 
 <section class="bg-bone">
-  <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
+  <!-- La primera sección reserva el alto del header. El header es fixed:
+       flota encima de la página en lugar de empujarla, así que si esta
+       sección no le hace sitio, su propio titular queda debajo de la barra.
+
+       La landing no necesita esto porque su hero ya lo hace —pasa por detrás
+       del header a propósito—, pero cada plantilla interior tiene que
+       resolverlo por su cuenta.
+
+       No se hace con padding en el <body> desde el CSS: eso se aplicaría
+       también a la landing y le metería el hero 9rem para abajo. -->
+  <div class="w-full px-5 pb-16 pt-[calc(var(--header-offset)+2rem)] sm:px-8 lg:px-10 lg:pb-24 lg:pt-[calc(var(--header-offset)+3rem)]">
 
     <!-- ═══════════════ Encabezado ═══════════════ -->
     <div class="max-w-3xl">
@@ -135,7 +145,7 @@ $ec_what_happens = array(
              dentro de una proporción fija, para que el alto quede reservado
              antes de que cargue, y lazy para que no arrastre el JavaScript de
              Maps en la carga inicial. -->
-        <div class="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-ink/5 ring-1 ring-ink/10">
+        <div class="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-ink/5 ring-1 ring-slate-200">
           <iframe
             src="<?php echo esc_url($ec_map_embed); ?>"
             title="Map showing EC Landscaping at 3754 N Higley Rd, Suite 2, Ogden, Utah"
@@ -149,7 +159,7 @@ $ec_what_happens = array(
     </div>
 
     <!-- ═══════════════ Qué pasa después ═══════════════ -->
-    <div class="mt-20 border-t border-ink/10 pt-12">
+    <div class="mt-20 border-t border-slate-200 pt-12">
       <h2 class="ec-shine max-w-2xl font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
         What happens after you hit send.
       </h2>

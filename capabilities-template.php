@@ -66,7 +66,17 @@ $ec_process = array(
 ?>
 
 <section class="bg-bone">
-  <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
+  <!-- La primera sección reserva el alto del header. El header es fixed:
+       flota encima de la página en lugar de empujarla, así que si esta
+       sección no le hace sitio, su propio titular queda debajo de la barra.
+
+       La landing no necesita esto porque su hero ya lo hace —pasa por detrás
+       del header a propósito—, pero cada plantilla interior tiene que
+       resolverlo por su cuenta.
+
+       No se hace con padding en el <body> desde el CSS: eso se aplicaría
+       también a la landing y le metería el hero 9rem para abajo. -->
+  <div class="w-full px-5 pb-16 pt-[calc(var(--header-offset)+2rem)] sm:px-8 lg:px-10 lg:pb-24 lg:pt-[calc(var(--header-offset)+3rem)]">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Capabilities</p>
       <h1 class="ec-shine font-display text-4xl leading-[1.08] font-bold tracking-tight text-ink sm:text-5xl">
@@ -104,7 +114,7 @@ $ec_process = array(
             type="button"
             data-carousel-prev
             aria-label="Previous capability"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-breeze-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4">
               <path d="M19 12H6M11 6l-6 6 6 6" />
@@ -114,7 +124,7 @@ $ec_process = array(
             type="button"
             data-carousel-next
             aria-label="Next capability"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-[box-shadow,background-color] duration-200 hover:bg-breeze-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4">
               <path d="M5 12h13M13 6l6 6-6 6" />
@@ -151,7 +161,7 @@ $ec_process = array(
               <a
                 href="<?php echo esc_url(home_url('/' . $item['slug'])); ?>"
                 <?php echo $ec_clone ? 'tabindex="-1"' : ''; ?>
-                class="group flex h-full flex-col overflow-hidden rounded-lg bg-white ring-1 ring-ink/10 transition-shadow duration-300 hover:shadow-xl hover:shadow-ink/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
+                class="group flex h-full flex-col overflow-hidden rounded-lg bg-breeze-100 ring-1 ring-slate-200 transition-shadow duration-300 hover:shadow-xl hover:shadow-ink/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none"
               >
                 <img
                   src="<?php echo esc_url($item['image']); ?>"
@@ -360,7 +370,7 @@ $ec_process = array(
 </script>
 
 <!-- ═══════════════════════ PROCESO ═══════════════════════ -->
-<section class="bg-white">
+<section class="bg-breeze-100">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <h2 class="ec-shine max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
       How a bid becomes a finished site.
@@ -368,7 +378,7 @@ $ec_process = array(
 
     <ol class="mt-12 flex flex-col">
       <?php foreach ($ec_process as $step) : ?>
-        <li class="grid gap-4 border-t border-ink/10 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
+        <li class="grid gap-4 border-t border-slate-200 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
           <span class="font-display text-2xl font-bold tracking-tight text-ember tabular-nums">
             <?php echo esc_html($step['n']); ?>
           </span>
@@ -385,7 +395,7 @@ $ec_process = array(
 </section>
 
 <!-- ═══════════════════════ CTA ═══════════════════════ -->
-<section class="bg-ink text-bone">
+<section class="bg-umber text-bone">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
     <div class="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
       <div>
@@ -421,7 +431,7 @@ $ec_process = array(
 if (have_posts()) :
   while (have_posts()) : the_post();
     if (trim(get_the_content()) === '') continue; ?>
-    <section class="bg-white">
+    <section class="bg-breeze-100">
       <div class="prose w-full max-w-3xl px-5 py-16 text-ink/80 sm:px-8 lg:px-10">
         <?php the_content(); ?>
       </div>
