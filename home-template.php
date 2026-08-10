@@ -30,7 +30,11 @@ $hero = array(
 
   // Se arma desde wp_get_upload_dir() para que la URL sobreviva la migración
   // de ec-landscaping.local a producción.
-  'video'   => $ec_uploads['baseurl'] . '/2026/07/ECLanscapingHero-1.mp4',
+  //
+  // Reemplaza a ECLanscapingHero-1.mp4, que sigue en la biblioteca por si hay
+  // que volver atrás. El archivo nuevo está en la carpeta de agosto, no en la
+  // de julio como el de Projects.
+  'video'   => $ec_uploads['baseurl'] . '/2026/08/VIDEO-EC.mp4',
 
   // Fotograma del video exportado como JPG. Es lo que ven quienes no cargan
   // el video: móvil, prefers-reduced-motion y conexiones lentas. Sin poster
@@ -46,27 +50,77 @@ $proof_bar = array(
   array('stat' => '50 mi', 'label' => 'service radius from Ogden, up to 90 for large projects'),
 );
 
-/* 03 · PARA QUIÉN CONSTRUIMOS */
+/* ═════════════════════════════════════════════════════════════════
+   03 · IMÁGENES DE LOS CLUSTERS DE COMPRADOR
+
+   Una variable por tarjeta. Pegá la URL y listo — el resto del bloque no
+   se toca. Vacío = la tarjeta se renderiza solo con texto, así que se
+   pueden ir subiendo de a una sin que la sección quede rota.
+
+   Se arman desde $ec_uploads y no con la URL pegada entera, para que
+   sobrevivan la migración de ec-landscaping.local a producción:
+     $ec_img_gc = $ec_uploads['baseurl'] . '/2026/08/BuyerGC.jpg';
+
+   CRITERIO DE BÚSQUEDA: se fotografía el TIPO DE PROPIEDAD, no al
+   comprador. "General contractor" o "property manager" como término de
+   búsqueda devuelve gente con casco señalando planos — el género más
+   reconocible de foto de banco, y justo lo que el brief prohíbe. El
+   edificio que ese comprador administra dice lo mismo sin delatarse.
+
+   Y ojo con la quinta: sin marcas legibles. Si aparece el logo de una
+   cadena real parece que estamos reclamando un cliente que todavía no
+   autorizó su nombre (Pendiente 03).
+   ═════════════════════════════════════════════════════════════════ */
+
+// Prompt: "commercial building under construction exterior"
+$ec_img_gc        = $ec_uploads['baseurl'] . '/2026/08/GeneralContractors-scaled.jpg';
+
+// Prompt: "office park commercial property exterior"
+$ec_img_pm        = $ec_uploads['baseurl'] . '/2026/08/PropertyManagers-scaled.jpg';
+
+// Prompt: "residential community entrance landscaping" — área común, no una casa
+$ec_img_hoa       = $ec_uploads['baseurl'] . '/2026/08/HOABoards-scaled.jpg';
+
+// Prompt: "corporate campus building landscape"
+$ec_img_multisite = $ec_uploads['baseurl'] . '/2026/08/InstitutionalMultisiteBuildings-scaled.jpg';
+
+// Prompt: "convenience store exterior daytime" — sin marca legible
+$ec_img_retail    = $ec_uploads['baseurl'] . '/2026/08/ConvenienceStore-scaled.jpg';
+
+
+/* 03 · PARA QUIÉN CONSTRUIMOS
+   El copy es textual del bloque 03 del deck y está aprobado: no se toca.
+   Lo único que se agrega acá es la imagen y su alt. */
 $clusters = array(
   array(
     'title' => 'General contractors & developers',
     'body'  => "Your certificate of occupancy shouldn't wait on the landscape. We bid the full scope, staff it with our own crew, and deliver submittals, insurance certificates and safety documentation with the bid, not after award.",
+    'image' => $ec_img_gc,
+    'alt'   => 'Commercial building under construction',
   ),
   array(
     'title' => 'Property managers',
     'body'  => 'One contract. Grounds, irrigation and snow. Twelve months of coverage under one vendor and one point of contact, with scheduled reporting and no surprise line items in your operating budget.',
+    'image' => $ec_img_pm,
+    'alt'   => 'Maintained grounds at a commercial office property',
   ),
   array(
     'title' => 'HOA boards',
     'body'  => 'A decision you can defend at the annual meeting. Transparent pricing by scope, references from other associations in Weber and Davis counties, and a local company your homeowners already see working in the neighborhood.',
+    'image' => $ec_img_hoa,
+    'alt'   => 'Landscaped common area at the entrance to a residential community',
   ),
   array(
     'title' => 'Institutional & multi-site owners',
     'body'  => 'Site 47 should look exactly like site 1. We build and maintain to written brand standards across locations, with the same crew leads and the same documentation on every property.',
+    'image' => $ec_img_multisite,
+    'alt'   => 'Corporate campus with landscaped grounds',
   ),
   array(
-    'title' => 'C-stores, credit unions & retail chains',
+    'title' => 'Convenience stores, credit unions & retail chains',
     'body'  => "We've already built to a corporate standard in your category. If your expansion plan adds sites across Northern Utah, we can bid them as a program instead of one at a time.",
+    'image' => $ec_img_retail,
+    'alt'   => 'Retail site exterior with landscaping',
   ),
 );
 
@@ -401,10 +455,41 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <!-- ↑ cierra el contenedor de una pantalla que comparten hero y barra -->
 
 <!-- ═══════════════════ 03 · PARA QUIÉN CONSTRUIMOS ═══════════════════ -->
-<section id="commercial" class="bg-bone lg:flex lg:min-h-svh lg:items-start">
+<!-- Galería en arco, inspirada en el CircularGallery de Vue Bits.
+
+     Reimplementada con DOM y transforms CSS en lugar de WebGL, y esa no es
+     una concesión: es mejor para esta página. El original dibuja todo dentro
+     de un canvas —imágenes como texturas y los títulos como mapas de bits
+     generados a mano—, lo que significa que Google no ve una sola palabra de
+     esta sección, que las fotos no tienen alt, que no hay lazy loading y que
+     el texto no se puede seleccionar. En una sección cuyo trabajo es
+     posicionar cinco tipos de comprador, eso es caro.
+
+     Con transforms el arco se ve igual y las imágenes siguen siendo <img> y
+     los títulos siguen siendo texto.
+
+     Lo único que se pierde del original es la distorsión de onda del shader
+     al arrastrar rápido. No se extraña.
+
+     Y una diferencia deliberada: el original secuestra la rueda del mouse
+     con un listener en window, así que scrollear la página mueve la galería.
+     Acá se arrastra o se usan las flechas; la rueda sigue siendo del
+     documento. -->
+<section id="commercial" class="relative isolate overflow-hidden bg-bone lg:flex lg:min-h-svh lg:items-start">
+
+  <div
+    data-dotgrid
+    data-dot-size="3"
+    data-gap="26"
+    data-proximity="150"
+    data-shock-radius="230"
+    data-base="#B9BAB3"
+    data-active="#A36C48"
+    class="pointer-events-none absolute inset-0 -z-10"
+    aria-hidden="true"
+  ><canvas class="h-full w-full"></canvas></div>
+
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <!-- El data-reveal va en el contenedor y no en el <h2>: ese elemento ya
-         lo anima ec-shine y dos transforms sobre el mismo nodo se pisan. -->
     <div data-reveal class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Who we build for</p>
       <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
@@ -415,69 +500,82 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       </p>
     </div>
 
-    <!-- Cascada: --reveal-i escalona el delay. El encabezado es el índice 0 y
-         las tarjetas siguen en orden de lectura, así que el ojo baja con la
-         animación en lugar de perseguirla. -->
-    <?php
-    /* Rejilla de 6 columnas, no de 3. Las tarjetas normales ocupan 2 (tres por
-       fila, igual que antes) y las de la última fila se reparten en partes
-       iguales lo que sobra: con 5 clusters, dos tarjetas de 3 columnas cada
-       una. La fila cierra a lo ancho y no queda celda muerta enseñando el
-       ink/10 del fondo.
+    <div data-arcgallery data-bend="90" class="mt-12 lg:mt-16">
 
-       Calculado y no hardcodeado para que siga cerrando si mañana se agrega o
-       se quita un cluster. */
-    $ec_leftover = count($clusters) % 3;
-    $ec_break    = count($clusters) - $ec_leftover;
-    ?>
-    <!-- Las filas van en proporción, no a contenido. La primera se queda en el
-         alto que le pide su texto y la segunda toma 1.3 veces eso, así que la
-         banda de abajo pesa un poco más que la de arriba en lugar de solo
-         emparejarla. El número a mover es el 1.3.
+      <div class="mb-6 flex items-end justify-between gap-6">
+        <p class="max-w-md text-xs leading-relaxed text-ink/50">Drag, or use the arrows.</p>
+        <div class="hidden shrink-0 items-center gap-2 lg:flex">
+          <button type="button" data-arcgallery-prev aria-label="Previous buyer"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-colors duration-200 hover:bg-breeze-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M19 12H6M11 6l-6 6 6 6" /></svg>
+          </button>
+          <button type="button" data-arcgallery-next aria-label="Next buyer"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-colors duration-200 hover:bg-breeze-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+          </button>
+        </div>
+      </div>
 
-         Con fr y sin alto definido en el contenedor, las pistas se reparten
-         manteniendo la proporción sin quedar por debajo de su contenido: no
-         hay riesgo de que se recorte el copy si crece.
+      <!-- Punto de partida: una rejilla legible con las cinco tarjetas
+           completas, párrafo incluido. El JS la convierte en arco. Sin JS
+           —o con prefers-reduced-motion— queda la rejilla, que es la que
+           lleva el argumento de la sección.
 
-         Ojo: asume dos filas, que es lo que dan 5 clusters en la rejilla de 6.
-         Si el array pasa a 7 o más, la tercera fila cae en auto y hay que
-         agregar la pista aquí. -->
-    <ul class="mt-12 grid gap-px bg-slate-200 sm:grid-cols-2 lg:grid-cols-6 lg:grid-rows-[minmax(0,1fr)_minmax(0,1.3fr)]">
-      <?php foreach ($clusters as $i => $cluster) :
-        // 2 sobrantes → mitad y mitad. 1 sobrante → ancho completo.
-        $ec_span = 'lg:col-span-2';
-        if ($ec_leftover && $i >= $ec_break) {
-          $ec_span = 2 === $ec_leftover ? 'lg:col-span-3' : 'lg:col-span-6';
-        }
-        ?>
-        <!-- El <li> es la celda de la rejilla y la placa biselada va adentro:
-             el bisel necesita su propio box-shadow sin competir con el gap-px
-             que dibuja los filetes. flex + flex-1 para que la placa llene la
-             celda cuando el copy de las tarjetas vecinas es más largo. -->
-        <li data-reveal style="--reveal-i:<?php echo (int) $i + 1; ?>" class="flex <?php echo $ec_span; ?>">
-          <!-- Sin translate en hover: con gap-px, levantar la placa abriría
-               una franja de ink/10 de 2px bajo la tarjeta. El relieve solo
-               vende el volumen igual de bien. -->
-          <div class="bevel-tile flex-1 bg-bone p-7 transition-[box-shadow,background-color] duration-300 ease-out hover:bevel-tile-raised hover:bg-breeze-100 motion-reduce:transition-none">
-            <h3 class="font-display text-lg font-bold tracking-tight text-ink">
-              <?php echo esc_html($cluster['title']); ?>
-            </h3>
-            <p class="mt-3 text-sm leading-relaxed text-ink/70">
+           Los párrafos no desaparecen al convertirse: el JS los oculta de
+           las tarjetas y muestra el de la tarjeta centrada debajo del arco.
+           El copy del bloque 03 es lo más trabajado del deck y no se cambia
+           por un efecto. -->
+      <ul data-arcgallery-track class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <?php foreach ($clusters as $i => $cluster) : ?>
+          <li data-arcgallery-item class="flex flex-col">
+            <figure class="flex flex-col">
+              <?php if (!empty($cluster['image'])) : ?>
+                <img
+                  src="<?php echo esc_url($cluster['image']); ?>"
+                  alt="<?php echo esc_attr($cluster['alt']); ?>"
+                  class="aspect-[3/4] w-full rounded-lg object-cover ring-1 ring-slate-200"
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                  data-arcgallery-media
+                />
+              <?php else : ?>
+                <!-- Todavía sin foto. Panel en la paleta con el número, en
+                     lugar de un hueco gris: se ve intencional mientras
+                     llegan los archivos, y el arco se puede evaluar igual.
+                     Se borra este else cuando estén las cinco. -->
+                <div
+                  class="flex aspect-[3/4] w-full items-end justify-end rounded-lg bg-[linear-gradient(150deg,#4F5341_0%,#3A3D30_100%)] p-6 ring-1 ring-slate-200"
+                  data-arcgallery-media
+                  aria-hidden="true"
+                >
+                  <span class="font-display text-[4rem] font-bold leading-none tracking-tight text-bone/25 tabular-nums">
+                    <?php echo esc_html(str_pad((string) ((int) $i + 1), 2, '0', STR_PAD_LEFT)); ?>
+                  </span>
+                </div>
+              <?php endif; ?>
+
+              <figcaption class="mt-4 font-display text-lg font-bold leading-snug tracking-tight text-ink" data-arcgallery-title>
+                <?php echo esc_html($cluster['title']); ?>
+              </figcaption>
+            </figure>
+
+            <p class="mt-3 text-sm leading-relaxed text-ink/70" data-arcgallery-body>
               <?php echo esc_html($cluster['body']); ?>
             </p>
-          </div>
-        </li>
-      <?php endforeach; ?>
+          </li>
+        <?php endforeach; ?>
+      </ul>
 
-      <?php
-      /* En lg la rejilla de 6 ya cierra sola. El hueco queda en sm, donde son
-         dos columnas y un número impar de clusters deja una celda muerta.
-         Se rellena con bone plano y sin bisel: es el plano sobre el que se
-         apoyan las placas, no una placa más. */
-      if (count($clusters) % 2 === 1) : ?>
-        <li aria-hidden="true" class="hidden bg-bone sm:block lg:hidden"></li>
-      <?php endif; ?>
-    </ul>
+      <!-- Párrafo de la tarjeta centrada. Solo se usa en modo arco; en la
+           rejilla los párrafos viven dentro de cada tarjeta. -->
+      <p
+        data-arcgallery-caption
+        hidden
+        aria-live="polite"
+        class="mx-auto mt-10 max-w-2xl text-center text-base leading-relaxed text-ink/70 transition-opacity duration-200"
+      ></p>
+    </div>
   </div>
 </section>
 
@@ -710,66 +808,113 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 08 · CREDENCIALES ═══════════════════ -->
-<section id="credentials" class="bg-breeze-100 lg:grid lg:min-h-svh lg:grid-cols-2 lg:items-stretch">
+<!-- Hallmark · redesign · seccion: credenciales · genre: editorial
+     fingerprint: masthead de doble filete · ledger 3x3 · banda oscura plana ·
+     imagen como estampilla · reveal: ninguno
+     pre-emit critique: P5 H4 E4 S5 R5 V5
 
-  <!-- Columna izquierda: encabezado y tabla, montados sobre una placa
-       biselada. El padding exterior es el margen de la página y hace de aire
-       alrededor de la placa — sin él el bisel toca los bordes de la sección y
-       deja de leerse como una pieza apoyada.
+     El problema no era la foto ni la tabla: era que esta sección se parecía a
+     las otras siete. Toda la página abre con eyebrow, titular y lede apilados
+     a la izquierda dentro de una tarjeta redondeada con bisel — y Credentials
+     es justamente la que no debería leerse como un bloque de marketing. El
+     copy lo dice: "Boring for everyone else. Decisive for you."
 
-       Reusa bevel-tile-raised, que ya existe para el hover de las tarjetas del
-       bloque 03. Acá va como estado fijo: una placa de este tamaño necesita
-       más presencia que una tarjeta, y no hay nueva CSS que mantener.
+     Cuatro decisiones, en orden de cuánto pesan:
 
-       El fondo pasa a bone. Sobre el blanco de la sección, un bisel blanco
-       sobre blanco no se ve: la luz superior del relieve necesita una
-       superficie más cálida contra la que contrastar. -->
-  <div class="flex flex-col px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="bevel-tile-raised flex-1 rounded-lg bg-bone p-7 sm:p-10">
-      <div class="max-w-3xl">
-        <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Credentials</p>
-        <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-          The page your compliance team is going to ask for.
-        </h2>
-        <p class="mt-5 text-lg leading-relaxed text-ink/70">
-          Boring for everyone else. Decisive for you.
+     1. Banda oscura y plana, sin tarjeta. Después de Projects la página son
+        seis secciones claras seguidas. UMBER devuelve la alternancia y le da
+        a esta el peso que el copy reclama. Y al no ser una tarjeta deja de
+        competir con las otras siete que sí lo son.
+
+     2. Masthead en lugar de encabezado. Doble filete arriba, entidad a la
+        izquierda y número de licencia a la derecha, en versalitas. Es como
+        empieza un documento, no una landing.
+
+     3. Ledger 3x3. Nueve credenciales entran exactas en tres columnas. Las
+        etiquetas van sobre los valores en lugar de al lado: en una retícula
+        de tres, una tabla etiqueta|valor deja media línea en blanco por celda.
+
+     4. Sin reveal ni destello. Un documento no entra animándose. Es la única
+        sección de la página que no se mueve, y esa quietud es parte de lo que
+        afirma.
+
+     Contraste verificado sobre UMBER #302F2D: bone 11.15:1 · bone/70 6.33:1 ·
+     bone/55 4.53:1 · ember-300 5.98:1. EMBER a secas da 3.05:1, así que los
+     acentos chicos usan ember-300. -->
+<section id="credentials" class="bg-umber text-bone">
+  <div class="w-full px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
+
+    <!-- ── Masthead ──
+         Doble filete arriba y simple abajo: la asimetría es la que hace que
+         se lea como cabecera de documento y no como un separador cualquiera. -->
+    <div class="border-b border-t-2 border-white/15 py-3">
+      <div class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-1">
+        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">
+          Credentials · EC Landscaping LLC
+        </p>
+        <!-- overflow-wrap:anywhere y no break-all: a 320px el número de
+             licencia es lo único que puede desbordar la fila. -->
+        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-bone/55 tabular-nums [overflow-wrap:anywhere]">
+          Utah 1106462255001 · S330
         </p>
       </div>
-
-      <!-- Tabla y no tarjetas: una tabla se lee como documento, una tarjeta
-           se lee como marketing. Para un GC eso importa. -->
-      <dl class="mt-12">
-        <?php foreach ($credentials as $row) : ?>
-          <div class="grid gap-1 border-b border-slate-200 py-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-8">
-            <dt class="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">
-              <?php echo esc_html($row['label']); ?>
-            </dt>
-            <dd class="text-sm text-ink"><?php echo esc_html($row['value']); ?></dd>
-          </div>
-        <?php endforeach; ?>
-      </dl>
     </div>
-  </div>
 
-  <!-- Columna derecha: panel a sangre, sin padding. Toca el borde superior,
-       el inferior y el derecho de la sección.
+    <!-- ── Titular a dos columnas ──
+         El lede deja de ir debajo del titular y pasa al costado. Es el mismo
+         texto, pero la disposición ya no repite la de las otras secciones —
+         que es exactamente lo que hacía que esta se sintiera genérica. -->
+    <div class="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+      <h2 class="font-display text-3xl leading-[1.1] font-bold tracking-tight text-bone [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
+        The page your compliance team is going to ask for.
+      </h2>
+      <p class="text-base leading-relaxed text-bone/70 lg:pb-2">
+        Boring for everyone else. Decisive for you.
+      </p>
+    </div>
 
-       La imagen va en position absolute y no en el flujo. Esa es la corrección:
-       una <img> en el flujo impone su alto natural y estira la sección hasta
-       donde mida el archivo — que es lo que la desbordaba. Sacada del flujo,
-       el alto lo manda la columna de la tabla y la foto se recorta para
-       llenarla, que es el comportamiento correcto para una fotografía.
+    <!-- ── Ledger ──
+         Nueve credenciales, tres columnas, filetes horizontales continuos.
+         Las celdas se tocan (sin gap) para que la regla inferior cruce la
+         fila entera; la separación entre columnas la da el padding y la
+         hairline vertical de lg.
 
-       El fondo ink cubre el instante antes de que cargue y cualquier franja
-       que quede si la proporción no cierra exacta. -->
-  <div class="relative min-h-[24rem] overflow-hidden bg-ink sm:min-h-[30rem] lg:min-h-0">
-    <img
-      src="<?php echo esc_url($ec_uploads['baseurl'] . '/2026/07/ec_landscaping_award.png'); ?>"
-      alt="BusinessRate Best of 2026 Award Winner plaque"
-      class="absolute inset-0 h-full w-full object-cover object-center"
-      loading="lazy"
-      decoding="async"
-    />
+         minmax(0,1fr) y no 1fr: con 1fr una celda de contenido largo estira
+         la columna y rompe la retícula. -->
+    <dl class="mt-11 grid grid-cols-[minmax(0,1fr)] border-t border-white/15 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))]">
+      <?php foreach ($credentials as $row) : ?>
+        <div class="border-b border-white/15 py-4 pr-6 lg:[&:nth-child(3n)]:border-l lg:[&:nth-child(3n)]:border-white/15 lg:[&:nth-child(3n)]:pl-8 lg:[&:nth-child(3n+2)]:border-l lg:[&:nth-child(3n+2)]:border-white/15 lg:[&:nth-child(3n+2)]:pl-8">
+          <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone/55">
+            <?php echo esc_html($row['label']); ?>
+          </dt>
+          <dd class="mt-2 text-sm leading-relaxed text-bone tabular-nums [overflow-wrap:anywhere]">
+            <?php echo esc_html($row['value']); ?>
+          </dd>
+        </div>
+      <?php endforeach; ?>
+    </dl>
+
+    <!-- ── Estampilla ──
+         El premio al pie, del tamaño de un sello, junto a la línea que dice
+         qué es. Deja de ser media sección y pasa a ser lo que un documento
+         lleva abajo: una marca que lo respalda.
+
+         El alt describe la placa; el texto de al lado no lo repite. -->
+    <div class="mt-10 flex flex-wrap items-center gap-6 border-t border-white/15 pt-7">
+      <img
+        src="<?php echo esc_url($ec_uploads['baseurl'] . '/2026/07/ec_landscaping_award.png'); ?>"
+        alt="BusinessRate Best of 2026 Award Winner plaque"
+        class="w-32 shrink-0 rounded object-contain ring-1 ring-white/15 sm:w-40 lg:w-48"
+        loading="lazy"
+        decoding="async"
+      />
+      <div>
+        <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone/55">Recognition</p>
+        <p class="mt-1 text-sm leading-relaxed text-bone">
+          BusinessRate Best of 2026 — Landscaper
+        </p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1032,10 +1177,14 @@ $faq_schema = array(
     Array.prototype.forEach.call(videos, function (v) { io.observe(v); });
   })();
   (function () {
-    /* Destello: se dispara una vez por titular al entrar en pantalla y se
-       deja de observar. Si el usuario pidió menos movimiento, ni siquiera se
-       añade la clase — el CSS ya lo cubre, pero así tampoco se agenda la
-       animación. */
+    /* Destello en bucle. La clase se pone al entrar en pantalla y se QUITA al
+       salir — antes se ponía una vez y se dejaba de observar, que era lo
+       correcto para un disparo único y es lo peor posible para un bucle: una
+       animación infinita en un titular que está tres pantallas más abajo
+       repinta igual y se paga en batería.
+
+       El CSS maneja el reposo entre pasadas; acá solo se decide qué titulares
+       están animando. Con prefers-reduced-motion no se agrega nada. */
     var mq = window.matchMedia;
     if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -1044,9 +1193,7 @@ $faq_schema = array(
 
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-shining');
-        io.unobserve(entry.target);
+        entry.target.classList.toggle('is-shining', entry.isIntersecting);
       });
     }, { threshold: 0.35 });
 
@@ -1257,6 +1404,364 @@ $faq_schema = array(
       applyMotionPreference();
     });
   })();
+  /* Rejilla de puntos reactiva — canvas plano, sin dependencias.
+     Inspirada en el DotGrid de Vue Bits, reimplementada por dos razones:
+     ese componente es Vue y este tema es React, y arrastra GSAP más
+     InertiaPlugin para lo único que hace falta de verdad, que es un
+     resorte amortiguado. Eso son treinta líneas.
+
+     El resorte: cada punto guarda su desplazamiento (ox, oy) y su velocidad.
+     En cada frame se le aplica una fuerza proporcional al desplazamiento y
+     contraria a él —eso lo devuelve al origen— más un rozamiento
+     proporcional a la velocidad, que impide que oscile para siempre. Subir
+     RESORTE lo hace más rígido; subir ROCE lo frena antes. */
+  (function () {
+    var roots = document.querySelectorAll('[data-dotgrid]');
+    if (!roots.length) return;
+
+    var mq = window.matchMedia;
+    /* Sin puntero fino no hay efecto que mostrar: en táctil los puntos
+       quedarían quietos y el canvas gastaría batería dibujando lo mismo. */
+    if (mq && !mq('(hover: hover) and (pointer: fine)').matches) return;
+    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
+
+    var RESORTE = 0.10;
+    var ROCE    = 0.86;
+
+    function hexRgb(h) {
+      var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);
+      return m ? [parseInt(m[1],16), parseInt(m[2],16), parseInt(m[3],16)] : [0,0,0];
+    }
+
+    Array.prototype.forEach.call(roots, function (root) {
+      var canvas = root.querySelector('canvas');
+      if (!canvas || !canvas.getContext) return;
+      var ctx = canvas.getContext('2d');
+
+      var size  = parseFloat(root.dataset.dotSize) || 3;
+      var gap   = parseFloat(root.dataset.gap) || 26;
+      var prox  = parseFloat(root.dataset.proximity) || 150;
+      var shock = parseFloat(root.dataset.shockRadius) || 230;
+      var base  = hexRgb(root.dataset.base || '#B9BAB3');
+      var act   = hexRgb(root.dataset.active || '#A36C48');
+
+      var dots = [];
+      var px = -9999, py = -9999;
+      var frame = null, visible = false;
+
+      function construir() {
+        var r = root.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width  = Math.round(r.width * dpr);
+        canvas.height = Math.round(r.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        var celda = size + gap;
+        var cols = Math.floor((r.width  + gap) / celda);
+        var rows = Math.floor((r.height + gap) / celda);
+        var x0 = (r.width  - (celda * cols - gap)) / 2 + size / 2;
+        var y0 = (r.height - (celda * rows - gap)) / 2 + size / 2;
+
+        dots = [];
+        for (var y = 0; y < rows; y++) {
+          for (var x = 0; x < cols; x++) {
+            dots.push({ cx: x0 + x * celda, cy: y0 + y * celda, ox: 0, oy: 0, vx: 0, vy: 0 });
+          }
+        }
+      }
+
+      function pintar() {
+        frame = visible ? window.requestAnimationFrame(pintar) : null;
+
+        var r = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, r.width, r.height);
+        var proxSq = prox * prox;
+
+        for (var i = 0; i < dots.length; i++) {
+          var d = dots[i];
+
+          /* Resorte amortiguado hacia el origen. Se salta el cálculo cuando
+             el punto ya está quieto: en una rejilla de cientos de puntos,
+             la mayoría lo está en cualquier frame dado. */
+          if (d.ox || d.oy || d.vx || d.vy) {
+            d.vx = (d.vx - d.ox * RESORTE) * ROCE;
+            d.vy = (d.vy - d.oy * RESORTE) * ROCE;
+            d.ox += d.vx;
+            d.oy += d.vy;
+            if (Math.abs(d.ox) < 0.05 && Math.abs(d.oy) < 0.05 &&
+                Math.abs(d.vx) < 0.05 && Math.abs(d.vy) < 0.05) {
+              d.ox = d.oy = d.vx = d.vy = 0;
+            }
+          }
+
+          var dx = d.cx - px, dy = d.cy - py;
+          var dsq = dx * dx + dy * dy;
+
+          if (dsq <= proxSq) {
+            var t = 1 - Math.sqrt(dsq) / prox;
+            ctx.fillStyle = 'rgb(' +
+              Math.round(base[0] + (act[0] - base[0]) * t) + ',' +
+              Math.round(base[1] + (act[1] - base[1]) * t) + ',' +
+              Math.round(base[2] + (act[2] - base[2]) * t) + ')';
+          } else {
+            ctx.fillStyle = root.dataset.base || '#B9BAB3';
+          }
+
+          ctx.beginPath();
+          ctx.arc(d.cx + d.ox, d.cy + d.oy, size / 2, 0, 6.283185);
+          ctx.fill();
+        }
+      }
+
+      function mover(e) {
+        var r = canvas.getBoundingClientRect();
+        px = e.clientX - r.left;
+        py = e.clientY - r.top;
+      }
+
+      /* Onda de choque al hacer clic. Solo se escucha dentro de la sección:
+         un listener en window haría saltar los puntos por un clic en el
+         navbar, que no tiene nada que ver con esto. */
+      function golpe(e) {
+        var r = canvas.getBoundingClientRect();
+        var cx = e.clientX - r.left, cy = e.clientY - r.top;
+        for (var i = 0; i < dots.length; i++) {
+          var d = dots[i];
+          var dx = d.cx - cx, dy = d.cy - cy;
+          var dist = Math.hypot(dx, dy);
+          if (dist >= shock || dist === 0) continue;
+          var f = (1 - dist / shock) * 14;
+          d.vx += (dx / dist) * f;
+          d.vy += (dy / dist) * f;
+        }
+      }
+
+      var host = root.parentElement || root;
+      host.addEventListener('mousemove', mover, { passive: true });
+      host.addEventListener('mouseleave', function () { px = py = -9999; }, { passive: true });
+      host.addEventListener('click', golpe);
+      window.addEventListener('resize', construir, { passive: true });
+
+      construir();
+
+      /* Fuera de pantalla no se dibuja. Sin esto el rAF corre toda la vida
+         de la página aunque la sección esté a tres pantallas de distancia. */
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          visible = entries[0].isIntersecting;
+          if (visible && !frame) frame = window.requestAnimationFrame(pintar);
+        }, { rootMargin: '100px 0px' }).observe(root);
+      } else {
+        visible = true;
+        frame = window.requestAnimationFrame(pintar);
+      }
+    });
+  })();
+  (function () {
+    /* Galería en arco — DOM y transforms, sin WebGL.
+
+       La geometría es la misma del CircularGallery: cada elemento se coloca
+       sobre la circunferencia de un círculo enorme cuyo punto más bajo pasa
+       por el centro del contenedor.
+
+         H = mitad del ancho visible
+         B = cuánto baja el arco en el borde   (data-bend, en píxeles)
+         R = (H² + B²) / 2B                    (radio del círculo)
+         y = R − √(R² − x²)                    (caída a distancia x)
+         θ = −signo(x) · asin(x / R)           (giro tangente al arco)
+
+       B en píxeles y no en unidades de viewport como el original: acá el
+       valor se puede leer como "la tarjeta del borde baja 90px", que es una
+       frase que significa algo cuando alguien lo ajusta dentro de un año. */
+    var raices = document.querySelectorAll('[data-arcgallery]');
+    if (!raices.length) return;
+
+    var mq = window.matchMedia;
+    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
+
+    Array.prototype.forEach.call(raices, function (raiz) {
+      var track = raiz.querySelector('[data-arcgallery-track]');
+      var items = Array.prototype.slice.call(raiz.querySelectorAll('[data-arcgallery-item]'));
+      var caption = raiz.querySelector('[data-arcgallery-caption]');
+      if (!track || items.length < 2) return;
+
+      var bendBase = parseFloat(raiz.dataset.bend) || 90;
+
+      var anchoItem = 0, paso = 0, total = 0, H = 0, B = 0, R = 0, altoTrack = 0;
+      var destino = 0, actual = 0, frame = null, visible = false;
+      var arrastrando = false, x0 = 0, base = 0, movio = false;
+      var activo = -1;
+
+      function medir() {
+        var anchoCaja = raiz.getBoundingClientRect().width;
+        var angosto = anchoCaja < 640;
+
+        /* En pantalla chica la tarjeta ocupa dos tercios del ancho, no un
+           30% como en escritorio. Con la proporción de escritorio quedaba
+           en 190px dentro de un viewport de 445 — una foto de sello en el
+           medio, con las vecinas encimándosele por los dos lados.
+
+           Acá solo hay sitio para una tarjeta y dos asomos, así que la del
+           centro tiene que mandar. El hueco también crece: con tarjetas más
+           anchas y giradas, el que servía en escritorio las hacía chocar. */
+        anchoItem = angosto
+          ? Math.round(Math.min(320, anchoCaja * 0.66))
+          : Math.round(Math.min(300, Math.max(190, anchoCaja * 0.30)));
+        var hueco = Math.round(anchoItem * (angosto ? 0.30 : 0.16));
+        paso = anchoItem + hueco;
+        total = paso * items.length;
+
+        H = anchoCaja / 2;
+        /* El arco se aplana en angosto. No es estética: la curvatura genera
+           el giro, y con una tarjeta de dos tercios de pantalla un giro de
+           20° la manda contra las vecinas. A 0.25 el giro del borde baja a
+           unos 11°, que se lee como arco sin chocar. */
+        /* Y se escala con el ancho por encima de eso. Con B fijo, una caja
+           más angosta da un arco MÁS cerrado —el radio depende de H— así que
+           a 768px el giro del borde salía en 26° contra los 17° del
+           escritorio. Proporcional, los dos quedan en 17. */
+        B = angosto ? bendBase * 0.25 : bendBase * Math.min(1, anchoCaja / 1200);
+        R = (H * H + B * B) / (2 * B);
+
+        // Alto de la tarjeta: la imagen es 3/4, más el título de dos líneas.
+        var altoItem = anchoItem * (4 / 3) + 62;
+        altoTrack = Math.round(altoItem + B + 16);
+
+        track.style.position = 'relative';
+        track.style.display = 'block';
+        track.style.height = altoTrack + 'px';
+        track.style.touchAction = 'pan-y';
+        track.style.cursor = 'grab';
+        track.style.userSelect = 'none';
+
+        items.forEach(function (li) {
+          li.style.position = 'absolute';
+          li.style.top = '0';
+          li.style.left = '50%';
+          li.style.width = anchoItem + 'px';
+          li.style.willChange = 'transform';
+          var p = li.querySelector('[data-arcgallery-body]');
+          if (p) p.style.display = 'none';   // el cuerpo se muestra bajo el arco
+        });
+
+        if (caption) caption.hidden = false;
+      }
+
+      function pintar() {
+        frame = visible ? window.requestAnimationFrame(pintar) : null;
+
+        // Suavizado: el destino se persigue, nunca se salta.
+        actual += (destino - actual) * 0.085;
+
+        var centrado = -1, mejor = Infinity;
+
+        for (var i = 0; i < items.length; i++) {
+          // Envoltura infinita: la posición se normaliza al rango
+          // [-total/2, total/2), de modo que el que sale por un lado
+          // reaparece por el otro sin que haya un principio ni un final.
+          var x = i * paso - actual;
+          x = ((x % total) + total * 1.5) % total - total / 2;
+
+          var ax = Math.min(Math.abs(x), H);
+          var y = R - Math.sqrt(Math.max(R * R - ax * ax, 0));
+          var giro = -Math.sign(x) * Math.asin(ax / R) * (180 / Math.PI);
+
+          /* Las de los extremos se apagan: sin eso, aparecen y desaparecen
+             de golpe en el borde del contenedor. El umbral se mide contra el
+             paso y no contra H, para que valga igual con tarjetas de 190px
+             que con las de 300: lo que importa es cuántas tarjetas de
+             distancia hay, no cuántos píxeles. */
+          var borde = Math.max(0, Math.min(1, (paso * 1.9 - Math.abs(x)) / paso));
+
+          var li = items[i];
+          li.style.transform = 'translate3d(' + Math.round(x - anchoItem / 2) + 'px,' +
+                               Math.round(y) + 'px,0) rotate(' + giro.toFixed(2) + 'deg)';
+          li.style.opacity = borde.toFixed(3);
+          li.style.zIndex = String(100 - Math.round(Math.abs(x) / 10));
+
+          if (Math.abs(x) < mejor) { mejor = Math.abs(x); centrado = i; }
+        }
+
+        if (centrado !== activo && centrado > -1) {
+          activo = centrado;
+          if (caption) {
+            var p = items[centrado].querySelector('[data-arcgallery-body]');
+            caption.textContent = p ? p.textContent.trim() : '';
+          }
+          items.forEach(function (li, n) {
+            var t = li.querySelector('[data-arcgallery-title]');
+            if (t) t.style.opacity = n === centrado ? '1' : '0.45';
+          });
+        }
+      }
+
+      // Imán al soltar: el arco descansa con una tarjeta centrada, nunca
+      // entre dos. Es lo que hace que la de adelante se lea completa.
+      function imantar() {
+        destino = Math.round(destino / paso) * paso;
+      }
+
+      function empujar(dir) {
+        destino += dir * paso;
+      }
+
+      function abajo(e) {
+        arrastrando = true; movio = false;
+        x0 = e.touches ? e.touches[0].clientX : e.clientX;
+        base = destino;
+        track.style.cursor = 'grabbing';
+      }
+      function mueve(e) {
+        if (!arrastrando) return;
+        var x = e.touches ? e.touches[0].clientX : e.clientX;
+        if (Math.abs(x - x0) > 3) movio = true;
+        destino = base - (x - x0);
+      }
+      function arriba() {
+        if (!arrastrando) return;
+        arrastrando = false;
+        track.style.cursor = 'grab';
+        imantar();
+      }
+
+      track.addEventListener('mousedown', abajo);
+      window.addEventListener('mousemove', mueve, { passive: true });
+      window.addEventListener('mouseup', arriba);
+      track.addEventListener('touchstart', abajo, { passive: true });
+      track.addEventListener('touchmove', mueve, { passive: true });
+      track.addEventListener('touchend', arriba, { passive: true });
+
+      // Un arrastre no debe disparar el enlace que quedó bajo el dedo.
+      track.addEventListener('click', function (e) {
+        if (movio) { e.preventDefault(); e.stopPropagation(); }
+      }, true);
+
+      var prev = raiz.querySelector('[data-arcgallery-prev]');
+      var next = raiz.querySelector('[data-arcgallery-next]');
+      if (prev) prev.addEventListener('click', function () { empujar(-1); });
+      if (next) next.addEventListener('click', function () { empujar(1); });
+
+      var reTimer = null;
+      window.addEventListener('resize', function () {
+        if (reTimer) window.clearTimeout(reTimer);
+        reTimer = window.setTimeout(medir, 120);
+      }, { passive: true });
+
+      medir();
+
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (e) {
+          visible = e[0].isIntersecting;
+          if (visible && !frame) frame = window.requestAnimationFrame(pintar);
+        }, { rootMargin: '120px 0px' }).observe(raiz);
+      } else {
+        visible = true;
+        frame = window.requestAnimationFrame(pintar);
+      }
+    });
+  })();
+
 </script>
 
 <?php
