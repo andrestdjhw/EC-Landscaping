@@ -8,10 +8,19 @@ function ec_load_assets() {
   $js_ver  = file_exists($js_path)  ? filemtime($js_path)  : '1.0';
   $css_ver = file_exists($css_path) ? filemtime($css_path) : '1.0';
 
-  // Display: Archivo · Body: Inter. Solo los pesos que usa el diseño.
+  /* Display: Play · Body: Roboto. Solo los pesos que usa el diseño.
+   *
+   * Play va únicamente en 700: los 66 usos de font-display del tema son
+   * todos font-bold, y la familia solo publica 400 y 700 — no hay 600 que
+   * pedir. Si algún día hace falta un display en regular, se agrega el 400.
+   *
+   * Roboto lleva los cuatro pesos del cuerpo: 400 de base, 500 en enlaces
+   * de contacto, 600 en eyebrows y etiquetas, 700 en las cifras.
+   *
+   * Reemplaza a Archivo + Inter. */
   wp_enqueue_style(
     'ec-fonts',
-    'https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap',
+    'https://fonts.googleapis.com/css2?family=Play:wght@700&family=Roboto:wght@400;500;600;700&display=swap',
     array(),
     null
   );

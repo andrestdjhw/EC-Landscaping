@@ -6,11 +6,21 @@
      * citations. Cualquier cambio aquí tiene que replicarse carácter por
      * carácter en Google Business, Facebook, Yelp y HomeAdvisor.
      *
-     * Logo: no se pasa a propósito. ecscapingneg.png es la versión en
-     * negativo y el footer es claro, así que desaparecería. Cuando llegue
-     * el logo en positivo, agregar 'logo' aquí (Pendiente 10).
+     * Logo (Pendiente 10): hasta ahora no se pasaba ninguno. El único archivo
+     * disponible era ecscapingneg.png, la versión en negativo, que sobre el
+     * fondo claro del footer desaparecía; el componente caía al wordmark
+     * tipográfico.
+     *
+     * OJO: el footer es theme => 'light', así que este archivo tiene que ser
+     * la versión en POSITIVO —arte oscuro—. El del navbar es otro
+     * (EC_Imagotipo2-1) y va sobre barra oscura. Si los dos se ven bien, es
+     * que son el par positivo/negativo; si acá el logo se pierde contra el
+     * bone, están cruzados y hay que intercambiar los dos archivos.
      */
+    $ec_uploads = wp_get_upload_dir();
+
     $ec_footer_props = array(
+      'logo'           => $ec_uploads['baseurl'] . '/2026/08/EC_Imagotipo2-scaled.png',
       'theme'          => 'light',
       'legalName'      => 'EC Landscaping LLC',
       'address'        => '3754 N Higley Rd, Suite 2',

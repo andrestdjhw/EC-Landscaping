@@ -20,8 +20,17 @@
     // El logo vive en la biblioteca de medios, no en el tema. Se arma desde
     // wp_get_upload_dir() para que la URL siga funcionando al migrar de
     // ec-landscaping.local a producción sin tocar código.
+    //
+    // Reemplaza a ecscapingneg.png, que sigue en la biblioteca por si hay que
+    // volver atrás. El archivo nuevo está en la carpeta de agosto.
+    //
+    // OJO con el tema del navbar: la barra es oscura (theme => 'dark' más
+    // abajo), así que este archivo tiene que ser la versión del logo en
+    // NEGATIVO —arte claro—. El anterior lo decía en el nombre; este no. Si
+    // al cargar se ve apagado o desaparece, es que subiste la versión en
+    // positivo y hace falta la otra.
     $ec_uploads = wp_get_upload_dir();
-    $ec_logo    = $ec_uploads['baseurl'] . '/2026/07/ecscapingneg.png';
+    $ec_logo    = $ec_uploads['baseurl'] . '/2026/08/EC_Imagotipo2-1-scaled.png';
 
     $ec_navbar_props = array(
       'logo'            => $ec_logo,

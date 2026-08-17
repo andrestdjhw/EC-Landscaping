@@ -477,18 +477,6 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
      documento. -->
 <section id="commercial" class="relative isolate overflow-hidden bg-bone lg:flex lg:min-h-svh lg:items-start">
 
-  <div
-    data-dotgrid
-    data-dot-size="3"
-    data-gap="26"
-    data-proximity="150"
-    data-shock-radius="230"
-    data-base="#B9BAB3"
-    data-active="#A36C48"
-    class="pointer-events-none absolute inset-0 -z-10"
-    aria-hidden="true"
-  ><canvas class="h-full w-full"></canvas></div>
-
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div data-reveal class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Who we build for</p>
@@ -1404,160 +1392,7 @@ $faq_schema = array(
       applyMotionPreference();
     });
   })();
-  /* Rejilla de puntos reactiva — canvas plano, sin dependencias.
-     Inspirada en el DotGrid de Vue Bits, reimplementada por dos razones:
-     ese componente es Vue y este tema es React, y arrastra GSAP más
-     InertiaPlugin para lo único que hace falta de verdad, que es un
-     resorte amortiguado. Eso son treinta líneas.
 
-     El resorte: cada punto guarda su desplazamiento (ox, oy) y su velocidad.
-     En cada frame se le aplica una fuerza proporcional al desplazamiento y
-     contraria a él —eso lo devuelve al origen— más un rozamiento
-     proporcional a la velocidad, que impide que oscile para siempre. Subir
-     RESORTE lo hace más rígido; subir ROCE lo frena antes. */
-  (function () {
-    var roots = document.querySelectorAll('[data-dotgrid]');
-    if (!roots.length) return;
-
-    var mq = window.matchMedia;
-    /* Sin puntero fino no hay efecto que mostrar: en táctil los puntos
-       quedarían quietos y el canvas gastaría batería dibujando lo mismo. */
-    if (mq && !mq('(hover: hover) and (pointer: fine)').matches) return;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    var RESORTE = 0.10;
-    var ROCE    = 0.86;
-
-    function hexRgb(h) {
-      var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);
-      return m ? [parseInt(m[1],16), parseInt(m[2],16), parseInt(m[3],16)] : [0,0,0];
-    }
-
-    Array.prototype.forEach.call(roots, function (root) {
-      var canvas = root.querySelector('canvas');
-      if (!canvas || !canvas.getContext) return;
-      var ctx = canvas.getContext('2d');
-
-      var size  = parseFloat(root.dataset.dotSize) || 3;
-      var gap   = parseFloat(root.dataset.gap) || 26;
-      var prox  = parseFloat(root.dataset.proximity) || 150;
-      var shock = parseFloat(root.dataset.shockRadius) || 230;
-      var base  = hexRgb(root.dataset.base || '#B9BAB3');
-      var act   = hexRgb(root.dataset.active || '#A36C48');
-
-      var dots = [];
-      var px = -9999, py = -9999;
-      var frame = null, visible = false;
-
-      function construir() {
-        var r = root.getBoundingClientRect();
-        if (!r.width || !r.height) return;
-        var dpr = window.devicePixelRatio || 1;
-        canvas.width  = Math.round(r.width * dpr);
-        canvas.height = Math.round(r.height * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        var celda = size + gap;
-        var cols = Math.floor((r.width  + gap) / celda);
-        var rows = Math.floor((r.height + gap) / celda);
-        var x0 = (r.width  - (celda * cols - gap)) / 2 + size / 2;
-        var y0 = (r.height - (celda * rows - gap)) / 2 + size / 2;
-
-        dots = [];
-        for (var y = 0; y < rows; y++) {
-          for (var x = 0; x < cols; x++) {
-            dots.push({ cx: x0 + x * celda, cy: y0 + y * celda, ox: 0, oy: 0, vx: 0, vy: 0 });
-          }
-        }
-      }
-
-      function pintar() {
-        frame = visible ? window.requestAnimationFrame(pintar) : null;
-
-        var r = canvas.getBoundingClientRect();
-        ctx.clearRect(0, 0, r.width, r.height);
-        var proxSq = prox * prox;
-
-        for (var i = 0; i < dots.length; i++) {
-          var d = dots[i];
-
-          /* Resorte amortiguado hacia el origen. Se salta el cálculo cuando
-             el punto ya está quieto: en una rejilla de cientos de puntos,
-             la mayoría lo está en cualquier frame dado. */
-          if (d.ox || d.oy || d.vx || d.vy) {
-            d.vx = (d.vx - d.ox * RESORTE) * ROCE;
-            d.vy = (d.vy - d.oy * RESORTE) * ROCE;
-            d.ox += d.vx;
-            d.oy += d.vy;
-            if (Math.abs(d.ox) < 0.05 && Math.abs(d.oy) < 0.05 &&
-                Math.abs(d.vx) < 0.05 && Math.abs(d.vy) < 0.05) {
-              d.ox = d.oy = d.vx = d.vy = 0;
-            }
-          }
-
-          var dx = d.cx - px, dy = d.cy - py;
-          var dsq = dx * dx + dy * dy;
-
-          if (dsq <= proxSq) {
-            var t = 1 - Math.sqrt(dsq) / prox;
-            ctx.fillStyle = 'rgb(' +
-              Math.round(base[0] + (act[0] - base[0]) * t) + ',' +
-              Math.round(base[1] + (act[1] - base[1]) * t) + ',' +
-              Math.round(base[2] + (act[2] - base[2]) * t) + ')';
-          } else {
-            ctx.fillStyle = root.dataset.base || '#B9BAB3';
-          }
-
-          ctx.beginPath();
-          ctx.arc(d.cx + d.ox, d.cy + d.oy, size / 2, 0, 6.283185);
-          ctx.fill();
-        }
-      }
-
-      function mover(e) {
-        var r = canvas.getBoundingClientRect();
-        px = e.clientX - r.left;
-        py = e.clientY - r.top;
-      }
-
-      /* Onda de choque al hacer clic. Solo se escucha dentro de la sección:
-         un listener en window haría saltar los puntos por un clic en el
-         navbar, que no tiene nada que ver con esto. */
-      function golpe(e) {
-        var r = canvas.getBoundingClientRect();
-        var cx = e.clientX - r.left, cy = e.clientY - r.top;
-        for (var i = 0; i < dots.length; i++) {
-          var d = dots[i];
-          var dx = d.cx - cx, dy = d.cy - cy;
-          var dist = Math.hypot(dx, dy);
-          if (dist >= shock || dist === 0) continue;
-          var f = (1 - dist / shock) * 14;
-          d.vx += (dx / dist) * f;
-          d.vy += (dy / dist) * f;
-        }
-      }
-
-      var host = root.parentElement || root;
-      host.addEventListener('mousemove', mover, { passive: true });
-      host.addEventListener('mouseleave', function () { px = py = -9999; }, { passive: true });
-      host.addEventListener('click', golpe);
-      window.addEventListener('resize', construir, { passive: true });
-
-      construir();
-
-      /* Fuera de pantalla no se dibuja. Sin esto el rAF corre toda la vida
-         de la página aunque la sección esté a tres pantallas de distancia. */
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (entries) {
-          visible = entries[0].isIntersecting;
-          if (visible && !frame) frame = window.requestAnimationFrame(pintar);
-        }, { rootMargin: '100px 0px' }).observe(root);
-      } else {
-        visible = true;
-        frame = window.requestAnimationFrame(pintar);
-      }
-    });
-  })();
   (function () {
     /* Galería en arco — DOM y transforms, sin WebGL.
 
@@ -1605,9 +1440,17 @@ $faq_schema = array(
            Acá solo hay sitio para una tarjeta y dos asomos, así que la del
            centro tiene que mandar. El hueco también crece: con tarjetas más
            anchas y giradas, el que servía en escritorio las hacía chocar. */
+        /* Escritorio: 30% más grande que el arranque —de 0.30 del ancho a
+           0.39, con el tope de 300px subido a 390—. Los tres números se
+           mueven juntos: si solo se sube el porcentaje, el tope lo recorta y
+           la tarjeta no crece en pantallas anchas, que es justo donde se
+           notaba el aire.
+
+           Angosto no cambia: ya estaba en dos tercios de pantalla y un 30%
+           más la desbordaría. */
         anchoItem = angosto
           ? Math.round(Math.min(320, anchoCaja * 0.66))
-          : Math.round(Math.min(300, Math.max(190, anchoCaja * 0.30)));
+          : Math.round(Math.min(390, Math.max(247, anchoCaja * 0.39)));
         var hueco = Math.round(anchoItem * (angosto ? 0.30 : 0.16));
         paso = anchoItem + hueco;
         total = paso * items.length;

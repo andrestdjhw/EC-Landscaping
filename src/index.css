@@ -45,10 +45,15 @@
 @theme {
 
   /* ── Tipografía ──
-     Display: Archivo, solo 600/700. Body: Inter.
-     Las familias se cargan desde functions.php con wp_enqueue_style. */
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Archivo", var(--font-sans);
+     Display: Play, solo 700. Body: Roboto.
+     Las familias se cargan desde functions.php con wp_enqueue_style.
+
+     El fallback de display encadena a --font-sans y no a una lista propia:
+     si Play no carga, los titulares caen en Roboto —que sí va a estar— en
+     lugar de en la sans del sistema. Un titular en Roboto bold se parece
+     bastante más a la intención que uno en Segoe UI. */
+  --font-sans: "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Play", var(--font-sans);
 
   /* ── SAND · el casi-negro de las bandas oscuras ── */
   --color-sand:     #0D0F10;
