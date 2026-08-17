@@ -167,7 +167,7 @@ $ec_what_happens = array(
       <ol class="mt-10 grid gap-8 sm:grid-cols-3">
         <?php foreach ($ec_what_happens as $step) : ?>
           <li class="border-t-2 border-forest pt-5">
-            <span class="font-display text-2xl font-bold tracking-tight text-ember tabular-nums">
+            <span class="font-display text-2xl font-bold tracking-tight text-ember-600-600 tabular-nums">
               <?php echo esc_html($step['n']); ?>
             </span>
             <h3 class="mt-2 font-display text-lg font-bold tracking-tight text-ink">

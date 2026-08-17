@@ -509,7 +509,7 @@ export default function ContactForm({
               >
                 <option value="">Select one</option>
                 {BUYERS.map(option => (
-                  <option key={option} value={option} className="bg-umber">
+                  <option key={option} value={option} className="bg-ink">
                     {option}
                   </option>
                 ))}
@@ -525,7 +525,7 @@ export default function ContactForm({
               >
                 <option value="">Select one</option>
                 {SCOPES.map(option => (
-                  <option key={option} value={option} className="bg-umber">
+                  <option key={option} value={option} className="bg-ink">
                     {option}
                   </option>
                 ))}
@@ -653,7 +653,15 @@ export default function ContactForm({
         aria-labelledby="ec-bid-title"
         className={[
           "pointer-events-auto flex max-h-full w-full flex-col overflow-hidden rounded-xl",
-          "bg-umber/95 text-bone shadow-2xl shadow-sand/40 ring-1 ring-white/12 backdrop-blur-md",
+          // bg-ink y no bg-umber. Con la paleta nueva, umber apunta a OLIVE
+          // #696D56, que es un tono MEDIO y no un oscuro: las etiquetas del
+          // formulario van en bone/55 y ahí caían a 2.57:1, y el botón ember
+          // quedaba en 1.64:1 contra su propio panel — invisible.
+          //
+          // Sobre PINE las mismas opacidades dan 4.54:1 y el botón 3.90:1.
+          // Es lo que devuelve la jerarquía entre etiqueta, valor y acción sin
+          // tocar una sola clase de los campos.
+          "bg-ink/95 text-bone shadow-2xl shadow-ink/50 ring-1 ring-white/12 backdrop-blur-md",
           // Permanente no anima: el panel no entra desde ningún lado, ya
           // estaba ahí cuando cargó la página.
           alwaysOn
@@ -698,7 +706,7 @@ export default function ContactForm({
         aria-labelledby="ec-bid-title"
         className={[
           "relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl",
-          "bg-umber text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl",
+          "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl",
           "transition-[opacity,transform] ease-out motion-reduce:transition-none",
           entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
         ].join(" ")}

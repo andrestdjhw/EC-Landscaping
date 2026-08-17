@@ -490,7 +490,7 @@ function ContactForm({
               children: "Select one"
             }), BUYERS.map(option => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
               value: option,
-              className: "bg-umber",
+              className: "bg-ink",
               children: option
             }, option))]
           })
@@ -507,7 +507,7 @@ function ContactForm({
               children: "Select one"
             }), SCOPES.map(option => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
               value: option,
-              className: "bg-umber",
+              className: "bg-ink",
               children: option
             }, option))]
           })
@@ -616,7 +616,16 @@ function ContactForm({
       ref: panelRef,
       role: "region",
       "aria-labelledby": "ec-bid-title",
-      className: ["pointer-events-auto flex max-h-full w-full flex-col overflow-hidden rounded-xl", "bg-umber/95 text-bone shadow-2xl shadow-sand/40 ring-1 ring-white/12 backdrop-blur-md",
+      className: ["pointer-events-auto flex max-h-full w-full flex-col overflow-hidden rounded-xl",
+      // bg-ink y no bg-umber. Con la paleta nueva, umber apunta a OLIVE
+      // #696D56, que es un tono MEDIO y no un oscuro: las etiquetas del
+      // formulario van en bone/55 y ahí caían a 2.57:1, y el botón ember
+      // quedaba en 1.64:1 contra su propio panel — invisible.
+      //
+      // Sobre PINE las mismas opacidades dan 4.54:1 y el botón 3.90:1.
+      // Es lo que devuelve la jerarquía entre etiqueta, valor y acción sin
+      // tocar una sola clase de los campos.
+      "bg-ink/95 text-bone shadow-2xl shadow-ink/50 ring-1 ring-white/12 backdrop-blur-md",
       // Permanente no anima: el panel no entra desde ningún lado, ya
       // estaba ahí cuando cargó la página.
       alwaysOn ? "" : ["transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"].join(" ")].join(" "),
@@ -646,7 +655,7 @@ function ContactForm({
       role: "dialog",
       "aria-modal": "true",
       "aria-labelledby": "ec-bid-title",
-      className: ["relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl", "bg-umber text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl", "transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"].join(" "),
+      className: ["relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl", "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl", "transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"].join(" "),
       style: {
         transitionDuration: `${ANIM_MS}ms`
       },
@@ -1425,15 +1434,15 @@ function BidButton({
 }) {
   const skins = {
     ember: [
-    // Texto en ink sobre EMBER (#A36C48): 4.39:1. Blanco da 4.38:1 y
-    // BREEZE 3.65:1, así que ink sigue siendo la mejor de las tres — pero
-    // ninguna llega al 4.5:1 que pide AA a 13px, porque el problema es la
-    // luminancia del fondo, no el color del texto.
+    // Texto en ink sobre CLAY (#BE805B): 3.90:1. Blanco da 2.85:1, así que
+    // ink es claramente la mejor de las dos — pero no llega al 4.5:1 que
+    // pide AA a 13px, porque el problema es la luminancia del fondo y no el
+    // color del texto.
     //
-    // La salida está en el tema: bg-ember-600 (#8A5B3C) con texto blanco da
-    // 5.77:1. No se aplicó porque cambia el botón en siete plantillas y tres
-    // componentes, y aleja el CTA del EMBER exacto de la lámina de marca.
-    // Ver la nota al pie de src/index.css.
+    // La salida está en el tema: bg-ember-600 (CLAY-600 #8C654B) con texto
+    // blanco da 5.15:1. No se aplicó porque cambia el botón en once archivos
+    // y aleja el CTA del CLAY exacto de la lámina de marca — es decisión de
+    // marca, no técnica. Ver la nota al pie de src/index.css.
     "border-white/25 bg-ember text-ink cta-relief", "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px"].join(" "),
     soft: ["border-white/[0.333] bg-[#e0e8ef] text-[#7e97b8] cta-soft", "hover:cta-soft-tight hover:bg-[#e5edf5] hover:text-[#516d91]"].join(" ")
   };

@@ -327,7 +327,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
        Gradiente explícito en lugar de utilidad de Tailwind para no depender
        del renombre de bg-gradient-* a bg-linear-* en v4. -->
   <div
-    class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,#ECEAE9_0%,rgba(236,234,233,0.95)_34%,rgba(236,234,233,0.6)_62%,rgba(236,234,233,0.3)_100%)]"
+    class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,#F1F0E6_0%,rgba(241,240,230,0.95)_34%,rgba(241,240,230,0.6)_62%,rgba(241,240,230,0.3)_100%)]"
     aria-hidden="true"
   ></div>
 
@@ -533,7 +533,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                      llegan los archivos, y el arco se puede evaluar igual.
                      Se borra este else cuando estén las cinco. -->
                 <div
-                  class="flex aspect-[3/4] w-full items-end justify-end rounded-lg bg-[linear-gradient(150deg,#4F5341_0%,#3A3D30_100%)] p-6 ring-1 ring-slate-200"
+                  class="flex aspect-[3/4] w-full items-end justify-end rounded-lg bg-[linear-gradient(150deg,#696D56_0%,#565945_100%)] p-6 ring-1 ring-slate-200"
                   data-arcgallery-media
                   aria-hidden="true"
                 >
@@ -588,7 +588,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
   ></video>
 
   <div
-    class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(13,15,16,0.92)_0%,rgba(13,15,16,0.86)_45%,rgba(13,15,16,0.8)_100%)]"
+    class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(47,52,45,0.92)_0%,rgba(47,52,45,0.86)_45%,rgba(47,52,45,0.8)_100%)]"
     aria-hidden="true"
   ></div>
 
@@ -747,7 +747,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                   <!-- Respaldo: si una imagen se cae en la migración, la tarjeta
                        queda con un panel liso en verde de marca en lugar de un
                        ícono de imagen rota. Barato de mantener, así que se queda. -->
-                  <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#4F5341_0%,#3A3D30_100%)]" aria-hidden="true"></div>
+                  <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#696D56_0%,#565945_100%)]" aria-hidden="true"></div>
                 <?php endif; ?>
 
                 <div class="flex flex-1 flex-col border-t-2 border-forest p-7">
@@ -780,7 +780,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
     <ol class="mt-12 flex flex-col">
       <?php foreach ($process as $step) : ?>
         <li class="grid gap-4 border-t border-slate-200 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
-          <span class="font-display text-2xl font-bold tracking-tight text-ember tabular-nums">
+          <span class="font-display text-2xl font-bold tracking-tight text-ember-600-600 tabular-nums">
             <?php echo esc_html($step['n']); ?>
           </span>
           <h3 class="font-display text-lg font-bold tracking-tight text-ink">
@@ -826,23 +826,24 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
         sección de la página que no se mueve, y esa quietud es parte de lo que
         afirma.
 
-     Contraste verificado sobre UMBER #302F2D: bone 11.15:1 · bone/70 6.33:1 ·
-     bone/55 4.53:1 · ember-300 5.98:1. EMBER a secas da 3.05:1, así que los
-     acentos chicos usan ember-300. -->
+     Contraste verificado sobre la superficie umber (ahora OLIVE #696D56, un
+     tono medio y no un oscuro): bone a plena da 4.68:1 y cualquier opacidad
+     por debajo rompe AA, así que acá el texto va sin opacidad y las reglas
+     suben a white/25. -->
 <section id="credentials" class="bg-umber text-bone">
   <div class="w-full px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
 
     <!-- ── Masthead ──
          Doble filete arriba y simple abajo: la asimetría es la que hace que
          se lea como cabecera de documento y no como un separador cualquiera. -->
-    <div class="border-b border-t-2 border-white/15 py-3">
+    <div class="border-b border-t-2 border-white/25 py-3">
       <div class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-1">
         <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">
           Credentials · EC Landscaping LLC
         </p>
         <!-- overflow-wrap:anywhere y no break-all: a 320px el número de
              licencia es lo único que puede desbordar la fila. -->
-        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-bone/55 tabular-nums [overflow-wrap:anywhere]">
+        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-bone tabular-nums [overflow-wrap:anywhere]">
           Utah 1106462255001 · S330
         </p>
       </div>
@@ -856,7 +857,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
       <h2 class="font-display text-3xl leading-[1.1] font-bold tracking-tight text-bone [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
         The page your compliance team is going to ask for.
       </h2>
-      <p class="text-base leading-relaxed text-bone/70 lg:pb-2">
+      <p class="text-base leading-relaxed text-bone lg:pb-2">
         Boring for everyone else. Decisive for you.
       </p>
     </div>
@@ -869,10 +870,10 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 
          minmax(0,1fr) y no 1fr: con 1fr una celda de contenido largo estira
          la columna y rompe la retícula. -->
-    <dl class="mt-11 grid grid-cols-[minmax(0,1fr)] border-t border-white/15 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))]">
+    <dl class="mt-11 grid grid-cols-[minmax(0,1fr)] border-t border-white/25 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))]">
       <?php foreach ($credentials as $row) : ?>
-        <div class="border-b border-white/15 py-4 pr-6 lg:[&:nth-child(3n)]:border-l lg:[&:nth-child(3n)]:border-white/15 lg:[&:nth-child(3n)]:pl-8 lg:[&:nth-child(3n+2)]:border-l lg:[&:nth-child(3n+2)]:border-white/15 lg:[&:nth-child(3n+2)]:pl-8">
-          <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone/55">
+        <div class="border-b border-white/25 py-4 pr-6 lg:[&:nth-child(3n)]:border-l lg:[&:nth-child(3n)]:border-white/25 lg:[&:nth-child(3n)]:pl-8 lg:[&:nth-child(3n+2)]:border-l lg:[&:nth-child(3n+2)]:border-white/25 lg:[&:nth-child(3n+2)]:pl-8">
+          <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone">
             <?php echo esc_html($row['label']); ?>
           </dt>
           <dd class="mt-2 text-sm leading-relaxed text-bone tabular-nums [overflow-wrap:anywhere]">
@@ -888,16 +889,16 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
          lleva abajo: una marca que lo respalda.
 
          El alt describe la placa; el texto de al lado no lo repite. -->
-    <div class="mt-10 flex flex-wrap items-center gap-6 border-t border-white/15 pt-7">
+    <div class="mt-10 flex flex-wrap items-center gap-6 border-t border-white/25 pt-7">
       <img
         src="<?php echo esc_url($ec_uploads['baseurl'] . '/2026/07/ec_landscaping_award.png'); ?>"
         alt="BusinessRate Best of 2026 Award Winner plaque"
-        class="w-32 shrink-0 rounded object-contain ring-1 ring-white/15 sm:w-40 lg:w-48"
+        class="w-32 shrink-0 rounded object-contain ring-1 ring-white/25 sm:w-40 lg:w-48"
         loading="lazy"
         decoding="async"
       />
       <div>
-        <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone/55">Recognition</p>
+        <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone">Recognition</p>
         <p class="mt-1 text-sm leading-relaxed text-bone">
           BusinessRate Best of 2026 — Landscaper
         </p>

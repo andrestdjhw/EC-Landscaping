@@ -177,7 +177,7 @@ $ec_process = array(
                   <p class="mt-3 text-sm leading-relaxed text-ink/70">
                     <?php echo esc_html($item['lede']); ?>
                   </p>
-                  <span class="mt-5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ember">
+                  <span class="mt-5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ember-600-600">
                     View capability <span aria-hidden="true">&rarr;</span>
                   </span>
                 </div>
@@ -379,7 +379,7 @@ $ec_process = array(
     <ol class="mt-12 flex flex-col">
       <?php foreach ($ec_process as $step) : ?>
         <li class="grid gap-4 border-t border-slate-200 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
-          <span class="font-display text-2xl font-bold tracking-tight text-ember tabular-nums">
+          <span class="font-display text-2xl font-bold tracking-tight text-ember-600-600 tabular-nums">
             <?php echo esc_html($step['n']); ?>
           </span>
           <h3 class="font-display text-lg font-bold tracking-tight text-ink">
@@ -402,7 +402,7 @@ $ec_process = array(
         <h2 class="ec-shine ec-shine--light font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
           Send us the plans.
         </h2>
-        <p class="mt-4 max-w-lg text-base leading-relaxed text-bone/75">
+        <p class="mt-4 max-w-lg text-base leading-relaxed text-bone">
           You&rsquo;ll hear back from the owner or the estimator &mdash; not a call center.
         </p>
       </div>

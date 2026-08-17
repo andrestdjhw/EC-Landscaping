@@ -50,59 +50,104 @@
 
      El fallback de display encadena a --font-sans y no a una lista propia:
      si Play no carga, los titulares caen en Roboto —que sí va a estar— en
-     lugar de en la sans del sistema. Un titular en Roboto bold se parece
-     bastante más a la intención que uno en Segoe UI. */
+     lugar de en la sans del sistema. */
   --font-sans: "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Play", var(--font-sans);
 
-  /* ── SAND · el casi-negro de las bandas oscuras ── */
-  --color-sand:     #0D0F10;
-  --color-sand-400: #3D3F40;
-  --color-sand-300: #6E6F70;
-  --color-sand-200: #9E9F9F;
-  --color-sand-100: #CFCFCF;
 
-  /* ── UMBER · dark cálido, un escalón por encima de SAND ── */
-  --color-umber:     #302F2D;
-  --color-umber-400: #595957;
-  --color-umber-300: #838281;
-  --color-umber-200: #ACACAB;
-  --color-umber-100: #D6D5D5;
+  /* ══════════════════════════════════════════════════════════════
+     PALETA — EC Landscaping
 
-  /* ── SLATE · el verde apagado de la sierra ── */
-  --color-slate:     #4F5341;
-  --color-slate-400: #727567;
-  --color-slate-300: #95988D;
-  --color-slate-200: #B9BAB3;
-  --color-slate-100: #DCDDD9;
+     Cinco colores de marca. Las rampas se derivaron mezclando cada base
+     hacia LINEN y NO hacia blanco puro: el blanco no está en la paleta y
+     mezclar hacia él desatura el matiz — un CLAY aclarado con blanco se
+     vuelve rosa, aclarado con LINEN se queda terracota.
+     ══════════════════════════════════════════════════════════════ */
 
-  /* ── EMBER · el único momento de calidez ── */
-  --color-ember:     #A36C48;
-  --color-ember-400: #B5896D;
-  --color-ember-300: #C8A791;
-  --color-ember-200: #DAC4B6;
-  --color-ember-100: #EDE2DB;
+  /* ── PINE · el verde casi negro. Única superficie oscura profunda ── */
+  --color-pine:     #2F342D;
+  --color-pine-500: #3E443B;   /* apenas más claro — separa dos oscuros vecinos */
+  --color-pine-400: #696C64;
+  --color-pine-300: #90928A;
+  --color-pine-200: #B7B8AE;
+  --color-pine-100: #D6D6CC;
 
-  /* Pasos oscuros que la lámina no trae: su rampa solo va hacia el claro y
-     el hover de un botón necesita ir hacia el oscuro. ember-600 es además
-     la superficie que resolvería el contraste del CTA — ver la nota final. */
-  --color-ember-600: #8A5B3C;
-  --color-ember-700: #7A4F35;
+  /* ── OLIVE · el verde de marca. Acento sobre claro Y segunda
+        superficie oscura: es lo que hace el cartel del look&feel ── */
+  --color-olive:     #696D56;
+  --color-olive-600: #565945;   /* paso oscuro, no está en la lámina */
+  --color-olive-400: #929481;
+  --color-olive-300: #ADAE9E;
+  --color-olive-200: #C8C9BB;
+  --color-olive-100: #DEDED2;
 
-  /* ── BREEZE · el claro. Nunca blanco puro: no está en la paleta ── */
-  --color-breeze:     #ECEAE9;
-  --color-breeze-300: #F0EEED;
-  --color-breeze-200: #F4F2F2;
-  --color-breeze-100: #F7F7F6;
+  /* ── CLAY · el terracota. El único momento cálido ── */
+  --color-clay:     #BE805B;
+  --color-clay-400: #CDA285;
+  --color-clay-300: #D8B8A0;
+  --color-clay-200: #E2CEBC;
+  --color-clay-100: #EAE0D3;
 
-  /* ── Alias semánticos ──
-     Los nombres que usan las plantillas y los componentes. Esta capa es lo
-     que hace que un cambio de paleta toque un archivo y no diez: ninguna
-     clase de Tailwind del proyecto cambia, solo cambia a qué apunta. */
-  --color-ink:    var(--color-sand);
-  --color-bone:   var(--color-breeze);
-  --color-forest: var(--color-slate);
-  --color-mist:   var(--color-breeze-300);
+  /* Pasos oscuros que la lámina no trae. clay-600 resuelve el contraste del
+     texto chico sobre claro (4.50:1) y el hover del CTA; clay-700 es el
+     estado activo. Mezclados hacia PINE, no hacia negro. */
+  --color-clay-600: #8C654B;
+  --color-clay-700: #7E5E46;
+
+  /* ── SAND · el tono medio cálido. Superficie intermedia ── */
+  --color-sand:     #E1D8C8;
+  --color-sand-400: #E6DFD1;
+  --color-sand-300: #E9E4D7;
+  --color-sand-200: #ECE9DD;
+  --color-sand-100: #EFEDE2;
+
+  /* ── LINEN · el claro. Nunca blanco puro ── */
+  --color-linen:     #F1F0E6;
+  --color-linen-200: #F6F5EF;
+  --color-linen-100: #FAFAF6;
+
+
+  /* ══════════════════════════════════════════════════════════════
+     Alias semánticos — los nombres que usa el markup
+
+     Esta capa es lo que convierte un cambio de paleta en un archivo y no
+     en catorce: ninguna clase de Tailwind del proyecto cambia, solo cambia
+     a qué apunta. Los 175 `ink`, 125 `bone`, 134 `ember` y 26 `forest` del
+     tema siguen escribiéndose igual.
+     ══════════════════════════════════════════════════════════════ */
+
+  --color-ink:    var(--color-pine);
+  --color-bone:   var(--color-linen);
+  --color-forest: var(--color-olive);
+  --color-ember:  var(--color-clay);
+  --color-mist:   var(--color-sand-200);
+
+  /* Compatibilidad con los tokens de la paleta anterior que el markup
+     todavía nombra. Se remapean en lugar de buscar y reemplazar en once
+     archivos, y así una sola línea revierte cada decisión.
+
+     umber → olive: era la segunda superficie oscura. La paleta nueva no
+     trae un segundo oscuro, y OLIVE cumple ese papel en el cartel de la
+     propuesta de marca. Contraste con LINEN encima: 8.16:1.
+
+     slate → olive, breeze → linen: eran los nombres viejos de las mismas
+     dos familias. */
+  --color-umber:      var(--color-olive);
+  --color-slate:      var(--color-olive);
+  --color-slate-100:  var(--color-olive-100);
+  --color-slate-200:  var(--color-olive-200);
+  --color-slate-300:  var(--color-olive-300);
+  --color-slate-400:  var(--color-olive-400);
+  --color-breeze:     var(--color-linen);
+  --color-breeze-100: var(--color-linen-100);
+  --color-breeze-200: var(--color-linen-200);
+  --color-breeze-300: var(--color-sand-100);
+  --color-ember-100:  var(--color-clay-100);
+  --color-ember-200:  var(--color-clay-200);
+  --color-ember-300:  var(--color-clay-300);
+  --color-ember-400:  var(--color-clay-400);
+  --color-ember-600:  var(--color-clay-600);
+  --color-ember-700:  var(--color-clay-700);
 }
 
 
@@ -229,17 +274,17 @@
 @utility bevel-tile {
   box-shadow:
     inset 1px 1px 0 rgba(255, 255, 255, 0.95),
-    inset -1px -1px 0 rgba(13, 15, 16, 0.08),
-    inset 0 -16px 24px -20px rgba(13, 15, 16, 0.22),
-    0 1px 1px rgba(13, 15, 16, 0.03);
+    inset -1px -1px 0 rgba(47, 52, 45, 0.08),
+    inset 0 -16px 24px -20px rgba(47, 52, 45, 0.22),
+    0 1px 1px rgba(47, 52, 45, 0.03);
 }
 
 @utility bevel-tile-raised {
   box-shadow:
     inset 1px 1px 0 rgb(255, 255, 255),
-    inset -1px -1px 0 rgba(13, 15, 16, 0.11),
-    inset 0 -20px 28px -20px rgba(13, 15, 16, 0.3),
-    0 12px 24px -14px rgba(13, 15, 16, 0.3);
+    inset -1px -1px 0 rgba(47, 52, 45, 0.11),
+    inset 0 -20px 28px -20px rgba(47, 52, 45, 0.3),
+    0 12px 24px -14px rgba(47, 52, 45, 0.3);
 }
 
 /* ── CTA sobre superficie OSCURA (navbar, banda de cierre, formulario) ──
@@ -248,16 +293,16 @@
    la píldora queda pegada al fondo. */
 @utility cta-relief {
   box-shadow:
-    0 0 0 4px rgba(163, 108, 72, 0.22),
-    0 0 0 9px rgba(163, 108, 72, 0.10),
-    0 6px 16px -6px rgba(13, 15, 16, 0.55);
+    0 0 0 4px rgba(190, 128, 91, 0.22),
+    0 0 0 9px rgba(190, 128, 91, 0.10),
+    0 6px 16px -6px rgba(47, 52, 45, 0.55);
 }
 
 @utility cta-relief-tight {
   box-shadow:
-    0 0 0 2px rgba(163, 108, 72, 0.3),
-    0 0 0 5px rgba(163, 108, 72, 0.14),
-    0 10px 20px -8px rgba(13, 15, 16, 0.6);
+    0 0 0 2px rgba(190, 128, 91, 0.3),
+    0 0 0 5px rgba(190, 128, 91, 0.14),
+    0 10px 20px -8px rgba(47, 52, 45, 0.6);
 }
 
 /* ── CTA sobre superficie CLARA (hero) ──
@@ -266,15 +311,15 @@
 @utility cta-relief-light {
   box-shadow:
     0 0 0 4px rgba(255, 255, 255, 0.7),
-    0 0 0 9px rgba(163, 108, 72, 0.16),
-    0 6px 16px -8px rgba(13, 15, 16, 0.3);
+    0 0 0 9px rgba(190, 128, 91, 0.16),
+    0 6px 16px -8px rgba(47, 52, 45, 0.3);
 }
 
 @utility cta-relief-light-tight {
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.85),
-    0 0 0 5px rgba(163, 108, 72, 0.22),
-    0 10px 20px -10px rgba(13, 15, 16, 0.35);
+    0 0 0 5px rgba(190, 128, 91, 0.22),
+    0 10px 20px -10px rgba(47, 52, 45, 0.35);
 }
 
 /* ── Skin "soft" del BidButton ──
@@ -311,7 +356,7 @@
     100deg,
     currentColor 0%,
     currentColor 40%,
-    rgba(163, 108, 72, 0.85) 50%,
+    rgba(190, 128, 91, 0.85) 50%,
     currentColor 60%,
     currentColor 100%
   );
@@ -405,9 +450,9 @@
    se lee menos sobre el hero claro: si queda flojo, subir el 0.55 antes
    que agrandar el spread. */
 @keyframes ec-cta-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(163, 108, 72, 0.55); }
-  70%  { box-shadow: 0 0 0 18px rgba(163, 108, 72, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(163, 108, 72, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(190, 128, 91, 0.55); }
+  70%  { box-shadow: 0 0 0 18px rgba(190, 128, 91, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(190, 128, 91, 0); }
 }
 
 .ec-cta-pulse {
@@ -423,7 +468,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ec-cta-pulse {
     animation: none;
-    box-shadow: 0 0 0 4px rgba(163, 108, 72, 0.2);
+    box-shadow: 0 0 0 4px rgba(190, 128, 91, 0.2);
   }
   .ec-cta-pulse--delayed {
     box-shadow: none;
@@ -459,27 +504,31 @@
 
 
 /* ══════════════════════════════════════════════════════════════════
-   NOTA DE CONTRASTE — leer antes de tocar el CTA
+   NOTA DE CONTRASTE — verificado sobre la paleta nueva
 
-   EMBER (#A36C48) es bastante más oscuro que el naranja anterior
-   (#E2711D), así que los números cambiaron y no todos para bien:
+   Sobre claro (LINEN #F1F0E6):
+     PINE  ......... 11.12:1  ✓
+     OLIVE .......... 4.68:1  ✓  eyebrows
+     CLAY ........... 2.85:1  ✗  no usar como texto sobre claro
+     CLAY-600 ....... 4.50:1  ✓  el que sí sirve para texto chico
 
-     texto ink sobre EMBER ......... 4.39:1
-     texto blanco sobre EMBER ...... 4.38:1
-     texto bone sobre EMBER ........ 3.65:1
+   Sobre oscuro (PINE #2F342D):
+     LINEN ......... 11.12:1  ✓
+     SAND ........... 9.01:1  ✓
+     CLAY ........... 3.90:1  ~  AA grande — sirve para cifras, no para 11px
+     CLAY-300 ....... 6.87:1  ✓  el que usan los eyebrows sobre oscuro
+     OLIVE .......... 2.38:1  ✗  invisible: no usar forest sobre PINE
 
-   Las tres quedan por debajo del 4.5:1 que pide AA para texto de 13px,
-   que es el tamaño del CTA. Ninguna elección de color de texto lo salva:
-   el problema es la luminancia del fondo.
+   Sobre OLIVE #696D56 como superficie:
+     LINEN .......... 8.16:1  ✓
+     PINE ........... 2.38:1  ✗
 
-   Por eso existe --color-ember-600 (#8A5B3C): ahí el texto blanco da
-   5.77:1 y bone da 4.81:1. Es el mismo terracota, un paso más oscuro.
+   EL CTA. Texto PINE sobre CLAY da 3.90:1 y no llega al 4.5:1 que pide AA
+   para 13px. Es el mismo problema que traía la paleta anterior y sigue sin
+   resolverse con un color de texto: lo decide la luminancia del fondo.
 
-   NO está aplicado. Cambiar la superficie del CTA toca los botones de
-   siete plantillas y tres componentes, y es una decisión de marca — el
-   botón deja de ser exactamente el EMBER de la lámina.
-
-   El otro punto flojo: EMBER como texto chico sobre claro da 4.08:1 (los
-   "View capability →" de 0.7rem). Mejora sobre el 2.9:1 del naranja
-   anterior, pero sigue corto. --color-ember-700 lo resolvería.
+   La salida está definida y no aplicada: bg-ember-600 (CLAY-600 #8C654B)
+   con texto blanco da 5.15:1. No se aplicó porque cambia el botón en once
+   archivos y aleja el CTA del CLAY exacto de la lámina — es decisión de
+   marca, no técnica.
    ══════════════════════════════════════════════════════════════════ */

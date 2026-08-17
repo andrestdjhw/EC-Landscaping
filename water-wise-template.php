@@ -144,10 +144,14 @@ $ec_tel_href = 'tel:+13852403907';
      y a tierra oscura en otra; un velo oscuro funciona con las cuatro sin
      depender de qué salga en el encuadre.
 
-     bg-sand debajo de la imagen: es lo que se ve el instante previo a que
+     bg-ink debajo de la imagen: es lo que se ve el instante previo a que
      cargue, y lo que queda si la ruta se rompe en la migración. Un hero que
-     falla en oscuro se lee como decisión; en blanco se lee como error. -->
-<section class="relative isolate overflow-hidden bg-sand text-bone">
+     falla en oscuro se lee como decisión; en claro se lee como error.
+
+     Decía bg-sand y hubo que cambiarlo: en la paleta anterior SAND era el
+     casi-negro, en la nueva es el claro cálido. El mismo nombre, el extremo
+     opuesto de la escala — el texto bone encima habría quedado en 1.23:1. -->
+<section class="relative isolate overflow-hidden bg-ink text-bone">
 
   <img
     src="<?php echo esc_url($ec_image); ?>"
@@ -170,8 +174,8 @@ $ec_tel_href = 'tel:+13852403907';
 
        Gradiente explícito y no utilidad de Tailwind: bg-gradient-* se
        renombró a bg-linear-* en v4 y no conviene depender de eso acá. -->
-  <div class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(13,15,16,0.80)_0%,rgba(13,15,16,0.86)_100%)] lg:hidden" aria-hidden="true"></div>
-  <div class="absolute inset-0 -z-10 hidden bg-[linear-gradient(100deg,rgba(13,15,16,0.94)_0%,rgba(13,15,16,0.88)_38%,rgba(13,15,16,0.62)_66%,rgba(13,15,16,0.38)_100%)] lg:block" aria-hidden="true"></div>
+  <div class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(47,52,45,0.80)_0%,rgba(47,52,45,0.86)_100%)] lg:hidden" aria-hidden="true"></div>
+  <div class="absolute inset-0 -z-10 hidden bg-[linear-gradient(100deg,rgba(47,52,45,0.94)_0%,rgba(47,52,45,0.88)_38%,rgba(47,52,45,0.62)_66%,rgba(47,52,45,0.38)_100%)] lg:block" aria-hidden="true"></div>
 
   <div class="relative flex min-h-[28rem] w-full items-center px-5 pb-16 pt-[calc(var(--header-offset)+2rem)] sm:px-8 lg:min-h-[34rem] lg:px-10 lg:pb-24 lg:pt-[calc(var(--header-offset)+3rem)]">
     <div class="max-w-2xl">
@@ -217,7 +221,11 @@ $ec_tel_href = 'tel:+13852403907';
      Los colores salen de la paleta y se pasan por data-*, no se escriben en
      el JS: así el script queda genérico y el mismo bloque sirve en otra
      sección con otro fondo. -->
-<section class="relative isolate overflow-hidden bg-breeze-200">
+<!-- bg-sand y no bg-breeze-200: es la sección más larga de la página y
+     necesita separarse de sus vecinas. Los dos pasos claros de LINEN se
+     distinguen apenas (#F1F0E6 contra #F6F5EF); SAND es un tono cálido
+     propio de la paleta y sí marca el cambio de bloque. -->
+<section class="relative isolate overflow-hidden bg-sand">
 
   <div
     data-dotgrid
@@ -225,8 +233,8 @@ $ec_tel_href = 'tel:+13852403907';
     data-gap="26"
     data-proximity="150"
     data-shock-radius="230"
-    data-base="#B9BAB3"
-    data-active="#A36C48"
+    data-base="#C8C9BB"
+    data-active="#BE805B"
     class="pointer-events-none absolute inset-0 -z-10"
     aria-hidden="true"
   ><canvas class="h-full w-full"></canvas></div>
@@ -264,7 +272,7 @@ $ec_tel_href = 'tel:+13852403907';
            estilos en línea. Así el efecto no depende de que una clase nueva
            haya entrado al build. -->
       <div data-cardswap data-delay="4200" data-dist-x="42" data-dist-y="38" data-skew="6">
-        <ul class="grid gap-px self-start bg-slate-200 sm:grid-cols-2" data-cardswap-list>
+        <ul class="grid gap-px self-start bg-slate-300 sm:grid-cols-2" data-cardswap-list>
           <?php foreach ($ec_scope as $item) : ?>
             <li class="flex flex-col overflow-hidden bg-breeze-100" data-cardswap-card>
               <?php if (!empty($item['image'])) : ?>
@@ -326,7 +334,7 @@ $ec_tel_href = 'tel:+13852403907';
     <ol class="mt-12 flex flex-col">
       <?php foreach ($ec_process as $step) : ?>
         <li class="grid gap-4 border-t border-slate-200 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
-          <span class="font-display text-2xl font-bold tracking-tight text-ember tabular-nums">
+          <span class="font-display text-2xl font-bold tracking-tight text-ember-600-600 tabular-nums">
             <?php echo esc_html($step['n']); ?>
           </span>
           <h3 class="font-display text-lg font-bold tracking-tight text-ink">
@@ -355,7 +363,7 @@ $ec_tel_href = 'tel:+13852403907';
             <h3 class="font-display text-lg font-bold tracking-tight text-ink group-hover:text-forest">
               <?php echo esc_html($other['title']); ?>
             </h3>
-            <span class="mt-3 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ember">
+            <span class="mt-3 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ember-600-600">
               View <span aria-hidden="true">&rarr;</span>
             </span>
           </a>
@@ -373,7 +381,7 @@ $ec_tel_href = 'tel:+13852403907';
         <h2 class="ec-shine ec-shine--light font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
           Send us the plans.
         </h2>
-        <p class="mt-4 max-w-lg text-base leading-relaxed text-bone/75">
+        <p class="mt-4 max-w-lg text-base leading-relaxed text-bone">
           You&rsquo;ll hear back from the owner or the estimator &mdash; not a call center.
         </p>
       </div>
@@ -437,8 +445,8 @@ $ec_tel_href = 'tel:+13852403907';
       var gap   = parseFloat(root.dataset.gap) || 26;
       var prox  = parseFloat(root.dataset.proximity) || 150;
       var shock = parseFloat(root.dataset.shockRadius) || 230;
-      var base  = hexRgb(root.dataset.base || '#B9BAB3');
-      var act   = hexRgb(root.dataset.active || '#A36C48');
+      var base  = hexRgb(root.dataset.base || '#C8C9BB');
+      var act   = hexRgb(root.dataset.active || '#BE805B');
 
       var dots = [];
       var px = -9999, py = -9999;
@@ -500,7 +508,7 @@ $ec_tel_href = 'tel:+13852403907';
               Math.round(base[1] + (act[1] - base[1]) * t) + ',' +
               Math.round(base[2] + (act[2] - base[2]) * t) + ')';
           } else {
-            ctx.fillStyle = root.dataset.base || '#B9BAB3';
+            ctx.fillStyle = root.dataset.base || '#C8C9BB';
           }
 
           ctx.beginPath();
@@ -665,7 +673,7 @@ $ec_tel_href = 'tel:+13852403907';
           c.style.minHeight = altoCard + 'px';
           c.style.alignItems = c.querySelector('[data-cardswap-media]') ? 'stretch' : 'flex-start';
           c.style.borderRadius = '12px';
-          c.style.boxShadow = '0 18px 40px -22px rgba(13,15,16,0.55)';
+          c.style.boxShadow = '0 18px 40px -22px rgba(47,52,45,0.55)';
           c.style.transformStyle = 'preserve-3d';
           c.style.backfaceVisibility = 'hidden';
           c.style.willChange = 'transform, opacity';

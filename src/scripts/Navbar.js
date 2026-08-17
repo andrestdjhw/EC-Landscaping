@@ -207,15 +207,15 @@ function ContactPlate({ icon: Icon, label, srLabel, href, external = false }) {
 function BidButton({ href, onClick, skin = "ember", size = "sm", className = "" }) {
   const skins = {
     ember: [
-      // Texto en ink sobre EMBER (#A36C48): 4.39:1. Blanco da 4.38:1 y
-      // BREEZE 3.65:1, así que ink sigue siendo la mejor de las tres — pero
-      // ninguna llega al 4.5:1 que pide AA a 13px, porque el problema es la
-      // luminancia del fondo, no el color del texto.
+      // Texto en ink sobre CLAY (#BE805B): 3.90:1. Blanco da 2.85:1, así que
+      // ink es claramente la mejor de las dos — pero no llega al 4.5:1 que
+      // pide AA a 13px, porque el problema es la luminancia del fondo y no el
+      // color del texto.
       //
-      // La salida está en el tema: bg-ember-600 (#8A5B3C) con texto blanco da
-      // 5.77:1. No se aplicó porque cambia el botón en siete plantillas y tres
-      // componentes, y aleja el CTA del EMBER exacto de la lámina de marca.
-      // Ver la nota al pie de src/index.css.
+      // La salida está en el tema: bg-ember-600 (CLAY-600 #8C654B) con texto
+      // blanco da 5.15:1. No se aplicó porque cambia el botón en once archivos
+      // y aleja el CTA del CLAY exacto de la lámina de marca — es decisión de
+      // marca, no técnica. Ver la nota al pie de src/index.css.
       "border-white/25 bg-ember text-ink cta-relief",
       "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px",
     ].join(" "),
