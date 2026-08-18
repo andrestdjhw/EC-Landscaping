@@ -239,7 +239,10 @@ function BidButton({ href, onClick, skin = "ember", size = "sm", className = "" 
       // el enlace navega a /contact como cualquier otro.
       data-bid-cta=""
       className={[
-        "group inline-flex items-center justify-center gap-2.5 rounded-full border-2",
+        // Sin rounded-full: el branding no tiene una sola forma redondeada,
+        // y este botón vive dentro del hero, donde la píldora desentonaba
+        // contra los bloques rectos de todas las secciones.
+        "group inline-flex items-center justify-center gap-2.5 border-2",
         "text-[0.8125rem] font-medium uppercase tracking-[0.4px]",
         "transition-all duration-200 ease-out",
         "active:translate-y-0 active:shadow-none",
@@ -722,7 +725,7 @@ export default function Navbar({
           <div className="grid grid-cols-2 gap-3">
             <a
               href={telHref}
-              className="rounded-full border-2 border-white/20 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone"
+              className="border-2 border-white/20 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone"
             >
               Call now
             </a>

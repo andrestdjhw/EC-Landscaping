@@ -367,12 +367,12 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
              son hermanos del botón— pueden reaccionar al hover. El área es la
              misma, así que la flecha del botón sigue animando igual. -->
         <span class="group relative inline-flex">
-          <span class="ec-cta-pulse absolute inset-0 rounded-full transition-opacity duration-200 group-hover:opacity-0" aria-hidden="true"></span>
+          <span class="ec-cta-pulse absolute inset-0 transition-opacity duration-200 group-hover:opacity-0" aria-hidden="true"></span>
           <span class="ec-cta-pulse ec-cta-pulse--delayed absolute inset-0 rounded-full transition-opacity duration-200 group-hover:opacity-0" aria-hidden="true"></span>
           <a
             href="<?php echo esc_url($bid_href); ?>"
             data-bid-cta
-            class="cta-relief-light relative inline-flex items-center gap-2.5 rounded-full border-2 border-white/60 bg-ember py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
+            class="cta-relief-light relative inline-flex items-center gap-2.5 border-2 border-white/60 bg-ember py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
           >
             Request a bid
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none">
@@ -432,19 +432,40 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════ 02 · BARRA DE PRUEBA ═══════════════ -->
-<!-- Se queda oscura a propósito. EMBER sobre SAND da 4.39:1, que a este
-     tamaño de cifra sobra; sobre el claro de BREEZE caería a 4.08:1 y habría
-     que repintarlas de verde o de negro — y las cifras dejarían de ser lo
-     primero que se ve. Como banda oscura bajo un hero claro cumple además una
-     segunda función: separa el hero del bloque 03, que también es claro. -->
-<section class="bg-ink lg:shrink-0">
+<!-- Cuatro bloques, no cuatro celdas iguales. En la valla ningún módulo
+     repite el color del vecino: el ritmo lo da la alternancia, no la
+     retícula. Acá la primera cifra —31 personas en la cuadrilla, el
+     diferenciador de toda la página— va sobre clay, y las otras tres sobre
+     ink. Eso convierte la barra en una composición y no en una tabla.
+
+     Se queda oscura a propósito: EMBER sobre PINE da 3.90:1, que a este
+     tamaño de cifra sobra; sobre claro caería y habría que repintar los
+     números. Y como banda oscura bajo un hero claro separa el hero del
+     bloque 03. -->
+<section class="relative bg-ink lg:shrink-0">
+
+  <!-- Remate de rayas sobre el filo superior. Es el recurso de la valla
+       girado: cierra el hero con el elemento gráfico de la marca en lugar de
+       una línea lisa. -->
+  <div class="ec-band ec-band--h absolute inset-x-0 top-0 h-1.5 opacity-40" aria-hidden="true"></div>
+
   <dl class="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
-    <?php foreach ($proof_bar as $item) : ?>
-      <div class="bg-ink px-5 py-7 sm:px-8 lg:px-10 lg:py-5">
-        <dt class="font-display text-3xl font-bold tracking-tight text-ember sm:text-4xl lg:text-[2rem]">
+    <?php foreach ($proof_bar as $i => $item) :
+      // El primer dato lleva el acento. El texto pasa a ink sobre clay:
+      // bone encima daría 2.85:1 y no se leería.
+      $ec_destacado = (0 === $i);
+      $ec_bg  = $ec_destacado ? 'bg-ember' : 'bg-ink';
+      $ec_num = $ec_destacado ? 'text-ink' : 'text-ember';
+      // Sobre clay el texto va SIN opacidad. Clay es un tono medio:
+      // ink a plena da 3.90:1 y a 75% cae a 2.76:1 — el texto de apoyo
+      // desaparece. Sobre ink sí hay margen para atenuarlo.
+      $ec_lbl = $ec_destacado ? 'text-ink' : 'text-bone/70';
+      ?>
+      <div class="<?php echo esc_attr($ec_bg); ?> px-5 py-7 sm:px-8 lg:px-10 lg:py-5">
+        <dt class="font-display text-3xl font-bold tracking-tight <?php echo esc_attr($ec_num); ?> sm:text-4xl lg:text-[2rem]">
           <?php echo esc_html($item['stat']); ?>
         </dt>
-        <dd class="mt-2 text-xs leading-relaxed text-bone/70 lg:mt-1.5">
+        <dd class="mt-2 text-xs leading-relaxed <?php echo esc_attr($ec_lbl); ?> lg:mt-1.5">
           <?php echo esc_html($item['label']); ?>
         </dd>
       </div>
@@ -455,124 +476,132 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <!-- ↑ cierra el contenedor de una pantalla que comparten hero y barra -->
 
 <!-- ═══════════════════ 03 · PARA QUIÉN CONSTRUIMOS ═══════════════════ -->
-<!-- Galería en arco, inspirada en el CircularGallery de Vue Bits.
+<!-- Marquee, no galería en arco. Las tarjetas quedan planas, alineadas y en
+     movimiento continuo.
 
-     Reimplementada con DOM y transforms CSS en lugar de WebGL, y esa no es
-     una concesión: es mejor para esta página. El original dibuja todo dentro
-     de un canvas —imágenes como texturas y los títulos como mapas de bits
-     generados a mano—, lo que significa que Google no ve una sola palabra de
-     esta sección, que las fotos no tienen alt, que no hay lazy loading y que
-     el texto no se puede seleccionar. En una sección cuyo trabajo es
-     posicionar cinco tipos de comprador, eso es caro.
+     Reusa el mismo motor [data-carousel][data-marquee] que el carrusel de
+     capacidades del bloque 05 — el que ya vive en el bloque de JavaScript al
+     pie de esta plantilla. Eso quita 211 líneas: el arco necesitaba su motor
+     para calcular radio, caída y giro por tarjeta, y nada de eso hace falta
+     cuando las tarjetas van derechas.
 
-     Con transforms el arco se ve igual y las imágenes siguen siendo <img> y
-     los títulos siguen siendo texto.
-
-     Lo único que se pierde del original es la distorsión de onda del shader
-     al arrastrar rápido. No se extraña.
-
-     Y una diferencia deliberada: el original secuestra la rueda del mouse
-     con un listener en window, así que scrollear la página mueve la galería.
-     Acá se arrastra o se usan las flechas; la rueda sigue siendo del
-     documento. -->
+     El cuerpo del copy vuelve DENTRO de cada tarjeta. En el arco vivía debajo
+     porque solo se mostraba el de la tarjeta centrada; con movimiento continuo
+     no hay una centrada, y un párrafo que cambia solo cada dos segundos es
+     ilegible. Cada tarjeta lleva lo suyo. -->
 <section id="commercial" class="relative isolate overflow-hidden bg-bone lg:flex lg:min-h-svh lg:items-start">
 
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div data-reveal class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Who we build for</p>
-      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-        You’re not buying landscaping. You’re buying a schedule that holds.
+      <h2 class="ec-shine ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+        You’re not buying landscaping.<br /><em>You’re buying a schedule that holds.</em>
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-ink/70">
         Every commercial buyer we work with is managing a different kind of risk. Here’s how we take it off your desk.
       </p>
     </div>
 
-    <div data-arcgallery data-bend="90" class="mt-12 lg:mt-16">
+    <div data-carousel data-marquee class="mt-12 lg:mt-16">
 
+      <!-- Las flechas se quedan aunque ya no hagan falta para ver el
+           contenido: son la salida para quien no puede o no quiere esperar a
+           que pase la tarjeta que le interesa. El motor las empuja un paso y
+           el movimiento retoma solo. -->
       <div class="mb-6 flex items-end justify-between gap-6">
-        <p class="max-w-md text-xs leading-relaxed text-ink/50">Drag, or use the arrows.</p>
+        <p class="max-w-md text-xs leading-relaxed text-ink/50">Five buyers, five kinds of risk.</p>
         <div class="hidden shrink-0 items-center gap-2 lg:flex">
-          <button type="button" data-arcgallery-prev aria-label="Previous buyer"
+          <button type="button" data-carousel-prev aria-label="Previous buyer"
             class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-colors duration-200 hover:bg-breeze-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M19 12H6M11 6l-6 6 6 6" /></svg>
           </button>
-          <button type="button" data-arcgallery-next aria-label="Next buyer"
+          <button type="button" data-carousel-next aria-label="Next buyer"
             class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-ink transition-colors duration-200 hover:bg-breeze-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
           </button>
         </div>
       </div>
 
-      <!-- Punto de partida: una rejilla legible con las cinco tarjetas
-           completas, párrafo incluido. El JS la convierte en arco. Sin JS
-           —o con prefers-reduced-motion— queda la rejilla, que es la que
-           lleva el argumento de la sección.
+      <!-- La pista sangra hasta el borde de la pantalla y recupera la
+           alineación con su propio padding: la tarjeta que asoma se corta
+           contra el borde del viewport, que es lo que hace legible que hay
+           más a la derecha.
 
-           Los párrafos no desaparecen al convertirse: el JS los oculta de
-           las tarjetas y muestra el de la tarjeta centrada debajo del arco.
-           El copy del bloque 03 es lo más trabajado del deck y no se cambia
-           por un efecto. -->
-      <ul data-arcgallery-track class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <?php foreach ($clusters as $i => $cluster) : ?>
-          <li data-arcgallery-item class="flex flex-col">
-            <figure class="flex flex-col">
-              <?php if (!empty($cluster['image'])) : ?>
-                <img
-                  src="<?php echo esc_url($cluster['image']); ?>"
-                  alt="<?php echo esc_attr($cluster['alt']); ?>"
-                  class="aspect-[3/4] w-full rounded-lg object-cover ring-1 ring-slate-200"
-                  loading="lazy"
-                  decoding="async"
-                  draggable="false"
-                  data-arcgallery-media
-                />
-              <?php else : ?>
-                <!-- Todavía sin foto. Panel en la paleta con el número, en
-                     lugar de un hueco gris: se ve intencional mientras
-                     llegan los archivos, y el arco se puede evaluar igual.
-                     Se borra este else cuando estén las cinco. -->
-                <div
-                  class="flex aspect-[3/4] w-full items-end justify-end rounded-lg bg-[linear-gradient(150deg,#696D56_0%,#565945_100%)] p-6 ring-1 ring-slate-200"
-                  data-arcgallery-media
-                  aria-hidden="true"
-                >
-                  <span class="font-display text-[4rem] font-bold leading-none tracking-tight text-bone/25 tabular-nums">
-                    <?php echo esc_html(str_pad((string) ((int) $i + 1), 2, '0', STR_PAD_LEFT)); ?>
-                  </span>
+           Sin scroll-snap ni scroll-smooth: pelean con un scrollLeft que se
+           reescribe en cada frame. -->
+      <ul
+        data-carousel-track
+        tabindex="0"
+        aria-label="Who we build for"
+        class="-mx-5 flex gap-6 overflow-x-auto px-5 pb-2 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10 [&::-webkit-scrollbar]:hidden"
+      >
+        <?php
+        /* Dos pasadas: la real y su copia. El bucle infinito del motor resta
+           un ciclo exacto al llegar a la mitad, y para que ese salto no se
+           vea el contenido tiene que ser idéntico. La copia va aria-hidden:
+           para un lector de pantalla los compradores son cinco, no diez. */
+        for ($ec_pass = 0; $ec_pass < 2; $ec_pass++) :
+          $ec_clone = (1 === $ec_pass);
+          foreach ($clusters as $i => $cluster) : ?>
+            <li
+              class="w-[80vw] shrink-0 sm:w-[22rem] lg:w-[24rem]"
+              <?php echo $ec_clone ? 'aria-hidden="true"' : ''; ?>
+            >
+              <!-- Bloque plano, no tarjeta: sin anillo, sin sombra, sin radio.
+                   En la valla y en la van todo es un rectángulo de color
+                   macizo contra otro, y el filete superior en clay es lo
+                   único que separa el pie del bloque de su imagen. -->
+              <article class="flex h-full flex-col overflow-hidden bg-sand">
+                <?php if (!empty($cluster['image'])) : ?>
+                  <img
+                    src="<?php echo esc_url($cluster['image']); ?>"
+                    alt="<?php echo $ec_clone ? '' : esc_attr($cluster['alt']); ?>"
+                    class="aspect-[4/3] w-full shrink-0 object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                <?php else : ?>
+                  <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#696D56_0%,#565945_100%)]" aria-hidden="true"></div>
+                <?php endif; ?>
+
+                <div class="flex flex-1 flex-col border-t-4 border-ember p-7">
+                  <h3 class="font-display text-lg font-bold leading-snug tracking-tight text-ink">
+                    <?php echo esc_html($cluster['title']); ?>
+                  </h3>
+                  <p class="mt-3 text-sm leading-relaxed text-ink/70">
+                    <?php echo esc_html($cluster['body']); ?>
+                  </p>
                 </div>
-              <?php endif; ?>
-
-              <figcaption class="mt-4 font-display text-lg font-bold leading-snug tracking-tight text-ink" data-arcgallery-title>
-                <?php echo esc_html($cluster['title']); ?>
-              </figcaption>
-            </figure>
-
-            <p class="mt-3 text-sm leading-relaxed text-ink/70" data-arcgallery-body>
-              <?php echo esc_html($cluster['body']); ?>
-            </p>
-          </li>
-        <?php endforeach; ?>
+              </article>
+            </li>
+          <?php endforeach;
+        endfor; ?>
       </ul>
-
-      <!-- Párrafo de la tarjeta centrada. Solo se usa en modo arco; en la
-           rejilla los párrafos viven dentro de cada tarjeta. -->
-      <p
-        data-arcgallery-caption
-        hidden
-        aria-live="polite"
-        class="mx-auto mt-10 max-w-2xl text-center text-base leading-relaxed text-ink/70 transition-opacity duration-200"
-      ></p>
     </div>
   </div>
 </section>
 
 <!-- ═══════════════════ 04 · PRECEDENTE INSTITUCIONAL ═══════════════════ -->
-<!-- Video a sangre. A diferencia del hero, aquí el scrim NO puede ser
-     asimétrico: las dos tarjetas de caso ocupan todo el ancho, así que la
-     mitad derecha también lleva texto. Es un velo oscuro parejo, apenas más
-     denso arriba, que garantiza el contraste caiga donde caiga el fotograma. -->
-<section id="projects" class="relative isolate overflow-hidden bg-ink text-bone lg:flex lg:min-h-svh lg:items-stretch">
+<!-- Rediseñado como composición modular sobre el video.
+
+     Antes era el patrón genérico de la página: encabezado suelto arriba y dos
+     tarjetas flotando debajo sobre un velo parejo. Ahora la sección es una
+     rejilla de bloques macizos y el video se ve POR LOS HUECOS, no por detrás
+     de tarjetas semitransparentes.
+
+     Ese cambio es el que hace que se parezca a la valla: allá el video no
+     existe, pero la lógica es la misma — módulos opacos que se tocan, y lo
+     que queda entre ellos es lo que deja pasar el fondo. Un bloque
+     translúcido encima de un video es lenguaje de interfaz; un bloque opaco
+     con una ventana al lado es lenguaje de cartel.
+
+     El scrim baja de 0.92 a 0.55: ya no tiene que garantizar contraste bajo
+     todo el texto, porque el texto vive dentro de bloques opacos. Solo tiene
+     que impedir que el video compita, y con menos velo el metraje se ve más.
+
+     Deliberadamente NO lleva ec-shine: es la única sección con dos videos de
+     por medio y el destello sobre metraje en movimiento se pierde. -->
+<section id="projects" class="relative isolate overflow-hidden bg-ink text-bone lg:flex lg:min-h-svh lg:items-center">
 
   <video
     data-bg-video
@@ -588,62 +617,117 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
   ></video>
 
   <div
-    class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(47,52,45,0.92)_0%,rgba(47,52,45,0.86)_45%,rgba(47,52,45,0.8)_100%)]"
+    class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(47,52,45,0.6)_0%,rgba(47,52,45,0.5)_50%,rgba(47,52,45,0.65)_100%)]"
     aria-hidden="true"
   ></div>
 
-  <!-- Columna: el encabezado ocupa lo suyo y la rejilla de casos se queda
-       con todo el alto sobrante. Eso es lo que hace que las tarjetas lleguen
-       hasta abajo en lugar de dejar media pantalla de video vacía. -->
-  <div class="relative flex w-full flex-col px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="max-w-3xl">
-      <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember">Track record</p>
-      <h2 class="ec-shine ec-shine--light font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
-        Brands that audit every vendor already hired us.
-      </h2>
-      <p class="mt-5 text-lg leading-relaxed text-bone/75">
-        Two institutional brands with corporate procurement standards reviewed our licensing, insurance and capacity — and paid us to build. That’s not a testimonial. That’s a precedent.
-      </p>
-    </div>
+  <div class="relative w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
 
-    <div class="mt-12 grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-2">
-      <?php foreach ($cases as $case) : ?>
-        <!-- Mismo tratamiento de superficie que la barra flotante del navbar:
-             rounded-lg + ring-1 ring-white/10 + shadow-lg shadow-ink/10 +
-             backdrop-blur-md. El fondo se queda en ink/55 y no en ink/95
-             para que el video siga leyéndose por detrás de la tarjeta. -->
-        <article class="flex flex-col overflow-hidden rounded-lg bg-ink/55 shadow-lg shadow-ink/10 ring-1 ring-white/10 backdrop-blur-md">
+    <!-- gap-px sin fondo: acá la línea entre módulos ES el video. En las
+         otras rejillas de la página el hueco muestra un ink al 15%; en esta
+         muestra el metraje, y eso convierte el video en el material que une
+         los bloques en lugar de en un telón detrás de ellos. -->
+    <div class="grid gap-px lg:grid-cols-6">
+
+      <!-- ── Encabezado, como bloque claro ──
+           Es el único módulo claro de una sección enteramente oscura, y esa
+           es la razón: en la valla el bloque de mayor jerarquía no es el que
+           repite el color de fondo, es el que lo rompe. Contra los cuatro
+           módulos en ink y el video detrás, el claro se lee primero.
+
+           Todo el texto se invierte con él. Un cambio de superficie arrastra
+           el color del contenido — dejar el eyebrow en ember-300 sobre claro
+           daría 1.79:1 y el titular en bone directamente no se vería. -->
+      <div class="relative flex flex-col justify-between bg-breeze-100 p-8 lg:col-span-2 lg:row-span-2 lg:p-10">
+        <div>
+          <!-- ember-600 y no ember-300: sobre claro el paso 300 da 1.79:1.
+               El 600 existe justamente para esto y da 4.50:1. -->
+          <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-600">Track record</p>
+          <h2 class="ec-shine ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+            Brands that audit every vendor <em>already hired us.</em>
+          </h2>
+          <p class="mt-6 text-base leading-relaxed text-ink/70">
+            Two institutional brands with corporate procurement standards reviewed our licensing, insurance and capacity — and paid us to build. That’s not a testimonial. That’s a precedent.
+          </p>
+        </div>
+
+        <!-- Banda de rayas al pie, como el faldón de la van. En ink: el
+             default de la clase es LINEN y sobre este bloque no se vería. -->
+        <div class="ec-band ec-band--h ec-band--ink mt-10 h-1.5 opacity-30" aria-hidden="true"></div>
+      </div>
+
+      <?php
+      /* Cada caso son DOS módulos: la foto y el texto, separados. Es lo que
+         hace la valla —la imagen es un rectángulo y el copy es otro— y lo
+         contrario de una tarjeta, donde la foto va cosida arriba del texto.
+
+         Se INTERCALAN: el primer caso pone la foto a la izquierda y el texto
+         a la derecha, el segundo al revés. Antes las dos fotos caían en la
+         misma columna y los dos textos en la otra, y eso volvía a leerse como
+         tabla — dos filas con las mismas celdas.
+
+         Alternar hace que la retícula se lea como composición: es la lógica
+         de la valla, donde ningún módulo está donde estaría si el sistema
+         fuera una tabla.
+
+         El orden se invierte en el DOM, no con `order`. Con `order` el lector
+         de pantalla y el recorrido de Tab siguen el orden del código, así que
+         en el segundo caso oiría la foto antes que su propio encabezado. */
+
+      // Markup de cada módulo, resuelto una vez y colocado en el orden que
+      // corresponda. Evita duplicar veinte líneas por invertir dos bloques.
+      $ec_render_foto = function ($case) {
+        ?>
+        <div class="relative min-h-[16rem] bg-ink lg:col-span-2 lg:min-h-[18rem]">
           <?php if (!empty($case['image'])) : ?>
-            <!-- La imagen absorbe el alto sobrante (flex-1 + min-h-0) y el
-                 texto conserva el suyo. Sin min-h-0 la imagen empujaría la
-                 tarjeta más allá de la sección en vez de recortarse. -->
             <img
               src="<?php echo esc_url($case['image']); ?>"
               alt="<?php echo esc_attr($case['alt']); ?>"
-              class="h-52 w-full shrink-0 object-cover lg:h-auto lg:min-h-[12rem] lg:flex-1 lg:shrink"
+              class="absolute inset-0 h-full w-full object-cover"
               loading="lazy"
               decoding="async"
             />
           <?php endif; ?>
+        </div>
+        <?php
+      };
 
-          <div class="p-8">
-            <p class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ember">
-              <?php echo esc_html($case['kicker']); ?>
-            </p>
-            <h3 class="mt-4 font-display text-xl leading-snug font-bold tracking-tight text-bone">
-              <?php echo esc_html($case['title']); ?>
-            </h3>
-            <p class="mt-4 text-sm leading-relaxed text-bone/70">
-              <?php echo esc_html($case['body']); ?>
-            </p>
-          </div>
-        </article>
-      <?php endforeach; ?>
+      $ec_render_texto = function ($case) {
+        ?>
+        <div class="flex flex-col justify-center bg-ink p-8 lg:col-span-2 lg:p-10">
+          <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">
+            <?php echo esc_html($case['kicker']); ?>
+          </p>
+          <h3 class="mt-4 font-display text-xl leading-snug font-bold tracking-tight text-bone">
+            <?php echo esc_html($case['title']); ?>
+          </h3>
+          <p class="mt-4 text-base leading-relaxed text-bone/80">
+            <?php echo esc_html($case['body']); ?>
+          </p>
+        </div>
+        <?php
+      };
+
+      foreach ($cases as $i => $case) :
+        if (0 === $i % 2) {
+          $ec_render_foto($case);
+          $ec_render_texto($case);
+        } else {
+          $ec_render_texto($case);
+          $ec_render_foto($case);
+        }
+      endforeach; ?>
+
+      <!-- Bloque de cierre en clay. Lleva la línea del NDA, que antes iba
+           suelta bajo la rejilla como una nota al pie. Convertida en módulo
+           deja de leerse como advertencia legal y pasa a ser lo que es: la
+           invitación a pedir los nombres. -->
+      <div class="flex items-center bg-ember p-8 lg:col-span-6 lg:p-10">
+        <p class="text-base leading-relaxed text-ink">
+          Client names and contract values available on request under NDA.
+        </p>
+      </div>
     </div>
-
-    <p class="mt-8 text-xs text-bone/70">
-      Client names and contract values available on request under NDA.
-    </p>
   </div>
 </section>
 
@@ -652,8 +736,8 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
     <div class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Capabilities</p>
-      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-        What we self-perform.
+      <h2 class="ec-shine ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+        What we <em>self-perform.</em>
       </h2>
       <p class="mt-5 text-lg leading-relaxed text-ink/70">
         Most landscape contractors in this corridor subcontract the heavy work and manage it from a truck. We hold the license, own the equipment and put our own people on your site.
@@ -733,7 +817,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
               class="w-[80vw] shrink-0 sm:w-[23rem] lg:w-[25rem]"
               <?php echo $ec_clone ? 'aria-hidden="true"' : ''; ?>
             >
-              <article class="flex h-full flex-col overflow-hidden rounded-lg bg-bone ring-1 ring-slate-200 transition-shadow duration-300 hover:shadow-xl hover:shadow-ink/10 motion-reduce:transition-none">
+              <article class="flex h-full flex-col overflow-hidden bg-sand">
 
                 <?php if (!empty($item['image'])) : ?>
                   <img
@@ -750,7 +834,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                   <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#696D56_0%,#565945_100%)]" aria-hidden="true"></div>
                 <?php endif; ?>
 
-                <div class="flex flex-1 flex-col border-t-2 border-forest p-7">
+                <div class="flex flex-1 flex-col border-t-4 border-ember p-7">
                   <h3 class="font-display text-lg font-bold tracking-tight text-ink">
                     <?php echo esc_html($item['title']); ?>
                   </h3>
@@ -768,138 +852,202 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 07 · CÓMO TRABAJAMOS ═══════════════════ -->
-<section class="bg-bone lg:flex lg:min-h-svh lg:items-start">
-  <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="max-w-3xl">
-      <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Process</p>
-      <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-        How a bid becomes a finished site.
-      </h2>
-    </div>
+<!-- Rediseñado como composición modular, que es el lenguaje de las dos piezas
+     de marca: rectángulos de distinto tamaño encajados entre sí, donde el
+     color, la foto, el texto y el vacío son el mismo tipo de bloque.
 
-    <ol class="mt-12 flex flex-col">
-      <?php foreach ($process as $step) : ?>
-        <li class="grid gap-4 border-t border-slate-200 py-7 sm:grid-cols-[4rem_minmax(0,16rem)_minmax(0,1fr)] sm:gap-8">
-          <span class="font-display text-2xl font-bold tracking-tight text-ember-600-600 tabular-nums">
-            <?php echo esc_html($step['n']); ?>
+     Antes era una lista con filetes — el elemento más genérico de la página.
+     Ahora los cinco pasos son cinco bloques macizos sobre una rejilla de 6
+     columnas, y el encabezado ocupa dos de esas celdas en lugar de vivir
+     arriba, suelto. Igual que en la valla, donde el titular es un bloque más
+     y no una capa flotando encima.
+
+     El reparto NO es decorativo. Los pasos 1 y 2 —walkthrough y bid— son los
+     que decide el comprador y ocupan el doble de ancho; los tres de ejecución
+     van a un tercio cada uno. La retícula cuenta la misma jerarquía que el
+     copy.
+
+     El gap-px sobre bg-ink es lo que dibuja los filetes: los bloques se tocan
+     y la línea es el fondo asomando, como en el cartel. -->
+<section class="bg-bone lg:flex lg:min-h-svh lg:items-center">
+  <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
+
+    <div class="grid gap-px bg-ink/15 lg:grid-cols-6">
+
+      <!-- Encabezado como bloque, no como capa. Ocupa dos celdas y se apoya
+           abajo: el titular arranca donde arrancan los pasos. -->
+      <div class="flex flex-col justify-end bg-ink p-8 text-bone lg:col-span-2 lg:row-span-2 lg:p-10">
+        <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">Process</p>
+        <h2 class="ec-shine ec-shine--light ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
+          How a bid becomes <em>a finished site.</em>
+        </h2>
+        <!-- Banda de rayas al pie del bloque, como el faldón de la van. -->
+        <div class="ec-band ec-band--h mt-8 h-1.5 opacity-40" aria-hidden="true"></div>
+      </div>
+
+      <?php
+      /* Superficie por posición en la retícula, no por rol.
+
+         Antes alternaba por significado —sand para los pasos de decisión,
+         breeze para los de ejecución— y eso dejaba 01 y 02 del mismo color,
+         pegados uno al otro. En la valla ningún módulo repite el color de su
+         vecino: el ritmo lo da la alternancia, y sin ella la rejilla vuelve a
+         leerse como tabla.
+
+         El tablero, con el encabezado ocupando las dos primeras celdas de
+         las filas 1 y 2:
+
+           [ ink  ][ 01 sand   ][ 02 breeze ]
+           [ ink  ][ 03 breeze ][ 04 sand   ]
+           [ 05 sand ][ clay, 4 columnas    ]
+
+         Cada bloque difiere de su vecino de al lado Y del de arriba. */
+      $ec_bg_por_paso = array('bg-sand', 'bg-breeze-100', 'bg-breeze-100', 'bg-sand', 'bg-sand');
+
+      foreach ($process as $i => $step) :
+        $ec_col = 'lg:col-span-2';
+        $ec_bg  = isset($ec_bg_por_paso[$i]) ? $ec_bg_por_paso[$i] : 'bg-sand';
+        ?>
+        <div class="<?php echo esc_attr($ec_col . ' ' . $ec_bg); ?> flex flex-col p-8 lg:p-10">
+          <span class="font-display text-5xl font-bold leading-none tracking-tight text-ember tabular-nums">
+            <?php echo esc_html(str_pad($step['n'], 2, '0', STR_PAD_LEFT)); ?>
           </span>
-          <h3 class="font-display text-lg font-bold tracking-tight text-ink">
+          <h3 class="mt-6 font-display text-lg font-bold leading-snug tracking-tight text-ink">
             <?php echo esc_html($step['title']); ?>
           </h3>
-          <p class="text-sm leading-relaxed text-ink/70">
+          <p class="mt-3 text-sm leading-relaxed text-ink/70">
             <?php echo esc_html($step['body']); ?>
           </p>
-        </li>
+        </div>
       <?php endforeach; ?>
-    </ol>
+
+      <!-- Bloque liso en clay, cerrando la fila entera.
+
+           En la valla hay un rectángulo sin contenido y no es un descuido: el
+           vacío es un bloque más del sistema y es lo que impide que la
+           rejilla se lea como tabla.
+
+           Ocupa cuatro columnas y no dos porque con dos quedaba una celda
+           suelta al final de la fila, y esa celda dejaba ver el fondo de la
+           rejilla como un rectángulo gris — un hueco, no un módulo.
+
+           Se oculta por debajo de lg, donde no hay retícula que cerrar. -->
+      <div class="hidden bg-ember lg:block lg:col-span-4" aria-hidden="true"></div>
+    </div>
   </div>
 </section>
 
 <!-- ═══════════════════ 08 · CREDENCIALES ═══════════════════ -->
-<!-- Hallmark · redesign · seccion: credenciales · genre: editorial
-     fingerprint: masthead de doble filete · ledger 3x3 · banda oscura plana ·
-     imagen como estampilla · reveal: ninguno
-     pre-emit critique: P5 H4 E4 S5 R5 V5
+<!-- Rediseñada como composición modular, igual que 02, 04, 07 y 09.
 
-     El problema no era la foto ni la tabla: era que esta sección se parecía a
-     las otras siete. Toda la página abre con eyebrow, titular y lede apilados
-     a la izquierda dentro de una tarjeta redondeada con bisel — y Credentials
-     es justamente la que no debería leerse como un bloque de marketing. El
-     copy lo dice: "Boring for everyone else. Decisive for you."
+     Sale el estampado. Era un tartán de escala grande usado como textura de
+     fondo, y en las dos piezas de marca ese recurso nunca cubre una
+     superficie: remata un borde. Acá competía con la retícula de credenciales
+     —dos cuadrículas superpuestas— y para no romper el contraste había que
+     dejarlo al 14%, o sea casi invisible. Un elemento que solo funciona
+     cuando no se ve no está aportando nada.
 
-     Cuatro decisiones, en orden de cuánto pesan:
+     Lo que ocupa su lugar es el propio sistema de bloques. Las nueve
+     credenciales dejan de ser filas de una tabla y pasan a ser nueve módulos
+     de la misma retícula, con el encabezado y el premio como dos bloques más
+     — uno de texto y otro de imagen, exactamente como en la valla.
 
-     1. Banda oscura y plana, sin tarjeta. Después de Projects la página son
-        seis secciones claras seguidas. UMBER devuelve la alternancia y le da
-        a esta el peso que el copy reclama. Y al no ser una tarjeta deja de
-        competir con las otras siete que sí lo son.
+     El fondo de sección es OLIVE y la rejilla va con gap-px SIN color propio:
+     la línea entre módulos es la superficie asomando. Es lo mismo que hace el
+     bloque 04 con el video, y lo que evita tener que elegir un color de
+     filete que no está en la paleta. -->
+<section id="credentials" class="bg-umber lg:flex lg:min-h-svh lg:items-center">
+  <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
 
-     2. Masthead en lugar de encabezado. Doble filete arriba, entidad a la
-        izquierda y número de licencia a la derecha, en versalitas. Es como
-        empieza un documento, no una landing.
+    <div class="grid gap-px lg:grid-cols-6">
 
-     3. Ledger 3x3. Nueve credenciales entran exactas en tres columnas. Las
-        etiquetas van sobre los valores en lugar de al lado: en una retícula
-        de tres, una tabla etiqueta|valor deja media línea en blanco por celda.
-
-     4. Sin reveal ni destello. Un documento no entra animándose. Es la única
-        sección de la página que no se mueve, y esa quietud es parte de lo que
-        afirma.
-
-     Contraste verificado sobre la superficie umber (ahora OLIVE #696D56, un
-     tono medio y no un oscuro): bone a plena da 4.68:1 y cualquier opacidad
-     por debajo rompe AA, así que acá el texto va sin opacidad y las reglas
-     suben a white/25. -->
-<section id="credentials" class="bg-umber text-bone">
-  <div class="w-full px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
-
-    <!-- ── Masthead ──
-         Doble filete arriba y simple abajo: la asimetría es la que hace que
-         se lea como cabecera de documento y no como un separador cualquiera. -->
-    <div class="border-b border-t-2 border-white/25 py-3">
-      <div class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-1">
-        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">
-          Credentials · EC Landscaping LLC
-        </p>
-        <!-- overflow-wrap:anywhere y no break-all: a 320px el número de
-             licencia es lo único que puede desbordar la fila. -->
-        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-bone tabular-nums [overflow-wrap:anywhere]">
-          Utah 1106462255001 · S330
-        </p>
-      </div>
-    </div>
-
-    <!-- ── Titular a dos columnas ──
-         El lede deja de ir debajo del titular y pasa al costado. Es el mismo
-         texto, pero la disposición ya no repite la de las otras secciones —
-         que es exactamente lo que hacía que esta se sintiera genérica. -->
-    <div class="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
-      <h2 class="font-display text-3xl leading-[1.1] font-bold tracking-tight text-bone [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
-        The page your compliance team is going to ask for.
-      </h2>
-      <p class="text-base leading-relaxed text-bone lg:pb-2">
-        Boring for everyone else. Decisive for you.
-      </p>
-    </div>
-
-    <!-- ── Ledger ──
-         Nueve credenciales, tres columnas, filetes horizontales continuos.
-         Las celdas se tocan (sin gap) para que la regla inferior cruce la
-         fila entera; la separación entre columnas la da el padding y la
-         hairline vertical de lg.
-
-         minmax(0,1fr) y no 1fr: con 1fr una celda de contenido largo estira
-         la columna y rompe la retícula. -->
-    <dl class="mt-11 grid grid-cols-[minmax(0,1fr)] border-t border-white/25 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))]">
-      <?php foreach ($credentials as $row) : ?>
-        <div class="border-b border-white/25 py-4 pr-6 lg:[&:nth-child(3n)]:border-l lg:[&:nth-child(3n)]:border-white/25 lg:[&:nth-child(3n)]:pl-8 lg:[&:nth-child(3n+2)]:border-l lg:[&:nth-child(3n+2)]:border-white/25 lg:[&:nth-child(3n+2)]:pl-8">
-          <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone">
-            <?php echo esc_html($row['label']); ?>
-          </dt>
-          <dd class="mt-2 text-sm leading-relaxed text-bone tabular-nums [overflow-wrap:anywhere]">
-            <?php echo esc_html($row['value']); ?>
-          </dd>
+      <!-- ── Encabezado ──
+           El número de licencia ya no va acá: era el masthead del diseño
+           anterior y repetía la primera credencial de la tabla. En un sistema
+           de módulos, decir dos veces lo mismo cuesta un bloque. -->
+      <div class="flex flex-col justify-between bg-ink p-8 text-bone lg:col-span-2 lg:row-span-2 lg:p-10">
+        <div>
+          <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">Credentials</p>
+          <h2 class="ec-shine ec-shine--light ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
+            The page your compliance team <em>is going to ask for.</em>
+          </h2>
+          <p class="mt-6 text-base leading-relaxed text-bone/80">
+            Boring for everyone else. Decisive for you.
+          </p>
         </div>
-      <?php endforeach; ?>
-    </dl>
+        <div class="ec-band ec-band--h mt-10 h-1.5 opacity-40" aria-hidden="true"></div>
+      </div>
 
-    <!-- ── Estampilla ──
-         El premio al pie, del tamaño de un sello, junto a la línea que dice
-         qué es. Deja de ser media sección y pasa a ser lo que un documento
-         lleva abajo: una marca que lo respalda.
+      <?php
+      /* Superficie por posición, no por contenido. Las ocho primeras
+         credenciales caen en una retícula de dos columnas a la derecha del
+         encabezado, y la novena abre la última fila.
 
-         El alt describe la placa; el texto de al lado no lo repite. -->
-    <div class="mt-10 flex flex-wrap items-center gap-6 border-t border-white/25 pt-7">
-      <img
-        src="<?php echo esc_url($ec_uploads['baseurl'] . '/2026/07/ec_landscaping_award.png'); ?>"
-        alt="BusinessRate Best of 2026 Award Winner plaque"
-        class="w-32 shrink-0 rounded object-contain ring-1 ring-white/25 sm:w-40 lg:w-48"
-        loading="lazy"
-        decoding="async"
-      />
-      <div>
-        <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-bone">Recognition</p>
-        <p class="mt-1 text-sm leading-relaxed text-bone">
+         El damero sale de (fila + columna): así ningún módulo repite el color
+         del de al lado ni el del de arriba, que es la regla que gobierna toda
+         la página desde el bloque 07. */
+      foreach ($credentials as $i => $row) :
+        if ($i < 8) {
+          $ec_bg = ((intdiv($i, 2) + ($i % 2)) % 2 === 0) ? 'bg-sand' : 'bg-breeze-100';
+        } else {
+          // La novena va debajo del bloque del premio, que es una imagen:
+          // no hay color arriba con el que pueda chocar.
+          $ec_bg = 'bg-sand';
+        }
+        ?>
+        <div class="<?php echo esc_attr($ec_bg); ?> p-7 lg:col-span-2 lg:p-8">
+          <dl>
+            <!-- Mismo tratamiento que los kickers de Track record: 0.68rem,
+                 tracking 0.18em y color de acento. Las dos secciones son
+                 bloques del mismo sistema y deben leerse igual.
+
+                 En ember-800 y no en el 600 de Track record: allá el kicker
+                 vive sobre un solo fondo, acá cada módulo cae sobre sand o
+                 sobre breeze-100 según su posición en el damero. El 600 da
+                 3.64:1 sobre sand y el 700 tampoco llega; el 800 pasa en las
+                 dos (4.61:1 y 6.23:1). -->
+            <dt class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-800">
+              <?php echo esc_html($row['label']); ?>
+            </dt>
+            <!-- El valor en display bold, como los títulos de caso de Track
+                 record. text-lg y no text-xl: "1106462255001 · classification
+                 S330" es el valor más largo y a xl parte en tres líneas. -->
+            <dd class="mt-4 font-display text-lg leading-snug font-bold tracking-tight text-ink tabular-nums [overflow-wrap:anywhere]">
+              <?php echo esc_html($row['value']); ?>
+            </dd>
+          </dl>
+        </div>
+
+        <?php
+        /* El premio se inserta después de la cuarta credencial, donde arranca
+           la tercera fila de la retícula. Va como bloque de imagen a sangre,
+           no como estampilla al pie: en la valla la foto es un módulo del
+           mismo sistema que el texto, con el mismo peso.
+
+           object-contain y no cover: es un objeto, y recortarlo lo mutila.
+           El fondo ink cubre lo que sobra de la caja. */
+        if (3 === $i) : ?>
+          <div class="relative flex min-h-[18rem] items-center justify-center bg-ink p-8 lg:col-span-2 lg:row-span-2 lg:min-h-0">
+            <img
+              src="<?php echo esc_url($ec_uploads['baseurl'] . '/2026/07/ec_landscaping_award.png'); ?>"
+              alt="BusinessRate Best of 2026 Award Winner plaque"
+              class="max-h-[22rem] w-auto max-w-full object-contain"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        <?php endif;
+      endforeach; ?>
+
+      <!-- ── Cierre en clay ──
+           Lleva la línea del premio, que antes era una estampilla con su
+           texto al pie. Como módulo, el reconocimiento queda a la altura de
+           las credenciales en lugar de ser una nota agregada al final. -->
+      <div class="flex flex-col justify-center bg-ember p-7 lg:col-span-4 lg:p-8">
+        <!-- Sobre clay la etiqueta se queda en ink: ember-800 encima da
+             1.58:1. Es la excepción del sistema y por eso está anotada. -->
+        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ink">Recognition</p>
+        <p class="mt-4 font-display text-lg leading-snug font-bold tracking-tight text-ink">
           BusinessRate Best of 2026 — Landscaper
         </p>
       </div>
@@ -908,107 +1056,124 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 </section>
 
 <!-- ═══════════════════ 09 · ÁREA DE SERVICIO ═══════════════════ -->
-<section id="service-area" class="bg-bone lg:flex lg:min-h-svh lg:items-start">
+<!-- Rediseñado como composición modular. Antes eran dos columnas con el mapa
+     y las listas apiladas dentro; ahora cada pieza es un bloque de la misma
+     retícula: el titular, el mapa, los condados, las ciudades, el dato del
+     patio y un bloque de color sin contenido.
+
+     Es la estructura de la valla: rectángulos de tamaños distintos que se
+     tocan, uno de ellos con foto, uno liso, y el texto ocupando los demás.
+     La foto —acá el mapa— no es un adorno al costado, es una celda más.
+
+     Y la información sube de jerarquía al hacerse bloque: las dos distancias
+     que definen la promesa comercial dejan de ser una fila de fichas al pie
+     y pasan a ser un bloque en clay, que es el único uso de ese color en la
+     sección. -->
+<section id="service-area" class="bg-bone lg:flex lg:min-h-svh lg:items-center">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-16">
 
-      <!-- ── Columna izquierda: la promesa y su diagrama ── -->
-      <div>
-        <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Service area</p>
-        <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-          Where we work.
+    <?php
+    /* El mapa se arma de la misma cadena de dirección que el NAP del footer.
+       Escrita una vez acá y derivadas las dos URLs: si mañana cambia la
+       dirección, no queda un mapa apuntando a la anterior.
+
+       output=embed es la forma sin API key. */
+    $ec_map_query = '3754 N Higley Rd Suite 2, Ogden, UT 84404';
+    $ec_map_embed = 'https://www.google.com/maps?q=' . rawurlencode($ec_map_query) . '&output=embed';
+    $ec_map_href  = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($ec_map_query);
+    ?>
+
+    <div class="grid gap-px bg-ink/15 lg:grid-cols-6">
+
+      <!-- ── Titular ── -->
+      <div class="flex flex-col justify-end bg-ink p-8 text-bone lg:col-span-2 lg:p-10">
+        <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">Service area</p>
+        <h2 class="ec-shine ec-shine--light ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
+          Where <em>we work.</em>
         </h2>
-        <p class="mt-5 text-base leading-relaxed text-ink/70">
-          50 miles from our Ogden yard, and up to 90 miles for large commercial installations. If your project sits outside that line and the scope justifies the drive, ask us anyway.
-        </p>
-
-        <?php
-        /* El mapa se arma de la misma cadena de dirección que el NAP del
-           footer. Escrita una vez acá y derivadas las dos URLs: si mañana
-           cambia la dirección, no queda un mapa apuntando a la anterior.
-
-           output=embed es la forma sin API key. Sirve para un mapa de lugar
-           como este; si en algún momento hace falta controlar zoom, marcadores
-           o estilo, ahí sí toca Maps Embed API y su clave. */
-        $ec_map_query = '3754 N Higley Rd Suite 2, Ogden, UT 84404';
-        $ec_map_embed = 'https://www.google.com/maps?q=' . rawurlencode($ec_map_query) . '&output=embed';
-        $ec_map_href  = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($ec_map_query);
-        ?>
-
-        <!-- Marco del mapa. El iframe va en absolute dentro de un contenedor
-             con proporción fija: así el alto queda reservado antes de que
-             cargue y la sección no salta cuando aparece.
-
-             loading=lazy no es cosmético — sin eso el iframe arrastra el
-             JavaScript de Maps en la carga inicial de una página que ya trae
-             dos videos. -->
-        <div class="relative mt-10 aspect-[4/3] w-full overflow-hidden rounded-lg bg-ink/5 ring-1 ring-slate-200 sm:aspect-[3/2]">
-          <iframe
-            src="<?php echo esc_url($ec_map_embed); ?>"
-            title="Map showing EC Landscaping at 3754 N Higley Rd, Suite 2, Ogden, Utah"
-            class="absolute inset-0 h-full w-full border-0"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            allowfullscreen
-          ></iframe>
-        </div>
-
-        <!-- Las dos distancias siguen siendo información que el mapa no da:
-             muestra dónde está el patio, no hasta dónde llega la cuadrilla. -->
-        <dl class="mt-6 flex flex-wrap gap-x-10 gap-y-4 text-sm">
-          <div>
-            <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/45">Yard</dt>
-            <dd class="mt-1 text-ink">
-              <a
-                href="<?php echo esc_url($ec_map_href); ?>"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-forest"
-              >3754 N Higley Rd, Ogden</a>
-            </dd>
-          </div>
-          <div>
-            <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/45">Standard radius</dt>
-            <dd class="mt-1 tabular-nums text-ink">50 miles</dd>
-          </div>
-          <div>
-            <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/45">Large installs</dt>
-            <dd class="mt-1 tabular-nums text-ink">Up to 90 miles</dd>
-          </div>
-        </dl>
       </div>
 
-      <!-- ── Columna derecha: dónde, en dos niveles ──
-           Los condados van en tipografía display y las ciudades en fichas
-           debajo. La jerarquía no es decorativa: un GC piensa por condado
-           —permisos, distrito de agua, jurisdicción— y un property manager
-           piensa por ciudad. El bloque responde a los dos sin repetirse. -->
-      <div>
-        <h3 class="mb-5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Counties served</h3>
-        <ul class="border-t border-slate-200">
+      <!-- ── Mapa: bloque de imagen, no columna ──
+           El iframe va en absolute dentro de una celda con proporción fija,
+           así el alto queda reservado antes de que cargue. loading=lazy no es
+           cosmético: sin eso arrastra el JavaScript de Maps en la carga
+           inicial de una página que ya trae dos videos. -->
+      <!-- El alto se fija acá y no se deja a la rejilla. Sin min-h propio,
+           esta celda toma el alto de su fila, y esa fila la manda el bloque
+           del titular de al lado — que mide lo que miden tres líneas de
+           texto. El mapa quedaba como una franja de 230px: se veía el
+           encuadre pero no el contexto, y los controles y la atribución de
+           Google se apretaban contra los bordes.
+
+           26rem le da al mapa proporción de mapa. De paso estira el bloque
+           del titular, que va con justify-end y apoya el texto abajo — como
+           el bloque de encabezado del proceso. -->
+      <div class="relative min-h-[20rem] bg-ink lg:col-span-4 lg:min-h-[26rem]">
+        <iframe
+          src="<?php echo esc_url($ec_map_embed); ?>"
+          title="Map showing EC Landscaping at 3754 N Higley Rd, Suite 2, Ogden, Utah"
+          class="absolute inset-0 h-full w-full border-0"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen
+        ></iframe>
+      </div>
+
+      <!-- ── Las dos distancias, en clay ──
+           Único uso del terracota en la sección. Es la promesa comercial
+           —hasta dónde llega la cuadrilla— y el mapa no la dice: muestra
+           dónde está el patio, no su alcance. -->
+      <div class="bg-ember p-8 text-ink lg:col-span-2 lg:p-10">
+        <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink">Radius</p>
+        <p class="mt-4 font-display text-4xl font-bold leading-none tracking-tight tabular-nums">50 mi</p>
+        <p class="mt-2 text-sm leading-relaxed text-ink">Standard service radius from our Ogden yard.</p>
+        <p class="mt-6 font-display text-2xl font-bold leading-none tracking-tight tabular-nums">Up to 90</p>
+        <p class="mt-2 text-sm leading-relaxed text-ink">For large commercial installations. Outside that line, ask us anyway.</p>
+      </div>
+
+      <!-- ── Condados ──
+           En tipografía display y no en lista: un GC piensa por condado
+           —permisos, distrito de agua, jurisdicción— y es el dato que más
+           pesa de esta sección. -->
+      <div class="bg-sand p-8 lg:col-span-2 lg:p-10">
+        <p class="mb-6 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Counties served</p>
+        <ul class="flex flex-col gap-3">
           <?php foreach ($service_counties as $county) : ?>
-            <li class="flex items-baseline justify-between gap-6 border-b border-slate-200 py-4">
-              <span class="font-display text-2xl font-bold tracking-tight text-ink sm:text-[1.75rem]">
-                <?php echo esc_html($county); ?>
-              </span>
-              <span class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/40">County · Utah</span>
+            <li class="font-display text-2xl font-bold leading-none tracking-tight text-ink">
+              <?php echo esc_html($county); ?>
             </li>
           <?php endforeach; ?>
         </ul>
+      </div>
 
-        <h3 class="mb-5 mt-12 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Core cities</h3>
-        <ul class="flex flex-wrap gap-2">
-          <?php foreach ($service_cities as $city) : ?>
-            <li class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-ink">
-              <?php echo esc_html($city); ?>
-            </li>
-          <?php endforeach; ?>
-        </ul>
+      <!-- ── Ciudades y el patio ──
+           Un property manager piensa por ciudad, así que las dos escalas
+           conviven pero en bloques distintos. -->
+      <div class="flex flex-col justify-between bg-breeze-100 p-8 lg:col-span-2 lg:p-10">
+        <div>
+          <p class="mb-4 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Core cities</p>
+          <ul class="flex flex-wrap gap-x-5 gap-y-2">
+            <?php foreach ($service_cities as $city) : ?>
+              <li class="text-base text-ink"><?php echo esc_html($city); ?></li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
 
-        <p class="mt-8 text-sm text-ink/60">
-          Not on the list? Call the yard —
-          <a href="tel:+13852403907" class="font-medium text-ink underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-forest">(385) 240-3907</a>
-        </p>
+        <div class="mt-8 border-t border-ink/15 pt-6">
+          <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Yard</p>
+          <p class="mt-2 text-sm text-ink">
+            <a
+              href="<?php echo esc_url($ec_map_href); ?>"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-forest"
+            >3754 N Higley Rd, Ogden</a>
+          </p>
+          <p class="mt-3 text-sm text-ink/70">
+            Not on the list? Call the yard —
+            <a href="tel:+13852403907" class="font-medium text-ink underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-forest">(385) 240-3907</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -1018,7 +1183,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <?php if (!empty($reviews)) : ?>
   <section class="bg-breeze-100 lg:flex lg:min-h-svh lg:items-start">
     <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-      <h2 class="ec-shine max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+      <h2 class="ec-shine ec-mixed max-w-3xl font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         <?php echo esc_html($review_summary['rating']); ?> stars.
         <?php echo esc_html($review_summary['count']); ?> reviews. And the crews get named.
       </h2>
@@ -1049,8 +1214,8 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
            se estire y anule el sticky. -->
       <div class="lg:sticky lg:top-[calc(var(--header-offset)+3rem)] lg:self-start">
         <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">FAQ</p>
-        <h2 class="ec-shine font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
-          Questions estimators actually ask.
+        <h2 class="ec-shine ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
+          Questions estimators <em>actually ask.</em>
         </h2>
 
         <!-- La página ya no tiene bloque de CTA final, así que este es el
@@ -1391,218 +1556,6 @@ $faq_schema = array(
       }
 
       applyMotionPreference();
-    });
-  })();
-
-  (function () {
-    /* Galería en arco — DOM y transforms, sin WebGL.
-
-       La geometría es la misma del CircularGallery: cada elemento se coloca
-       sobre la circunferencia de un círculo enorme cuyo punto más bajo pasa
-       por el centro del contenedor.
-
-         H = mitad del ancho visible
-         B = cuánto baja el arco en el borde   (data-bend, en píxeles)
-         R = (H² + B²) / 2B                    (radio del círculo)
-         y = R − √(R² − x²)                    (caída a distancia x)
-         θ = −signo(x) · asin(x / R)           (giro tangente al arco)
-
-       B en píxeles y no en unidades de viewport como el original: acá el
-       valor se puede leer como "la tarjeta del borde baja 90px", que es una
-       frase que significa algo cuando alguien lo ajusta dentro de un año. */
-    var raices = document.querySelectorAll('[data-arcgallery]');
-    if (!raices.length) return;
-
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    Array.prototype.forEach.call(raices, function (raiz) {
-      var track = raiz.querySelector('[data-arcgallery-track]');
-      var items = Array.prototype.slice.call(raiz.querySelectorAll('[data-arcgallery-item]'));
-      var caption = raiz.querySelector('[data-arcgallery-caption]');
-      if (!track || items.length < 2) return;
-
-      var bendBase = parseFloat(raiz.dataset.bend) || 90;
-
-      var anchoItem = 0, paso = 0, total = 0, H = 0, B = 0, R = 0, altoTrack = 0;
-      var destino = 0, actual = 0, frame = null, visible = false;
-      var arrastrando = false, x0 = 0, base = 0, movio = false;
-      var activo = -1;
-
-      function medir() {
-        var anchoCaja = raiz.getBoundingClientRect().width;
-        var angosto = anchoCaja < 640;
-
-        /* En pantalla chica la tarjeta ocupa dos tercios del ancho, no un
-           30% como en escritorio. Con la proporción de escritorio quedaba
-           en 190px dentro de un viewport de 445 — una foto de sello en el
-           medio, con las vecinas encimándosele por los dos lados.
-
-           Acá solo hay sitio para una tarjeta y dos asomos, así que la del
-           centro tiene que mandar. El hueco también crece: con tarjetas más
-           anchas y giradas, el que servía en escritorio las hacía chocar. */
-        /* Escritorio: 30% más grande que el arranque —de 0.30 del ancho a
-           0.39, con el tope de 300px subido a 390—. Los tres números se
-           mueven juntos: si solo se sube el porcentaje, el tope lo recorta y
-           la tarjeta no crece en pantallas anchas, que es justo donde se
-           notaba el aire.
-
-           Angosto no cambia: ya estaba en dos tercios de pantalla y un 30%
-           más la desbordaría. */
-        anchoItem = angosto
-          ? Math.round(Math.min(320, anchoCaja * 0.66))
-          : Math.round(Math.min(390, Math.max(247, anchoCaja * 0.39)));
-        var hueco = Math.round(anchoItem * (angosto ? 0.30 : 0.16));
-        paso = anchoItem + hueco;
-        total = paso * items.length;
-
-        H = anchoCaja / 2;
-        /* El arco se aplana en angosto. No es estética: la curvatura genera
-           el giro, y con una tarjeta de dos tercios de pantalla un giro de
-           20° la manda contra las vecinas. A 0.25 el giro del borde baja a
-           unos 11°, que se lee como arco sin chocar. */
-        /* Y se escala con el ancho por encima de eso. Con B fijo, una caja
-           más angosta da un arco MÁS cerrado —el radio depende de H— así que
-           a 768px el giro del borde salía en 26° contra los 17° del
-           escritorio. Proporcional, los dos quedan en 17. */
-        B = angosto ? bendBase * 0.25 : bendBase * Math.min(1, anchoCaja / 1200);
-        R = (H * H + B * B) / (2 * B);
-
-        // Alto de la tarjeta: la imagen es 3/4, más el título de dos líneas.
-        var altoItem = anchoItem * (4 / 3) + 62;
-        altoTrack = Math.round(altoItem + B + 16);
-
-        track.style.position = 'relative';
-        track.style.display = 'block';
-        track.style.height = altoTrack + 'px';
-        track.style.touchAction = 'pan-y';
-        track.style.cursor = 'grab';
-        track.style.userSelect = 'none';
-
-        items.forEach(function (li) {
-          li.style.position = 'absolute';
-          li.style.top = '0';
-          li.style.left = '50%';
-          li.style.width = anchoItem + 'px';
-          li.style.willChange = 'transform';
-          var p = li.querySelector('[data-arcgallery-body]');
-          if (p) p.style.display = 'none';   // el cuerpo se muestra bajo el arco
-        });
-
-        if (caption) caption.hidden = false;
-      }
-
-      function pintar() {
-        frame = visible ? window.requestAnimationFrame(pintar) : null;
-
-        // Suavizado: el destino se persigue, nunca se salta.
-        actual += (destino - actual) * 0.085;
-
-        var centrado = -1, mejor = Infinity;
-
-        for (var i = 0; i < items.length; i++) {
-          // Envoltura infinita: la posición se normaliza al rango
-          // [-total/2, total/2), de modo que el que sale por un lado
-          // reaparece por el otro sin que haya un principio ni un final.
-          var x = i * paso - actual;
-          x = ((x % total) + total * 1.5) % total - total / 2;
-
-          var ax = Math.min(Math.abs(x), H);
-          var y = R - Math.sqrt(Math.max(R * R - ax * ax, 0));
-          var giro = -Math.sign(x) * Math.asin(ax / R) * (180 / Math.PI);
-
-          /* Las de los extremos se apagan: sin eso, aparecen y desaparecen
-             de golpe en el borde del contenedor. El umbral se mide contra el
-             paso y no contra H, para que valga igual con tarjetas de 190px
-             que con las de 300: lo que importa es cuántas tarjetas de
-             distancia hay, no cuántos píxeles. */
-          var borde = Math.max(0, Math.min(1, (paso * 1.9 - Math.abs(x)) / paso));
-
-          var li = items[i];
-          li.style.transform = 'translate3d(' + Math.round(x - anchoItem / 2) + 'px,' +
-                               Math.round(y) + 'px,0) rotate(' + giro.toFixed(2) + 'deg)';
-          li.style.opacity = borde.toFixed(3);
-          li.style.zIndex = String(100 - Math.round(Math.abs(x) / 10));
-
-          if (Math.abs(x) < mejor) { mejor = Math.abs(x); centrado = i; }
-        }
-
-        if (centrado !== activo && centrado > -1) {
-          activo = centrado;
-          if (caption) {
-            var p = items[centrado].querySelector('[data-arcgallery-body]');
-            caption.textContent = p ? p.textContent.trim() : '';
-          }
-          items.forEach(function (li, n) {
-            var t = li.querySelector('[data-arcgallery-title]');
-            if (t) t.style.opacity = n === centrado ? '1' : '0.45';
-          });
-        }
-      }
-
-      // Imán al soltar: el arco descansa con una tarjeta centrada, nunca
-      // entre dos. Es lo que hace que la de adelante se lea completa.
-      function imantar() {
-        destino = Math.round(destino / paso) * paso;
-      }
-
-      function empujar(dir) {
-        destino += dir * paso;
-      }
-
-      function abajo(e) {
-        arrastrando = true; movio = false;
-        x0 = e.touches ? e.touches[0].clientX : e.clientX;
-        base = destino;
-        track.style.cursor = 'grabbing';
-      }
-      function mueve(e) {
-        if (!arrastrando) return;
-        var x = e.touches ? e.touches[0].clientX : e.clientX;
-        if (Math.abs(x - x0) > 3) movio = true;
-        destino = base - (x - x0);
-      }
-      function arriba() {
-        if (!arrastrando) return;
-        arrastrando = false;
-        track.style.cursor = 'grab';
-        imantar();
-      }
-
-      track.addEventListener('mousedown', abajo);
-      window.addEventListener('mousemove', mueve, { passive: true });
-      window.addEventListener('mouseup', arriba);
-      track.addEventListener('touchstart', abajo, { passive: true });
-      track.addEventListener('touchmove', mueve, { passive: true });
-      track.addEventListener('touchend', arriba, { passive: true });
-
-      // Un arrastre no debe disparar el enlace que quedó bajo el dedo.
-      track.addEventListener('click', function (e) {
-        if (movio) { e.preventDefault(); e.stopPropagation(); }
-      }, true);
-
-      var prev = raiz.querySelector('[data-arcgallery-prev]');
-      var next = raiz.querySelector('[data-arcgallery-next]');
-      if (prev) prev.addEventListener('click', function () { empujar(-1); });
-      if (next) next.addEventListener('click', function () { empujar(1); });
-
-      var reTimer = null;
-      window.addEventListener('resize', function () {
-        if (reTimer) window.clearTimeout(reTimer);
-        reTimer = window.setTimeout(medir, 120);
-      }, { passive: true });
-
-      medir();
-
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (e) {
-          visible = e[0].isIntersecting;
-          if (visible && !frame) frame = window.requestAnimationFrame(pintar);
-        }, { rootMargin: '120px 0px' }).observe(raiz);
-      } else {
-        visible = true;
-        frame = window.requestAnimationFrame(pintar);
-      }
     });
   })();
 

@@ -609,7 +609,7 @@ export default function ContactForm({
                 type="submit"
                 disabled={status === "sending"}
                 className={[
-                  "cta-relief group inline-flex items-center justify-center gap-2.5 rounded-full border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6",
+                  "cta-relief group inline-flex items-center justify-center gap-2.5 border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6",
                   "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink whitespace-nowrap",
                   "transition-all duration-200 ease-out",
                   "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px",
@@ -652,7 +652,7 @@ export default function ContactForm({
         role="region"
         aria-labelledby="ec-bid-title"
         className={[
-          "pointer-events-auto flex max-h-full w-full flex-col overflow-hidden rounded-xl",
+          "pointer-events-auto flex max-h-full w-full flex-col overflow-hidden",
           // bg-ink y no bg-umber. Con la paleta nueva, umber apunta a OLIVE
           // #696D56, que es un tono MEDIO y no un oscuro: las etiquetas del
           // formulario van en bone/55 y ahí caían a 2.57:1, y el botón ember
@@ -705,8 +705,8 @@ export default function ContactForm({
         aria-modal="true"
         aria-labelledby="ec-bid-title"
         className={[
-          "relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl",
-          "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl",
+          "relative flex max-h-[92svh] w-full flex-col overflow-hidden",
+          "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl",
           "transition-[opacity,transform] ease-out motion-reduce:transition-none",
           entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
         ].join(" ")}

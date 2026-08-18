@@ -580,7 +580,7 @@ function ContactForm({
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("button", {
             type: "submit",
             disabled: status === "sending",
-            className: ["cta-relief group inline-flex items-center justify-center gap-2.5 rounded-full border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6", "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink whitespace-nowrap", "transition-all duration-200 ease-out", "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px", "active:translate-y-0 active:shadow-none", "disabled:pointer-events-none disabled:opacity-60", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", compact ? "order-first w-full" : ""].join(" "),
+            className: ["cta-relief group inline-flex items-center justify-center gap-2.5 border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6", "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink whitespace-nowrap", "transition-all duration-200 ease-out", "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px", "active:translate-y-0 active:shadow-none", "disabled:pointer-events-none disabled:opacity-60", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", compact ? "order-first w-full" : ""].join(" "),
             children: [status === "sending" ? "Sending…" : "Send it", status !== "sending" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
               viewBox: "0 0 24 24",
               fill: "none",
@@ -616,7 +616,7 @@ function ContactForm({
       ref: panelRef,
       role: "region",
       "aria-labelledby": "ec-bid-title",
-      className: ["pointer-events-auto flex max-h-full w-full flex-col overflow-hidden rounded-xl",
+      className: ["pointer-events-auto flex max-h-full w-full flex-col overflow-hidden",
       // bg-ink y no bg-umber. Con la paleta nueva, umber apunta a OLIVE
       // #696D56, que es un tono MEDIO y no un oscuro: las etiquetas del
       // formulario van en bone/55 y ahí caían a 2.57:1, y el botón ember
@@ -655,7 +655,7 @@ function ContactForm({
       role: "dialog",
       "aria-modal": "true",
       "aria-labelledby": "ec-bid-title",
-      className: ["relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-xl", "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl sm:rounded-xl", "transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"].join(" "),
+      className: ["relative flex max-h-[92svh] w-full flex-col overflow-hidden", "bg-ink text-bone shadow-2xl ring-1 ring-white/10 sm:max-w-2xl", "transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"].join(" "),
       style: {
         transitionDuration: `${ANIM_MS}ms`
       },
@@ -831,6 +831,9 @@ __webpack_require__.r(__webpack_exports__);
  *   logo        URL del logotipo en POSITIVO (arte oscuro). En theme="light"
  *               el ecscapingneg.png no sirve: es la versión en negativo y
  *               desaparece sobre fondo claro. Sin logo se usa el wordmark.
+ *   stamp       URL del estampado de marca. Solo se dibuja en theme="dark":
+ *               el tartán es claro y sobre bone no se distinguiría. Vacío =
+ *               el footer va liso.
  *   theme       "light" (default, fondo bone) | "dark" (fondo ink)
  *   socials     [{ network, href }] — network: facebook | instagram | google
  *               | linkedin | youtube. Vacío = no se renderiza la fila.
@@ -986,6 +989,7 @@ function Wordmark({
 }
 function Footer({
   logo = null,
+  stamp = null,
   theme = "light",
   legalName = "EC Landscaping LLC",
   address = "3754 N Higley Rd, Suite 2",
@@ -1007,21 +1011,48 @@ function Footer({
   const telHref = `tel:+1${phone.replace(/\D/g, "")}`;
   const surface = dark ? "bg-ink text-bone" : "bg-bone text-ink";
   const rule = dark ? "border-white/10" : "border-ink/10";
-  const muted = dark ? "text-bone/60" : "text-ink/60";
-  const linkTone = dark ? "text-bone/65 hover:text-bone" : "text-ink/65 hover:text-ink";
+
+  /* En oscuro el texto atenuado sube de /60 y /65 a /75 y /80. No es un
+     ajuste de gusto: con el estampado al 14% el punto más claro del tartán
+     deja el fondo en #484B43, y ahí bone/60 da 3.97:1 y bone/65 da 4.35:1
+     — los dos por debajo de AA. A /75 y /80 quedan en 5.22:1 y 5.66:1.
+      En claro se conservan los valores originales: ahí no hay estampado. */
+  const muted = dark ? "text-bone/75" : "text-ink/60";
+  const linkTone = dark ? "text-bone/80 hover:text-bone" : "text-ink/65 hover:text-ink";
   const headingTone = dark ? "text-bone" : "text-ink";
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("footer", {
-    className: `${surface} border-t ${rule}`,
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "px-5 pt-14 pb-8 sm:px-8 lg:px-10",
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("footer", {
+    className: `relative isolate overflow-hidden ${surface} border-t ${rule}`,
+    children: [dark && stamp && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "pointer-events-none absolute inset-0 -z-10",
+      "aria-hidden": "true",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+        className: "ec-stamp",
+        style: {
+          "--stamp": `url('${stamp}')`
+        }
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+      className: "relative px-5 pt-14 pb-8 sm:px-8 lg:px-10",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
         className: "grid gap-12 lg:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,1fr))] lg:gap-10",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
           className: "flex flex-col gap-6",
-          children: [logo ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
+          children: [logo ?
+          /*#__PURE__*/
+          /* brightness(0) invert(1) pinta el logo de blanco pleno, sea cual
+             sea su color original: brightness(0) lo lleva todo a negro y el
+             invert lo devuelve como blanco. Es lo que permite usar el mismo
+             archivo en las dos superficies sin subir una segunda versión.
+              Tiene un costo: aplana. El arco terracota del imagotipo
+             desaparece y queda una silueta blanca. Si esa parte tiene que
+             conservar su color, no hay filtro que lo resuelva — hace falta
+             el archivo en negativo de verdad, y entonces se quita esta
+             clase.
+              Solo en tema oscuro: sobre bone un logo blanco no se vería. */
+          (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
             src: logo,
             alt: legalName,
-            className: "h-11 w-auto self-start"
+            className: `h-11 w-auto self-start ${dark ? "[filter:brightness(0)_invert(1)]" : ""}`
           }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Wordmark, {
             dark: dark
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("address", {
@@ -1094,7 +1125,7 @@ function Footer({
           }, social.network))
         })]
       })]
-    })
+    })]
   });
 }
 
@@ -1458,7 +1489,11 @@ function BidButton({
     // el enlace navega a /contact como cualquier otro.
     ,
     "data-bid-cta": "",
-    className: ["group inline-flex items-center justify-center gap-2.5 rounded-full border-2", "text-[0.8125rem] font-medium uppercase tracking-[0.4px]", "transition-all duration-200 ease-out", "active:translate-y-0 active:shadow-none", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", skins[skin], sizes[size], className].join(" "),
+    className: [
+    // Sin rounded-full: el branding no tiene una sola forma redondeada,
+    // y este botón vive dentro del hero, donde la píldora desentonaba
+    // contra los bloques rectos de todas las secciones.
+    "group inline-flex items-center justify-center gap-2.5 border-2", "text-[0.8125rem] font-medium uppercase tracking-[0.4px]", "transition-all duration-200 ease-out", "active:translate-y-0 active:shadow-none", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", skins[skin], sizes[size], className].join(" "),
     children: ["Request a Bid", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
       ...iconProps,
       className: "h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0",
@@ -1843,7 +1878,7 @@ function Navbar({
           className: "grid grid-cols-2 gap-3",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
             href: telHref,
-            className: "rounded-full border-2 border-white/20 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone",
+            className: "border-2 border-white/20 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone",
             children: "Call now"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(BidButton, {
             href: bidHref,

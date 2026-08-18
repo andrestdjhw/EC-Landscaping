@@ -17,6 +17,9 @@ import React from "react"
  *   logo        URL del logotipo en POSITIVO (arte oscuro). En theme="light"
  *               el ecscapingneg.png no sirve: es la versión en negativo y
  *               desaparece sobre fondo claro. Sin logo se usa el wordmark.
+ *   stamp       URL del estampado de marca. Solo se dibuja en theme="dark":
+ *               el tartán es claro y sobre bone no se distinguiría. Vacío =
+ *               el footer va liso.
  *   theme       "light" (default, fondo bone) | "dark" (fondo ink)
  *   socials     [{ network, href }] — network: facebook | instagram | google
  *               | linkedin | youtube. Vacío = no se renderiza la fila.
@@ -132,6 +135,7 @@ function Wordmark({ dark }) {
 
 export default function Footer({
   logo = null,
+  stamp = null,
   theme = "light",
   legalName = "EC Landscaping LLC",
   address = "3754 N Higley Rd, Suite 2",
@@ -154,20 +158,64 @@ export default function Footer({
 
   const surface = dark ? "bg-ink text-bone" : "bg-bone text-ink"
   const rule = dark ? "border-white/10" : "border-ink/10"
-  const muted = dark ? "text-bone/60" : "text-ink/60"
+
+  /* En oscuro el texto atenuado sube de /60 y /65 a /75 y /80. No es un
+     ajuste de gusto: con el estampado al 14% el punto más claro del tartán
+     deja el fondo en #484B43, y ahí bone/60 da 3.97:1 y bone/65 da 4.35:1
+     — los dos por debajo de AA. A /75 y /80 quedan en 5.22:1 y 5.66:1.
+
+     En claro se conservan los valores originales: ahí no hay estampado. */
+  const muted = dark ? "text-bone/75" : "text-ink/60"
   const linkTone = dark
-    ? "text-bone/65 hover:text-bone"
+    ? "text-bone/80 hover:text-bone"
     : "text-ink/65 hover:text-ink"
   const headingTone = dark ? "text-bone" : "text-ink"
 
   return (
-    <footer className={`${surface} border-t ${rule}`}>
-      <div className="px-5 pt-14 pb-8 sm:px-8 lg:px-10">
+    <footer className={`relative isolate overflow-hidden ${surface} border-t ${rule}`}>
+
+      {/* ── Estampado de marca ──
+          El "Estampado de Apoyo" del manual: el tartán de cuadros. Reemplaza
+          al mosaico de gradientes que aproximábamos en CSS.
+
+          La URL llega por prop desde footer.php y viaja al CSS en una custom
+          property: la hoja de estilos no puede resolver la ruta de la
+          biblioteca de medios por su cuenta.
+
+          Solo sobre superficie oscura, y solo si hay archivo. En theme="light"
+          el estampado quedaría más claro que su propio fondo.
+
+          La opacidad vive en el CSS y está topeada en 0.14: por encima, el
+          texto atenuado del footer deja de pasar AA sobre los cuadros claros
+          del tartán. */}
+      {dark && stamp && (
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <span className="ec-stamp" style={{ "--stamp": `url('${stamp}')` }} />
+        </div>
+      )}
+
+      <div className="relative px-5 pt-14 pb-8 sm:px-8 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,1fr))] lg:gap-10">
           {/* ── Marca + NAP ── */}
           <div className="flex flex-col gap-6">
             {logo ? (
-              <img src={logo} alt={legalName} className="h-11 w-auto self-start" />
+              /* brightness(0) invert(1) pinta el logo de blanco pleno, sea cual
+                 sea su color original: brightness(0) lo lleva todo a negro y el
+                 invert lo devuelve como blanco. Es lo que permite usar el mismo
+                 archivo en las dos superficies sin subir una segunda versión.
+
+                 Tiene un costo: aplana. El arco terracota del imagotipo
+                 desaparece y queda una silueta blanca. Si esa parte tiene que
+                 conservar su color, no hay filtro que lo resuelva — hace falta
+                 el archivo en negativo de verdad, y entonces se quita esta
+                 clase.
+
+                 Solo en tema oscuro: sobre bone un logo blanco no se vería. */
+              <img
+                src={logo}
+                alt={legalName}
+                className={`h-11 w-auto self-start ${dark ? "[filter:brightness(0)_invert(1)]" : ""}`}
+              />
             ) : (
               <Wordmark dark={dark} />
             )}

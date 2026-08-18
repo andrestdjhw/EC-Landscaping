@@ -94,6 +94,16 @@
   --color-clay-600: #8C654B;
   --color-clay-700: #7E5E46;
 
+  /* clay-800: el único paso que pasa AA sobre las DOS superficies claras
+     del sistema de bloques. Las etiquetas de módulo van en este color y
+     caen indistintamente sobre sand o sobre breeze-100 según su posición
+     en el damero, así que necesitan un valor que sirva en ambas:
+
+       clay-600  sand 3.64:1  ✗
+       clay-700  sand 4.15:1  ✗
+       clay-800  sand 4.61:1  ✓   breeze-100 6.23:1  ✓ */
+  --color-clay-800: #745843;
+
   /* ── SAND · el tono medio cálido. Superficie intermedia ── */
   --color-sand:     #E1D8C8;
   --color-sand-400: #E6DFD1;
@@ -148,6 +158,7 @@
   --color-ember-400:  var(--color-clay-400);
   --color-ember-600:  var(--color-clay-600);
   --color-ember-700:  var(--color-clay-700);
+  --color-ember-800:  var(--color-clay-800);
 }
 
 
@@ -532,3 +543,117 @@
    archivos y aleja el CTA del CLAY exacto de la lámina — es decisión de
    marca, no técnica.
    ══════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════
+   8 · ESTAMPADO DEL FOOTER
+   El "Estampado de Apoyo" de la marca: el tartán de cuadros.
+
+   Reemplaza al mosaico de cuatro gradientes que había acá. Es la pieza de
+   marca de verdad, no una aproximación en CSS.
+
+   La URL la inyecta el PHP en una custom property. La hoja de estilos no
+   puede llamar a wp_get_upload_dir(), y pegar la ruta literal rompe la
+   migración de ec-landscaping.local a producción.
+
+   cover y no repeat: el archivo es una composición de escala grande. En la
+   sección de credenciales lo probamos como mosaico a 720px y entraba tres
+   o cuatro veces, dejando de leerse como textura para leerse como fondo
+   escocés.
+
+   SIN multiply acá. Sobre PINE —el oscuro profundo— multiply solo podría
+   oscurecer un fondo que ya está casi en el fondo de la escala, y el
+   estampado desaparecería. En credenciales el multiply era necesario
+   porque la superficie era OLIVE, un tono medio con el texto al límite;
+   acá hay margen de sobra y el estampado tiene que aclarar para verse.
+
+   LA OPACIDAD ES UN TECHO MEDIDO. En su cuadro más claro el tartán vale
+   del orden de SAND. Sobre PINE al 14%:
+
+     bone/60 ... 3.97:1  ✗     bone/70 ... 4.75:1  ✓
+     bone/65 ... 4.35:1  ✗     bone/75 ... 5.22:1  ✓
+
+   Por eso el componente sube las opacidades de texto del footer: a 14% de
+   estampado, bone/60 y bone/65 dejan de pasar AA. Las dos cosas se mueven
+   juntas — subir esta opacidad obliga a subir aquellas. */
+
+.ec-stamp {
+  position: absolute;
+  inset: 0;
+  background-image: var(--stamp);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.14;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   9 · BANDA DE RAYAS
+   El recurso gráfico que aparece en las dos piezas de marca: la franja
+   vertical al borde izquierdo de la valla y el faldón de la van.
+
+   No es un patrón de fondo, es un REMATE DE BORDE. En las dos piezas
+   ocupa una franja angosta contra el canto y nunca invade la superficie
+   donde va el texto — por eso acá se usa como filete de sección y no
+   como textura, que es el error que veníamos cometiendo con el tartán.
+
+   Las rayas se degradan: densas de un lado y abiertas del otro. Eso se
+   consigue superponiendo dos repeating-linear-gradient de paso distinto
+   y enmascarando el segundo, en lugar de dibujar cada raya a mano.
+   ══════════════════════════════════════════════════════════════════ */
+
+.ec-band {
+  --band-ink: var(--color-linen);
+  --band-step: 14px;
+  --band-weight: 5px;
+
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--band-ink) 0,
+    var(--band-ink) var(--band-weight),
+    transparent var(--band-weight),
+    transparent var(--band-step)
+  );
+}
+
+/* La variante que se abre hacia abajo: mismo paso, pero la máscara apaga
+   progresivamente el final. Es lo que hace la franja de la valla. */
+.ec-band--fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+}
+
+/* Sobre superficie clara. El default de --band-ink es LINEN, pensado para
+   bloques oscuros; sobre un fondo claro esas rayas no se ven. */
+.ec-band--ink {
+  --band-ink: var(--color-pine);
+}
+
+/* Horizontal, para rematar bloques anchos en vez de altos. */
+.ec-band--h {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--band-ink) 0,
+    var(--band-ink) var(--band-weight),
+    transparent var(--band-weight),
+    transparent var(--band-step)
+  );
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   10 · TITULAR DE PESO MIXTO
+   En las dos piezas el titular arranca en bold y sigue en regular dentro
+   de la misma línea: "ALREADY BUILDING / davis county's next decade".
+   No es decorativo — separa la afirmación del complemento sin usar dos
+   tamaños ni dos colores.
+
+   Play solo publica 400 y 700, así que el contraste de peso es el máximo
+   que da la familia. Se marca con <em> y no con <span class="...">: es
+   énfasis semántico, y un lector de pantalla debería oírlo.
+   ══════════════════════════════════════════════════════════════════ */
+
+.ec-mixed em {
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.85;
+}

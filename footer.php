@@ -11,17 +11,28 @@
      * fondo claro del footer desaparecía; el componente caía al wordmark
      * tipográfico.
      *
-     * OJO: el footer es theme => 'light', así que este archivo tiene que ser
-     * la versión en POSITIVO —arte oscuro—. El del navbar es otro
-     * (EC_Imagotipo2-1) y va sobre barra oscura. Si los dos se ven bien, es
-     * que son el par positivo/negativo; si acá el logo se pierde contra el
-     * bone, están cruzados y hay que intercambiar los dos archivos.
+     * OJO CON EL LOGO: el footer pasó a theme => 'dark' para que se vea el
+     * patrón orgánico —el efecto produce formas claras y sobre bone no se
+     * distinguía—. Eso invierte el requisito: ahora este archivo tiene que
+     * ser la versión en NEGATIVO, la misma que el navbar.
+     *
+     * Se deja apuntando a EC_Imagotipo2 porque no sé cuál de los dos es cuál.
+     * Si el logo del footer se pierde contra el fondo oscuro, intercambialo
+     * por EC_Imagotipo2-1 —el del navbar— y listo.
+     *
+     * Para volver el footer a claro: 'theme' => 'light'. El patrón deja de
+     * montarse solo, y el logo vuelve a necesitar la versión en positivo.
      */
     $ec_uploads = wp_get_upload_dir();
 
     $ec_footer_props = array(
       'logo'           => $ec_uploads['baseurl'] . '/2026/08/EC_Imagotipo2-scaled.png',
-      'theme'          => 'light',
+
+      // Estampado de Apoyo. Se arma desde wp_get_upload_dir() como el resto
+      // de los medios, para que sobreviva la migración a producción. Vaciar
+      // esta línea deja el footer liso — el componente no lo dibuja.
+      'stamp'          => $ec_uploads['baseurl'] . '/2026/08/Estampado-de-Apoyo-scaled.png',
+      'theme'          => 'dark',
       'legalName'      => 'EC Landscaping LLC',
       'address'        => '3754 N Higley Rd, Suite 2',
       'cityState'      => 'Ogden, UT 84404',
