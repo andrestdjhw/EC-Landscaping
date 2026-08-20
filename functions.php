@@ -183,3 +183,92 @@ function ec_handle_bid_request(WP_REST_Request $request) {
 
   return new WP_REST_Response(array('ok' => true), 200);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   MOVIMIENTO — revelado por scroll y destello de titulares
+
+   Vivía copiado dentro de cada plantilla. Acá está una sola vez y aplica a
+   TODAS las páginas del tema, incluidas index.php y single.php, que nunca
+   lo tuvieron.
+
+   Son dos piezas y van en dos lugares distintos a propósito:
+
+   · La MARCA (wp_head, prioridad 1) tiene que ejecutarse antes de que el
+     navegador pinte. El estado oculto de [data-reveal] cuelga de .ec-reveal,
+     así que si la clase llegara tarde se vería el contenido y después
+     desaparecería de golpe.
+
+   · Los MOTORES (wp_footer) corren cuando el DOM ya existe.
+
+   Sin JavaScript la clase nunca se agrega y todo el contenido se ve tal
+   cual. Nunca se esconde texto apostando a que corra un script — es la
+   diferencia entre una animación y una página rota.
+   ══════════════════════════════════════════════════════════════════ */
+
+function ec_motion_boot() {
+  ?>
+  <script>
+    (function () {
+      var mq = window.matchMedia;
+      if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
+      document.documentElement.classList.add('ec-reveal');
+    })();
+  </script>
+  <?php
+}
+add_action('wp_head', 'ec_motion_boot', 1);
+
+function ec_motion_engines() {
+  ?>
+  <script>
+    /* ── Revelado por scroll ──
+       Genérico por [data-reveal]: colgarlo de cualquier bloque nuevo no pide
+       tocar este código.
+
+       unobserve al revelar: es una entrada, no un efecto de ida y vuelta.
+       Volver a subir no debería re-esconder texto que ya se leyó. */
+    (function () {
+      if (!document.documentElement.classList.contains('ec-reveal')) return;
+
+      var items = document.querySelectorAll('[data-reveal]');
+      if (!items.length) return;
+
+      if (!('IntersectionObserver' in window)) {
+        Array.prototype.forEach.call(items, function (el) { el.classList.add('is-revealed'); });
+        return;
+      }
+
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-revealed');
+          io.unobserve(entry.target);
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+      Array.prototype.forEach.call(items, function (el) { io.observe(el); });
+    })();
+
+    /* ── Destello de los titulares ──
+       La clase se pone al entrar en pantalla y se QUITA al salir: la
+       animación va en bucle, y dejarla corriendo en un titular que está tres
+       pantallas más abajo repinta igual y se paga en batería. */
+    (function () {
+      var mq = window.matchMedia;
+      if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
+
+      var titles = document.querySelectorAll('.ec-shine');
+      if (!titles.length || !('IntersectionObserver' in window)) return;
+
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          entry.target.classList.toggle('is-shining', entry.isIntersecting);
+        });
+      }, { threshold: 0.35 });
+
+      Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
+    })();
+  </script>
+  <?php
+}
+add_action('wp_footer', 'ec_motion_engines');

@@ -245,8 +245,8 @@ $ec_tel_href = 'tel:+13852403907';
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
 
     <!-- Encabezado como bloque, a todo el ancho de la retícula. -->
-    <div class="bg-ink p-8 text-bone lg:p-12">
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+    <div data-reveal class="bg-ink p-8 text-bone lg:p-12">
+      <div data-reveal class="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
         <h2 class="ec-shine ec-shine--light ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
           What&rsquo;s <em>in scope.</em>
         </h2>
@@ -259,7 +259,7 @@ $ec_tel_href = 'tel:+13852403907';
 
     <!-- Un alcance por fila: foto y texto como dos módulos del mismo sistema,
          alternando de lado. El gap-px muestra el fondo sand de la sección. -->
-    <div class="mt-px grid gap-px lg:grid-cols-2">
+    <div class="ec-plates mt-px grid gap-px lg:grid-cols-2">
       <?php foreach ($ec_scope as $ec_i => $item) :
 
         // La superficie del texto alterna para que ninguna fila repita a la
@@ -303,7 +303,7 @@ $ec_tel_href = 'tel:+13852403907';
     <!-- Cierre en clay, cerrando la retícula con la afirmación de la sección.
          Antes iba suelto en la columna izquierda; como módulo queda a la
          altura de los alcances en lugar de leerse como pie de página. -->
-    <div class="mt-px bg-ember p-8 lg:p-12">
+    <div data-reveal class="mt-px bg-ember p-8 lg:p-12">
       <p class="max-w-3xl text-base leading-relaxed text-ink">
         The same crew on your property in July and in January — which is the only way the person plowing your lot already knows where the curbs are.
       </p>
@@ -354,7 +354,7 @@ $ec_tel_href = 'tel:+13852403907';
 <section class="bg-bone">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
     <h2 class="mb-8 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink/50">Also self-performed</h2>
-    <ul class="grid gap-px bg-slate-200 sm:grid-cols-3">
+    <ul class="ec-plates grid gap-px bg-slate-200 sm:grid-cols-3">
       <?php foreach ($ec_others as $other) : ?>
         <li class="bg-bone">
           <a
@@ -419,32 +419,6 @@ if (have_posts()) :
       </div>
     </section>
   
-<script>
-  /* Destello de los titulares. Vive en cada plantilla porque cada página es un
-     archivo completo — y hasta ahora faltaba acá: la clase ec-shine estaba en
-     el markup de las seis páginas interiores, pero sin este script nadie le
-     ponía is-shining y el efecto no ocurría en ninguna.
-
-     La clase se pone al entrar en pantalla y se quita al salir: con una
-     animación en bucle, dejar animando un titular fuera del viewport repinta
-     igual y se paga en batería. */
-  (function () {
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    var titles = document.querySelectorAll('.ec-shine');
-    if (!titles.length || !('IntersectionObserver' in window)) return;
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        entry.target.classList.toggle('is-shining', entry.isIntersecting);
-      });
-    }, { threshold: 0.35 });
-
-    Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
-  })();
-</script>
-
 <?php endwhile;
 endif;
 

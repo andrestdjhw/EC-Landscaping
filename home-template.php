@@ -289,22 +289,6 @@ $bid_href = home_url('/contact');
 $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 ?>
 
-<script>
-  /* Marca <html> como "hay revelado" antes de que se pinte nada. Va aquí y no
-     al final de la página a propósito: el estado oculto de [data-reveal] cuelga
-     de .ec-reveal, así que si esta clase llegara tarde se vería el bloque 03
-     completo y después desaparecería de golpe.
-
-     El corolario es que sin JavaScript la clase nunca se agrega y todo el
-     contenido queda visible. Nunca se esconde texto apostando a que corra un
-     script. Lo mismo con prefers-reduced-motion: no se agrega la clase, no hay
-     nada que revelar. */
-  (function () {
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-    document.documentElement.classList.add('ec-reveal');
-  })();
-</script>
 
 <!-- ═══════════════════════ 01 · HERO ═══════════════════════ -->
 <!-- Video a sangre detrás de toda la sección. El texto sigue en oscuro sobre
@@ -481,7 +465,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
      bloque 03. -->
 <section class="relative bg-ink lg:shrink-0">
 
-  <dl class="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
+  <dl class="ec-plates grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
     <?php
     /* Tres superficies, no dos. Antes el primer bloque iba en clay y los
        otros tres en ink: tres oscuros seguidos, que es justo lo que la valla
@@ -691,7 +675,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
          otras rejillas de la página el hueco muestra un ink al 15%; en esta
          muestra el metraje, y eso convierte el video en el material que une
          los bloques en lugar de en un telón detrás de ellos. -->
-    <div class="grid gap-px lg:grid-cols-6">
+    <div data-reveal class="ec-plates grid gap-px lg:grid-cols-6">
 
       <!-- ── Encabezado, como bloque claro ──
            Es el único módulo claro de una sección enteramente oscura, y esa
@@ -798,7 +782,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <!-- ═══════════════════════ 05 · CAPACIDADES ═══════════════════════ -->
 <section id="capabilities" class="bg-breeze-100 lg:flex lg:min-h-svh lg:items-start">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div class="max-w-3xl">
+    <div data-reveal class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Capabilities</p>
       <h2 class="ec-shine ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
         What we <em>self-perform.</em>
@@ -955,7 +939,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <section class="bg-bone lg:flex lg:min-h-svh lg:items-center">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
 
-    <div class="grid gap-px bg-ink/15 lg:grid-cols-6">
+    <div data-reveal class="ec-plates grid gap-px bg-ink/15 lg:grid-cols-6">
 
       <!-- Encabezado como bloque, no como capa. Ocupa dos celdas y se apoya
            abajo: el titular arranca donde arrancan los pasos. -->
@@ -1042,7 +1026,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
 <section id="credentials" class="bg-umber lg:flex lg:min-h-svh lg:items-center">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
 
-    <div class="grid gap-px lg:grid-cols-6">
+    <div data-reveal class="ec-plates grid gap-px lg:grid-cols-6">
 
       <!-- ── Encabezado ──
            El número de licencia ya no va acá: era el masthead del diseño
@@ -1166,7 +1150,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
     $ec_map_href  = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($ec_map_query);
     ?>
 
-    <div class="grid gap-px bg-ink/15 lg:grid-cols-6">
+    <div data-reveal class="ec-plates grid gap-px bg-ink/15 lg:grid-cols-6">
 
       <!-- ── Titular ── -->
       <div class="flex flex-col justify-end bg-ink p-8 text-bone lg:col-span-2 lg:p-10">
@@ -1295,7 +1279,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
            título se va de pantalla justo cuando el usuario está leyendo la
            respuesta más larga. self-start es lo que impide que la columna
            se estire y anule el sticky. -->
-      <div class="lg:sticky lg:top-[calc(var(--header-offset)+3rem)] lg:self-start">
+      <div data-reveal class="lg:sticky lg:top-[calc(var(--header-offset)+3rem)] lg:self-start">
         <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">FAQ</p>
         <h2 class="ec-shine ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl">
           Questions estimators <em>actually ask.</em>
@@ -1413,59 +1397,8 @@ $faq_schema = array(
 
     Array.prototype.forEach.call(videos, function (v) { io.observe(v); });
   })();
-  (function () {
-    /* Destello en bucle. La clase se pone al entrar en pantalla y se QUITA al
-       salir — antes se ponía una vez y se dejaba de observar, que era lo
-       correcto para un disparo único y es lo peor posible para un bucle: una
-       animación infinita en un titular que está tres pantallas más abajo
-       repinta igual y se paga en batería.
-
-       El CSS maneja el reposo entre pasadas; acá solo se decide qué titulares
-       están animando. Con prefers-reduced-motion no se agrega nada. */
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    var titles = document.querySelectorAll('.ec-shine');
-    if (!titles.length || !('IntersectionObserver' in window)) return;
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        entry.target.classList.toggle('is-shining', entry.isIntersecting);
-      });
-    }, { threshold: 0.35 });
-
-    Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
-  })();
-  (function () {
-    /* Revelado por scroll. Genérico: observa cualquier [data-reveal] de la
-       página, así que colgarlo de otro bloque no pide tocar este script.
-
-       Si .ec-reveal no está en <html>, es porque el usuario pidió menos
-       movimiento o porque el script de arranque no corrió: en ninguno de los
-       dos casos hay nada oculto que revelar, así que se sale de una.
-
-       unobserve al revelar: es una entrada, no un efecto de ida y vuelta.
-       Volver a subir no debería re-esconder texto que ya se leyó. */
-    if (!document.documentElement.classList.contains('ec-reveal')) return;
-
-    var items = document.querySelectorAll('[data-reveal]');
-    if (!items.length) return;
-
-    if (!('IntersectionObserver' in window)) {
-      Array.prototype.forEach.call(items, function (el) { el.classList.add('is-revealed'); });
-      return;
-    }
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-revealed');
-        io.unobserve(entry.target);
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-
-    Array.prototype.forEach.call(items, function (el) { io.observe(el); });
-  })();
+  
+  
   (function () {
     /* Marquee: desplazamiento continuo sobre un contenedor con scroll nativo.
        El JS empuja scrollLeft frame a frame en vez de animar un transform, y

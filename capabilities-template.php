@@ -77,7 +77,7 @@ $ec_process = array(
        No se hace con padding en el <body> desde el CSS: eso se aplicaría
        también a la landing y le metería el hero 9rem para abajo. -->
   <div class="w-full px-5 pb-16 pt-[calc(var(--header-offset)+2rem)] sm:px-8 lg:px-10 lg:pb-24 lg:pt-[calc(var(--header-offset)+3rem)]">
-    <div class="max-w-3xl">
+    <div data-reveal class="max-w-3xl">
       <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">Capabilities</p>
       <h1 class="ec-shine font-display text-4xl leading-[1.08] font-bold tracking-tight text-ink sm:text-5xl">
         What we self-perform.
@@ -437,32 +437,6 @@ if (have_posts()) :
       </div>
     </section>
   
-<script>
-  /* Destello de los titulares. Vive en cada plantilla porque cada página es un
-     archivo completo — y hasta ahora faltaba acá: la clase ec-shine estaba en
-     el markup de las seis páginas interiores, pero sin este script nadie le
-     ponía is-shining y el efecto no ocurría en ninguna.
-
-     La clase se pone al entrar en pantalla y se quita al salir: con una
-     animación en bucle, dejar animando un titular fuera del viewport repinta
-     igual y se paga en batería. */
-  (function () {
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    var titles = document.querySelectorAll('.ec-shine');
-    if (!titles.length || !('IntersectionObserver' in window)) return;
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        entry.target.classList.toggle('is-shining', entry.isIntersecting);
-      });
-    }, { threshold: 0.35 });
-
-    Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
-  })();
-</script>
-
 <?php endwhile;
 endif;
 

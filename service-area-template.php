@@ -133,11 +133,7 @@ $bid_href = home_url('/contact');
   /* Marca de revelado, antes de que se pinte nada: el estado oculto de
      [data-reveal] cuelga de .ec-reveal, así que si la clase llegara tarde se
      vería el contenido y después desaparecería de golpe. */
-  (function () {
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-    document.documentElement.classList.add('ec-reveal');
-  })();
+  
 </script>
 
 <!-- ═══════════════════════ ENCABEZADO ═══════════════════════ -->
@@ -186,7 +182,7 @@ $bid_href = home_url('/contact');
      porque son la promesa comercial que el mapa no puede mostrar. -->
 <section class="bg-bone">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div data-reveal class="grid gap-px bg-ink/15 lg:grid-cols-6">
+    <div data-reveal class="ec-plates grid gap-px bg-ink/15 lg:grid-cols-6">
 
       <!-- El iframe va en absolute dentro de una celda con alto propio: así
            el espacio queda reservado antes de que cargue y la página no salta.
@@ -264,7 +260,7 @@ $bid_href = home_url('/contact');
     <!-- Cada condado es una fila de dos módulos: texto y mapa, alternando de
          lado. Mismo patrón que las secciones de alcance de las páginas de
          capacidad. -->
-    <div class="mt-px grid gap-px">
+    <div class="ec-plates mt-px grid gap-px">
       <?php foreach ($counties as $ec_i => $c) :
         $ec_bg  = (0 === $ec_i % 2) ? 'bg-breeze-100' : 'bg-linen';
         $ec_izq = (0 === $ec_i % 2);
@@ -323,7 +319,7 @@ $bid_href = home_url('/contact');
         <!-- El orden se invierte en el DOM y no con `order`: con `order` el
              lector de pantalla oiría el mapa antes que el nombre del condado
              al que pertenece. -->
-        <div data-reveal class="grid gap-px lg:grid-cols-2">
+        <div data-reveal class="ec-plates grid gap-px lg:grid-cols-2">
           <?php if ($ec_izq) { $ec_texto(); $ec_mapa(); } else { $ec_mapa(); $ec_texto(); } ?>
         </div>
       <?php endforeach; ?>
@@ -459,45 +455,11 @@ $ec_faq_schema = array(
   /* Destello de los titulares. La clase se pone al entrar en pantalla y se
      quita al salir: la animación va en bucle, y dejarla corriendo fuera del
      viewport repinta igual y se paga en batería. */
-  (function () {
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    var titles = document.querySelectorAll('.ec-shine');
-    if (!titles.length || !('IntersectionObserver' in window)) return;
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        entry.target.classList.toggle('is-shining', entry.isIntersecting);
-      });
-    }, { threshold: 0.35 });
-
-    Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
-  })();
+  
 
   /* Revelado por scroll. Si .ec-reveal no está en <html> no hay nada oculto
      que revelar y se sale de una. */
-  (function () {
-    if (!document.documentElement.classList.contains('ec-reveal')) return;
-
-    var items = document.querySelectorAll('[data-reveal]');
-    if (!items.length) return;
-
-    if (!('IntersectionObserver' in window)) {
-      Array.prototype.forEach.call(items, function (el) { el.classList.add('is-revealed'); });
-      return;
-    }
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-revealed');
-        io.unobserve(entry.target);
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-
-    Array.prototype.forEach.call(items, function (el) { io.observe(el); });
-  })();
+  
 </script>
 
 <?php get_footer(); ?>

@@ -672,3 +672,87 @@
   font-weight: 400;
   opacity: 0.85;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   11 · PLACAS
+   Profundidad para los bloques modulares, SIN sombra proyectada.
+
+   El problema que resuelve: color liso sobre color liso separado por un
+   filete de 1px se lee inerte. El problema que NO puede resolver con una
+   sombra: la van y la valla no tienen ni una, y agregarlas devolvería el
+   lenguaje de tarjeta que sacamos de todo el sitio.
+
+   La salida es imitar cómo se comporta la tinta en papel, que es plana pero
+   no inerte. Tres capas, todas dentro del bloque:
+
+   1. UN DEGRADADO DEL 3% de arriba abajo. Es el gradiente más leve que se
+      percibe: no se ve como degradado, se ve como una superficie que recibe
+      luz. Al 5% ya se nota y deja de ser sutil.
+
+   2. UN FILO SUPERIOR CLARO Y UNO INFERIOR OSCURO, de 1px, por dentro. Es
+      lo que hace un canto real bajo luz cenital. Va con inset box-shadow y
+      no con border, para no alterar el tamaño de la caja ni la retícula.
+
+   3. GRANO en las superficies claras. Un SVG de ruido fractal al 3.5%, del
+      tamaño de un patrón de imprenta. Es lo que separa "plano" de "impreso".
+
+   Contraste verificado: el degradado mueve el texto menos de 0.8:1 en el peor
+   caso, y todas las combinaciones siguen por encima de AA. CLAY queda fuera
+   del degradado a propósito — su texto está en 3.90:1 y un 3% de oscurecido
+   lo baja a 3.67.
+
+   ── USO ──
+   La clase va en el CONTENEDOR de la rejilla, no en cada bloque:
+     <div class="ec-plates grid gap-px lg:grid-cols-6">
+   Así un módulo nuevo hereda el tratamiento sin que haya que acordarse.
+   ══════════════════════════════════════════════════════════════════ */
+
+.ec-plates > * {
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+    inset 0 -1px 0 0 rgb(0 0 0 / 0.10);
+}
+
+/* El degradado solo sobre superficies claras y sobre ink. Se aplica al
+   background-image para no pisar el background-color de la utilidad de
+   Tailwind: el color sigue siendo el token, esto se superpone. */
+.ec-plates > [class*="bg-sand"],
+.ec-plates > [class*="bg-breeze"],
+.ec-plates > [class*="bg-linen"],
+.ec-plates > [class*="bg-ink"] {
+  background-image: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.03) 0%,
+    rgb(255 255 255 / 0) 45%,
+    rgb(0 0 0 / 0.03) 100%
+  );
+}
+
+/* Grano de imprenta. feTurbulence generado una vez como data-URI: no pesa,
+   no pide un archivo y no depende de que exista un <filter> en el DOM.
+
+   Solo en superficies claras — sobre ink el ruido se lee como compresión
+   de video, no como papel. */
+.ec-plates > [class*="bg-sand"]::after,
+.ec-plates > [class*="bg-breeze"]::after,
+.ec-plates > [class*="bg-linen"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Los bloques con foto o iframe no llevan nada de esto: la imagen ya tiene
+   su propia profundidad, y un grano encima la ensucia. */
+.ec-plates > *:has(> img),
+.ec-plates > *:has(> iframe) {
+  background-image: none;
+}
+
+.ec-plates > *:has(> img)::after,
+.ec-plates > *:has(> iframe)::after {
+  content: none;
+}

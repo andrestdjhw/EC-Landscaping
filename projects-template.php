@@ -396,11 +396,7 @@ $bid_href = home_url('/contact');
   /* Misma marca de revelado que la home. Va acá y no al pie: el estado oculto
      de [data-reveal] cuelga de .ec-reveal, así que si la clase llegara tarde
      se vería el contenido y después desaparecería de golpe. */
-  (function () {
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-    document.documentElement.classList.add('ec-reveal');
-  })();
+  
 </script>
 
 <!-- ═══════════════════════ ENCABEZADO ═══════════════════════ -->
@@ -513,7 +509,7 @@ $bid_href = home_url('/contact');
          tarjeta, `columns` acomoda sin dejar huecos y sin una línea de JS.
          break-inside-avoid es lo que impide que una tarjeta se parta entre
          dos columnas. -->
-    <div id="ec-grid" class="gap-5 space-y-5 sm:columns-2 lg:columns-3">
+    <div id="ec-grid" class="ec-plates gap-5 space-y-5 sm:columns-2 lg:columns-3">
       <?php foreach ($projects as $pr) :
         $ec_main = isset($ec_img_main[$pr['id']]) ? $ec_img_main[$pr['id']] : '';
         $ec_ba   = !empty($ec_img_before[$pr['id']]);
@@ -724,7 +720,7 @@ $ec_lb_data = array_map(
 <section class="bg-umber text-bone">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
 
-    <div data-reveal class="grid gap-px lg:grid-cols-6">
+    <div data-reveal class="ec-plates grid gap-px lg:grid-cols-6">
 
       <div class="flex flex-col justify-end bg-ink p-8 lg:col-span-2 lg:row-span-2 lg:p-10">
         <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">What they reviewed</p>
@@ -780,7 +776,7 @@ $ec_lb_data = array_map(
       </h2>
     </div>
 
-    <ul class="mt-12 grid gap-px bg-ink/15 sm:grid-cols-2 lg:grid-cols-4">
+    <ul class="ec-plates mt-12 grid gap-px bg-ink/15 sm:grid-cols-2 lg:grid-cols-4">
       <?php foreach ($capabilities as $ec_i => $cap) :
         $ec_bg = (0 === $ec_i % 2) ? 'bg-sand' : 'bg-breeze-100';
         ?>
@@ -835,21 +831,7 @@ $ec_lb_data = array_map(
   /* Destello de los titulares. La clase se pone al entrar en pantalla y se
      quita al salir: la animación va en bucle, y dejarla corriendo en un
      titular fuera del viewport repinta igual y se paga en batería. */
-  (function () {
-    var mq = window.matchMedia;
-    if (mq && mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    var titles = document.querySelectorAll('.ec-shine');
-    if (!titles.length || !('IntersectionObserver' in window)) return;
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        entry.target.classList.toggle('is-shining', entry.isIntersecting);
-      });
-    }, { threshold: 0.35 });
-
-    Array.prototype.forEach.call(titles, function (t) { io.observe(t); });
-  })();
+  
 
   /* ── Galería de proyectos ──
      Filtros, visor y comparador de arrastre. Sin dependencias.
@@ -1057,27 +1039,7 @@ $ec_lb_data = array_map(
   /* Revelado por scroll. Si .ec-reveal no está en <html> —porque el usuario
      pidió menos movimiento o porque el script de arranque no corrió— no hay
      nada oculto que revelar y se sale de una. */
-  (function () {
-    if (!document.documentElement.classList.contains('ec-reveal')) return;
-
-    var items = document.querySelectorAll('[data-reveal]');
-    if (!items.length) return;
-
-    if (!('IntersectionObserver' in window)) {
-      Array.prototype.forEach.call(items, function (el) { el.classList.add('is-revealed'); });
-      return;
-    }
-
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-revealed');
-        io.unobserve(entry.target);
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-
-    Array.prototype.forEach.call(items, function (el) { io.observe(el); });
-  })();
+  
 </script>
 
 <?php get_footer(); ?>
