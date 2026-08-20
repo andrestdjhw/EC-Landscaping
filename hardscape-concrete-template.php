@@ -52,7 +52,7 @@ $ec_img_walls    = $ec_media_scope . 'RetainingWalls-scaled.jpg';
 $ec_img_pavers   = $ec_media_scope . 'PaverPlazas-scaled.jpg';
 $ec_img_flatwork = $ec_media_scope . 'FlatStampedConcrete-scaled.jpg';
 $ec_img_curbing  = $ec_media_scope . 'CurbingSiteWalls-scaled.jpg';
-$ec_img_pooldeck = $ec_media_scope . 'PoolDecks-scaled.jpg';
+$ec_img_pooldeck = $ec_media_scope . 'HardscapeCapabilitiesPooldeck.jpg';
 
 /* Ojo con el nombre del archivo: en la biblioteca está subido como
    "SelfPermormedLicence" — con la r y la m cambiadas de lugar en

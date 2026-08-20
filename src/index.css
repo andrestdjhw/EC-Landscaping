@@ -65,6 +65,16 @@
      ══════════════════════════════════════════════════════════════ */
 
   /* ── PINE · el verde casi negro. Única superficie oscura profunda ── */
+  /* pine-900: por debajo del base. La lámina de marca no lo trae —PINE es
+     su punto más oscuro— pero la franja de utilidad necesita separarse de la
+     barra de navegación ahora que las dos van pegadas, y no hay forma de
+     hacerlo hacia arriba sin sacarla de la paleta.
+
+     Mezclado hacia negro un 45%: separa lo justo (1.34:1 contra PINE, que se
+     lee como escalón y no como otro color) y de paso sube el contraste del
+     texto de la franja — la licencia pasa de 4.90:1 a 5.35:1. */
+  --color-pine-900: #1A1D19;
+
   --color-pine:     #2F342D;
   --color-pine-500: #3E443B;   /* apenas más claro — separa dos oscuros vecinos */
   --color-pine-400: #696C64;
@@ -127,6 +137,7 @@
      ══════════════════════════════════════════════════════════════ */
 
   --color-ink:    var(--color-pine);
+  --color-ink-900: var(--color-pine-900);
   --color-bone:   var(--color-linen);
   --color-forest: var(--color-olive);
   --color-ember:  var(--color-clay);
@@ -183,17 +194,21 @@
          franja  py-1.5 x2 + placa py-1.5 x2 + icono h-4 + borde = 41
          barra   pt-4 del wrapper + py-4 x2 + logo h-8           = 80
 
-       Escritorio, 137px: igual, pero la barra la manda el CTA
+       Escritorio: igual, pero la barra la manda el CTA
          (py-3 x2 + texto 13px + border-2 x2 = 48) en lugar del logo.
 
-       Los valores van redondeados hacia arriba: 0.5rem de holgura es
-       invisible, 20px de falta son el titular tapado por la barra. */
-    --header-offset: 8rem;
+       Los valores bajan 1rem respecto de antes: la barra dejó de flotar y
+       se soltaron los 16px de padding exterior que la separaban de la
+       franja. Móvil 105px → 7rem, escritorio 121px → 8rem.
+
+       Van redondeados hacia arriba: 0.5rem de holgura es invisible,
+       20px de falta son el titular tapado por la barra. */
+    --header-offset: 7rem;
   }
 
   @media (min-width: 1024px) {
     :root {
-      --header-offset: 9rem;
+      --header-offset: 8rem;
     }
   }
 

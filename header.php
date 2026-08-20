@@ -40,7 +40,26 @@
       // y el cliente pidió expresamente que no se muestre (Pendiente 01).
       'address'         => '3754 N Higley Rd, Suite 2 · Ogden, UT',
       'mapsHref'        => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode('3754 N Higley Rd Suite 2, Ogden, UT 84404'),
-      'license'         => 'UT License 1106462255001 · S330',
+      /* Sin el número, solo la clase. La franja de utilidad es un lugar de
+         paso: el número completo no se lee de un vistazo y ocupa el ancho
+         que necesitan las tres placas de contacto de la derecha.
+
+         El número NO se pierde: sigue completo en la tabla de credenciales
+         del bloque 08, que es donde un GC va a buscarlo, y en el footer. */
+      'license'         => 'UT License S330',
+
+      /* Redes sociales — Pendiente 13 del brief.
+         Cada URL vacía se dibuja como icono apagado, sin enlace: se ve la
+         franja completa pero no se promete un destino que no existe.
+
+         ANTES DE PUBLICAR: llenar las tres o borrar las claves que EC no
+         tenga. Un icono apagado es aceptable en desarrollo y no en producción
+         — comunica que la empresa tiene un perfil que en realidad no tiene. */
+      'social'          => array(
+        'facebook'  => '',
+        'instagram' => '',
+        'tiktok'    => '',
+      ),
       // Todos los CTA del sitio llevan a /contact. El modal global se retiró.
       'bidHref'         => home_url('/contact'),
       'theme'           => 'dark',
@@ -81,7 +100,11 @@
        */
       'links'           => array(
         array('label' => 'Commercial', 'href' => home_url('/#commercial')),
-        array('label' => 'Projects',   'href' => home_url('/#projects')),
+        // Projects deja de ser un ancla de la home y pasa a página propia.
+        // El scrollspy de la navbar sigue funcionando: fragmentOf() devuelve
+        // null para un href sin '#', así que este enlace queda fuera del
+        // seguimiento en lugar de romperlo.
+        array('label' => 'Projects',   'href' => home_url('/projects')),
         array(
           'label'    => 'Capabilities',
           'activeId' => '#capabilities',
@@ -94,7 +117,10 @@
           ),
         ),
         array('label' => 'Credentials',  'href' => home_url('/#credentials')),
-        array('label' => 'Service Area', 'href' => home_url('/#service-area')),
+        // Service Area también pasa a página propia. El bloque 09 se queda en
+        // la home: es el que responde "¿llegan hasta acá?" sin salir de la
+        // landing, y esta página lo desarrolla condado por condado.
+        array('label' => 'Service Area', 'href' => home_url('/service-area')),
       ),
     );
     ?>

@@ -13,7 +13,10 @@ import React, { useEffect, useRef, useState } from "react"
  *                     así que solo funciona con theme="dark". Si se cambia a "light"
  *                     hace falta subir la versión en positivo.
  *   phone             Teléfono en formato display.  ej. "(385) 240-3907"
- *   license           Línea de licencia.            ej. "UT 1106462255001 · S330"
+ *   license           Línea de licencia.            ej. "UT License S330"
+ *   social            Perfiles sociales. { facebook, instagram, tiktok }.
+ *                     Clave vacía o ausente = el icono se dibuja apagado y
+ *                     sin enlace. Pendiente 13 del brief.
  *   links             [{ label, href, activeId, children }]
  *                     children: [{ label, href }] convierte la entrada en un
  *                     desplegable. El padre pasa a ser <button> y no <a>: un
@@ -163,6 +166,70 @@ const ChevronIcon = props => (
  * `external` solo se activa para el mapa; tel: y mailto: los resuelve el
  * sistema operativo y abrirlos en pestaña nueva deja una ventana en blanco.
  */
+/* ── Iconos sociales ──
+   Definidos acá y no en Icons.js a propósito: son de uso exclusivo de esta
+   franja. Si en algún momento hacen falta también en el footer, se mueven
+   allá y acá queda un import.
+
+   Los tres a 24x24 con fill, no stroke: los logos de marca se dibujan como
+   siluetas macizas y a 14px un contorno de 1.5 se empasta. */
+
+function FacebookIcon({ className = "" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.9h-2.33V22C18.34 21.24 22 17.08 22 12.06Z" />
+    </svg>
+  )
+}
+
+function InstagramIcon({ className = "" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 1.98c-3.14 0-3.51.01-4.75.07-1.15.05-1.77.24-2.18.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.18-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.15.24 1.77.4 2.18.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.18.4 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.15-.05 1.77-.24 2.18-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.18.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.15-.24-1.77-.4-2.18a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.18-.4-1.24-.06-1.61-.07-4.75-.07Zm0 3.37a5.49 5.49 0 1 1 0 10.98 5.49 5.49 0 0 1 0-10.98Zm0 1.98a3.51 3.51 0 1 0 0 7.02 3.51 3.51 0 0 0 0-7.02Zm5.71-3.24a1.28 1.28 0 1 1 0 2.56 1.28 1.28 0 0 1 0-2.56Z" />
+    </svg>
+  )
+}
+
+function TikTokIcon({ className = "" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 1 1 .77-5.06v-3.1a5.66 5.66 0 0 0-.77-.05A5.68 5.68 0 1 0 15.54 15.4V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.29 4.29 0 0 1-3.24-1.48Z" />
+    </svg>
+  )
+}
+
+/* Enlace social. Mientras no haya URL se dibuja como span inerte en vez de
+   un <a href="#">: un enlace que no lleva a ningún lado ensucia el recorrido
+   de Tab y engaña al lector de pantalla. El icono se ve —que es lo que
+   permite evaluar la franja ahora— pero no promete nada.
+
+   Cuando lleguen las URLs se llenan en header.php y estos se vuelven enlaces
+   reales sin tocar el componente. */
+function SocialLink({ icon: Icon, label, href }) {
+  const clases = "flex h-7 w-7 items-center justify-center text-bone/60 transition-colors"
+
+  if (!href) {
+    return (
+      <span className={`${clases} cursor-default opacity-40`} title={`${label} — pendiente`}>
+        <Icon className="h-3.5 w-3.5" />
+        <span className="sr-only">{label} (enlace pendiente)</span>
+      </span>
+    )
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${clases} hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      <span className="sr-only">{label}</span>
+    </a>
+  )
+}
+
 function ContactPlate({ icon: Icon, label, srLabel, href, external = false }) {
   return (
     <a
@@ -404,7 +471,12 @@ export default function Navbar({
   email = "info@ecscaping.com",
   address = "3754 N Higley Rd, Suite 2 · Ogden, UT",
   mapsHref = "https://www.google.com/maps/search/?api=1&query=3754+N+Higley+Rd+Suite+2+Ogden+UT+84404",
-  license = "UT License 1106462255001 · S330",
+  license = "UT License S330",
+
+  /* Redes sociales. Cada clave acepta una URL; las que estén vacías se
+     dibujan como icono inerte, no como enlace roto. Se llenan desde
+     header.php cuando el cliente entregue los perfiles (Pendiente 13). */
+  social = {},
   links = DEFAULT_LINKS,
   bidHref = "/contact",
   // null y no "/residential": el enlace es opt-in por prop. Ver la nota de
@@ -465,23 +537,46 @@ export default function Navbar({
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50">
-        {/* ── Franja de utilidad: banda propia a todo el ancho, separada de la
-            barra. Es opaca, así que tapa la franja superior del video del hero
-            — para que el video se vea por detrás basta cambiar bg-ink por
-            bg-ink/85 y añadir backdrop-blur-md: la licencia queda en 4.7:1,
-            que sigue pasando AA a 11px. ── */}
+        {/* ── Franja de utilidad ──
+            Va pegada a la barra, sin aire entre las dos: juntas forman un solo
+            bloque oscuro. Antes la barra flotaba con px-4 pt-4 y se leía como
+            una pieza separada apoyada sobre la franja — lenguaje de interfaz,
+            no de marca. En la valla y en la van los módulos se tocan.
+
+            El padding lateral es el mismo de las secciones de la página
+            (px-5 / sm:px-8 / lg:px-10), así que el número de licencia arranca
+            en la misma vertical que los titulares de abajo.
+
+            Sigue colapsando al hacer scroll: eso no cambia. Lo que cambia es
+            que al colapsar no queda un hueco, porque nunca lo hubo. ── */}
         <div
           className={[
-            "overflow-hidden border-b border-white/5 bg-ink text-bone",
+            /* bg-ink-900 y no bg-ink: la franja va pegada a la barra, así que
+               necesita un escalón propio para no leerse como un solo bloque
+               de 120px de alto. Hacia arriba no se puede —cualquier tono más
+               claro la volvería protagonista sobre la navegación— así que se
+               separa hacia abajo. */
+            "overflow-hidden border-b border-white/10 bg-ink-900 text-bone",
             "transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none",
             docked ? "max-h-0 opacity-0" : "max-h-12 opacity-100",
           ].join(" ")}
         >
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-1.5">
-            <span className="hidden text-[0.68rem] font-medium uppercase tracking-[0.14em] text-bone/55 md:inline">
-              {license}
-            </span>
-            <div className="flex flex-1 items-center justify-end gap-2">
+          {/* Tres zonas: contacto directo · ubicación · credencial y redes.
+
+              La rejilla es de tres columnas y no un flex con justify-between,
+              porque con flex el centro se corre según cuánto midan los
+              extremos — y el bloque de la izquierda cambia de ancho con el
+              teléfono y el correo. Con grid-cols-3 el geotag queda centrado
+              contra la página, no contra sus vecinos.
+
+              El orden no es arbitrario: teléfono y correo primero porque son
+              las dos acciones que un estimador toma desde acá; la dirección
+              en el centro porque es contexto, no acción; y a la derecha lo que
+              se consulta pero no se usa — la licencia y las redes. */}
+          <div className="grid grid-cols-[1fr_auto] items-center gap-4 px-5 py-1.5 sm:px-8 lg:grid-cols-3 lg:px-10">
+
+            {/* ── Izquierda: teléfono y correo ── */}
+            <div className="flex items-center justify-start gap-2">
               <ContactPlate
                 icon={PhoneIcon}
                 label={phone}
@@ -494,6 +589,14 @@ export default function Navbar({
                 srLabel={`Email ${email}`}
                 href={mailHref}
               />
+            </div>
+
+            {/* ── Centro: la dirección ──
+                Se oculta por debajo de lg. Es el dato más largo de los tres
+                y el único que no es una acción: cuando el espacio aprieta, es
+                el primero que sobra. Sigue en el footer y en el bloque de
+                área de servicio. */}
+            <div className="hidden items-center justify-center lg:flex">
               <ContactPlate
                 icon={PinIcon}
                 label={address}
@@ -501,34 +604,45 @@ export default function Navbar({
                 href={mapsHref}
                 external
               />
-              {residentialHref && (
-                <a
-                  href={residentialHref}
-                  className="ml-1 hidden text-[0.68rem] font-medium uppercase tracking-[0.14em] text-bone/45 transition-colors hover:text-bone/90 lg:inline"
-                >
-                  Residential <span aria-hidden="true">→</span>
-                </a>
-              )}
+            </div>
+
+            {/* ── Derecha: licencia y redes ── */}
+            <div className="flex items-center justify-end gap-3">
+              <span className="hidden text-[0.68rem] font-medium uppercase tracking-[0.14em] text-bone/55 xl:inline">
+                {license}
+              </span>
+
+              {/* El filete solo aparece cuando hay algo a su izquierda que
+                  separar. */}
+              <span className="hidden h-4 w-px bg-white/15 xl:inline-block" aria-hidden="true"></span>
+
+              <div className="flex items-center gap-0.5">
+                <SocialLink icon={FacebookIcon}  label="Facebook"  href={social.facebook} />
+                <SocialLink icon={InstagramIcon} label="Instagram" href={social.instagram} />
+                <SocialLink icon={TikTokIcon}    label="TikTok"    href={social.tiktok} />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ── Barra principal: flotante arriba, acoplada al hacer scroll ── */}
-        <div
-          className={[
-            "transition-all duration-300 ease-out motion-reduce:transition-none",
-            docked ? "px-0 pt-0" : "px-4 pt-4 sm:px-6",
-          ].join(" ")}
-        >
+        {/* ── Barra principal ── */}
+        {/* Sin padding exterior en ningún estado. Era lo que separaba la barra
+            de la franja y lo que la hacía flotar. */}
+        <div>
           <nav
             aria-label="Primary"
             className={[
               barSurface,
-              "mx-auto flex items-center justify-between gap-6",
+              "flex items-center justify-between gap-6",
               "transition-all duration-300 ease-out motion-reduce:transition-none",
+              /* Ancho completo y bordes rectos en los dos estados. Lo único
+                 que cambia al acoplarse es el alto —py-3 contra py-4— y el
+                 desenfoque, que aparece cuando la barra empieza a dejar ver
+                 el contenido por detrás. */
+              "px-5 sm:px-8 lg:px-10",
               docked
-                ? "max-w-none rounded-none px-5 py-3 shadow-[0_1px_0_0_rgba(0,0,0,0.08)] backdrop-blur-xl backdrop-saturate-150 sm:px-8"
-                : "max-w-7xl rounded-lg px-5 py-4 shadow-lg shadow-ink/10 backdrop-blur-md sm:px-7",
+                ? "py-3 shadow-[0_1px_0_0_rgba(0,0,0,0.25)] backdrop-blur-xl backdrop-saturate-150"
+                : "py-4",
             ].join(" ")}
           >
             {/* Marca */}

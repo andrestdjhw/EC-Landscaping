@@ -149,6 +149,14 @@ $cases = array(
 
 /* 05 · CAPACIDADES — carrusel de tarjetas con imagen.
 
+   Cada tarjeta enlaza a su página de capacidad. El href se arma con
+   home_url() y no con una ruta literal: si WordPress vive en un
+   subdirectorio, una ruta absoluta desde la raíz se rompe.
+
+   Los slugs tienen que coincidir con los de las páginas creadas en el admin:
+   landscape-installation · hardscape-concrete · grounds-maintenance ·
+   water-wise-retrofits.
+
    Las rutas se arman desde wp_get_upload_dir() y no se pegan literales, igual
    que el hero y los casos: así la URL sobrevive la migración de
    ec-landscaping.local a producción sin tocar código.
@@ -157,25 +165,29 @@ $capabilities = array(
   array(
     'title' => 'Commercial landscape installation',
     'body'  => 'New construction, retail pads, branch sites, multifamily and industrial. Grading and soil preparation, irrigation mains and zones, planting, sod, trees and final grade to plan.',
-    'image' => $ec_uploads['baseurl'] . '/2026/07/CommercialLandscapeInstallation-scaled.webp',
+    'image' => $ec_uploads['baseurl'] . '/2026/08/ECLandscaping.jpg',
+    'href'  => home_url('/landscape-installation'),
     'alt'   => 'Commercial landscape installation in progress on a Northern Utah site',
   ),
   array(
     'title' => 'Hardscape & concrete',
     'body'  => 'Retaining walls, paver plazas and walkways, flat and stamped concrete, curbing, site walls and pool decks — self-performed under our own concrete and masonry license.',
-    'image' => $ec_uploads['baseurl'] . '/2026/07/HardscapeConcrete-scaled.webp',
+    'image' => $ec_uploads['baseurl'] . '/2026/08/ECHardscape.jpg',
+    'href'  => home_url('/hardscape-concrete'),
     'alt'   => 'Retaining wall and paver hardscape under construction',
   ),
   array(
     'title' => 'Grounds maintenance, irrigation & snow',
     'body'  => 'Annual contracts covering mowing, fertilization, pruning, spring startup, smart irrigation management, fall winterization, and snow and ice management through the winter. One vendor, twelve months.',
-    'image' => $ec_uploads['baseurl'] . '/2026/07/GroundsMaintenance-scaled.webp',
+    'image' => $ec_uploads['baseurl'] . '/2026/08/GroundsMaintenance.jpg',
+    'href'  => home_url('/grounds-maintenance'),
     'alt'   => 'Grounds maintenance on a commercial property',
   ),
   array(
     'title' => 'Water-wise retrofits',
     'body'  => 'Turf conversion, drip and smart controllers, native and adapted plantings, and design that meets local water district requirements without looking like a gravel lot.',
-    'image' => $ec_uploads['baseurl'] . '/2026/07/WaterWiseRetrofits-scaled.webp',
+    'image' => $ec_uploads['baseurl'] . '/2026/07/WaterWiseRetrofits-scaled.webp',  // sin reemplazo aún
+    'href'  => home_url('/water-wise-retrofits'),
     'alt'   => 'Drought-tolerant planting with drip irrigation on a commercial property',
   ),
 );
@@ -340,19 +352,32 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
        al hacer clic: ahora está siempre, así que necesita ocupar su espacio en
        el layout. Con position:absolute el titular no sabría que hay algo a su
        derecha y a 1280px exactos se tocarían. -->
-  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+1rem)] sm:px-8 lg:h-full lg:min-h-0 lg:px-10 lg:pb-12 lg:pt-[var(--header-offset)] xl:grid xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-center xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_30rem]">
-    <div class="max-w-3xl">
-      <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest">
+  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+1rem)] sm:px-8 lg:h-full lg:min-h-0 lg:px-10 lg:pb-12 lg:pt-[var(--header-offset)] [@media(min-width:1024px)_and_(max-height:800px)]:pb-6 xl:grid xl:min-h-0 xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-stretch xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_30rem]">
+
+    <!-- La columna de texto se centra por su cuenta desde xl.
+
+         Hasta xl la sección es un flex con items-center y el texto queda
+         centrado solo. Desde xl pasa a rejilla con items-stretch —que es lo
+         que impide al panel del formulario estirar la fila y desbordar— y
+         eso estira también esta columna: se vuelve tan alta como la fila,
+         pero su contenido sigue fluyendo desde arriba y queda pegado al
+         borde superior.
+
+         min-h-0 acompaña al justify-center: sin él, una columna estirada no
+         puede encogerse por debajo de su contenido y el centrado no tiene
+         contra qué calcularse. -->
+    <div class="max-w-3xl xl:flex xl:min-h-0 xl:flex-col xl:justify-center">
+      <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest [@media(min-width:1024px)_and_(max-height:800px)]:mb-3">
         <?php echo esc_html($hero['eyebrow']); ?>
       </p>
-      <h1 class="ec-shine font-display text-4xl leading-[1.08] font-bold tracking-tight text-ink sm:text-5xl lg:text-[3.4rem] [@media(min-width:1024px)_and_(max-height:860px)]:text-[2.7rem]">
+      <h1 class="ec-shine font-display text-4xl leading-[1.08] font-bold tracking-tight text-ink sm:text-5xl lg:text-[3.4rem] [@media(min-width:1024px)_and_(max-height:860px)]:text-[2.7rem] [@media(min-width:1024px)_and_(max-height:800px)]:text-[2.25rem]">
         <?php echo esc_html($hero['title']); ?>
       </h1>
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-ink/80 [@media(min-width:1024px)_and_(max-height:860px)]:mt-4 [@media(min-width:1024px)_and_(max-height:860px)]:text-base">
+      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-ink/80 [@media(min-width:1024px)_and_(max-height:860px)]:mt-4 [@media(min-width:1024px)_and_(max-height:860px)]:text-base [@media(min-width:1024px)_and_(max-height:800px)]:mt-3 [@media(min-width:1024px)_and_(max-height:800px)]:text-sm">
         <?php echo esc_html($hero['lede']); ?>
       </p>
 
-      <div class="mt-9 flex flex-wrap items-center gap-4">
+      <div class="mt-9 flex flex-wrap items-center gap-4 [@media(min-width:1024px)_and_(max-height:800px)]:mt-6">
         <!-- Los pulsos van en hermanos detrás del botón, no en su box-shadow.
              El relieve del CTA (cta-relief-light) ya ocupa esa propiedad y
              animarla encima haría que las dos se pisen: el bisel latiría junto
@@ -372,7 +397,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
           <a
             href="<?php echo esc_url($bid_href); ?>"
             data-bid-cta
-            class="cta-relief-light relative inline-flex items-center gap-2.5 border-2 border-white/60 bg-ember py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
+            class="cta-relief-light relative inline-flex items-center gap-2.5 border-2 border-white/60 bg-ember py-4 pl-7 pr-6 [@media(min-width:1024px)_and_(max-height:800px)]:py-3 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
           >
             Request a bid
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none">
@@ -388,7 +413,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
         <?php endif; ?>
       </div>
 
-      <p class="mt-8 max-w-xl text-xs leading-relaxed text-ink/70">
+      <p class="mt-8 max-w-xl text-xs leading-relaxed text-ink/70 [@media(min-width:1024px)_and_(max-height:800px)]:mt-4 [@media(min-width:1024px)_and_(max-height:800px)]:hidden">
         <?php echo esc_html($hero['micro']); ?>
       </p>
     </div>
@@ -423,9 +448,21 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
     );
     ?>
 
+    <!-- min-h-0 y no un max-h calculado sobre 100svh. Ese era el bug: el
+         panel se limitaba contra la altura del VIEWPORT, pero el hero no mide
+         un viewport — mide eso menos la barra de prueba, con la que comparte
+         pantalla. El panel quedaba unos 90px más alto que su contenedor,
+         estiraba la fila de la rejilla, y el overflow-hidden de la sección
+         recortaba el CTA y el pie del formulario. En una pantalla de 15" eso
+         es justo lo que se pierde.
+
+         Ahora la celda se estira al alto real de la fila y min-h-0 le permite
+         encogerse por debajo de su contenido, que es lo que deja al panel
+         toparse con max-h-full y activar su scroll interno. El panel se
+         centra dentro de la celda con items-center. -->
     <div
       id="ec-hero-form"
-      class="hidden max-h-[calc(100svh-var(--header-offset)-8rem)] xl:block"
+      class="hidden min-h-0 xl:flex xl:items-center"
       data-props="<?php echo esc_attr(wp_json_encode($ec_hero_form_props)); ?>"
     ></div>
   </div>
@@ -444,28 +481,54 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
      bloque 03. -->
 <section class="relative bg-ink lg:shrink-0">
 
-  <!-- Remate de rayas sobre el filo superior. Es el recurso de la valla
-       girado: cierra el hero con el elemento gráfico de la marca en lugar de
-       una línea lisa. -->
-  <div class="ec-band ec-band--h absolute inset-x-0 top-0 h-1.5 opacity-40" aria-hidden="true"></div>
-
   <dl class="grid grid-cols-2 gap-px bg-white/10 lg:grid-cols-4">
-    <?php foreach ($proof_bar as $i => $item) :
-      // El primer dato lleva el acento. El texto pasa a ink sobre clay:
-      // bone encima daría 2.85:1 y no se leería.
-      $ec_destacado = (0 === $i);
-      $ec_bg  = $ec_destacado ? 'bg-ember' : 'bg-ink';
-      $ec_num = $ec_destacado ? 'text-ink' : 'text-ember';
-      // Sobre clay el texto va SIN opacidad. Clay es un tono medio:
-      // ink a plena da 3.90:1 y a 75% cae a 2.76:1 — el texto de apoyo
-      // desaparece. Sobre ink sí hay margen para atenuarlo.
-      $ec_lbl = $ec_destacado ? 'text-ink' : 'text-bone/70';
+    <?php
+    /* Tres superficies, no dos. Antes el primer bloque iba en clay y los
+       otros tres en ink: tres oscuros seguidos, que es justo lo que la valla
+       no hace. El tercero pasa a claro y la barra queda clay · ink · claro ·
+       ink, sin dos vecinos iguales.
+
+       Cada superficie arrastra su propio par de colores de texto, y ninguno
+       es intercambiable:
+         · sobre CLAY, ink a plena. Es un tono medio: a 75% cae a 2.76:1.
+         · sobre INK, ember para la cifra y bone/70 para la etiqueta.
+         · sobre CLARO, ember-600 y no ember. El ember base da 3.12:1 y falla
+           incluso el mínimo de texto grande; el 600 da 4.92:1. */
+    /* La cuarta entrada de cada fila es el filete de rayas del borde superior.
+
+       Antes era UN solo elemento cruzando la barra entera, en LINEN. Sobre
+       los bloques oscuros se veía y sobre el claro desaparecía — rayas claras
+       sobre fondo claro— así que el remate se cortaba justo en el medio.
+
+       Ahora el filete vive dentro de cada bloque y toma el color que
+       contrasta con su propia superficie: ink sobre las dos claras, linen
+       sobre las oscuras. Un elemento por bloque en lugar de uno global es lo
+       que permite que el remate cruce entero. */
+    $ec_superficies = array(
+      0 => array('bg-ember',      'text-ink',        'text-ink',       'ec-band--ink'),
+      1 => array('bg-ink',        'text-ember',      'text-bone/70',   ''),
+      2 => array('bg-breeze-100', 'text-ember-600',  'text-ink/70',    'ec-band--ink'),
+      3 => array('bg-ink',        'text-ember',      'text-bone/70',   ''),
+    );
+
+    foreach ($proof_bar as $i => $item) :
+      list($ec_bg, $ec_num, $ec_lbl, $ec_banda) = isset($ec_superficies[$i])
+        ? $ec_superficies[$i]
+        : array('bg-ink', 'text-ember', 'text-bone/70', '');
       ?>
-      <div class="<?php echo esc_attr($ec_bg); ?> px-5 py-7 sm:px-8 lg:px-10 lg:py-5">
-        <dt class="font-display text-3xl font-bold tracking-tight <?php echo esc_attr($ec_num); ?> sm:text-4xl lg:text-[2rem]">
+      <!-- La barra encoge en pantalla corta: comparte viewport con el hero y
+           cada píxel que suelta acá es un píxel que gana el formulario. -->
+      <div class="<?php echo esc_attr($ec_bg); ?> relative px-5 py-7 sm:px-8 lg:px-10 lg:py-4 [@media(min-width:1024px)_and_(max-height:800px)]:py-2.5">
+
+        <!-- Remate de rayas sobre el filo superior del bloque. Es el recurso
+             de la valla girado: cierra el hero con el elemento gráfico de la
+             marca en lugar de una línea lisa. -->
+        <div class="ec-band ec-band--h <?php echo esc_attr($ec_banda); ?> pointer-events-none absolute inset-x-0 top-0 h-1.5 opacity-40" aria-hidden="true"></div>
+
+        <dt class="font-display text-3xl font-bold tracking-tight <?php echo esc_attr($ec_num); ?> sm:text-4xl lg:text-[1.85rem] [@media(min-width:1024px)_and_(max-height:800px)]:text-[1.5rem]">
           <?php echo esc_html($item['stat']); ?>
         </dt>
-        <dd class="mt-2 text-xs leading-relaxed <?php echo esc_attr($ec_lbl); ?> lg:mt-1.5">
+        <dd class="mt-2 text-xs leading-relaxed <?php echo esc_attr($ec_lbl); ?> lg:mt-1 [@media(min-width:1024px)_and_(max-height:800px)]:mt-0.5">
           <?php echo esc_html($item['label']); ?>
         </dd>
       </div>
@@ -573,6 +636,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                   </p>
                 </div>
               </article>
+              </a>
             </li>
           <?php endforeach;
         endfor; ?>
@@ -817,16 +881,34 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
               class="w-[80vw] shrink-0 sm:w-[23rem] lg:w-[25rem]"
               <?php echo $ec_clone ? 'aria-hidden="true"' : ''; ?>
             >
+              <?php
+              /* La tarjeta entera es el enlace, no un "ver más" al pie: el
+                 área de clic es el bloque completo, que es lo que un dedo
+                 espera de una tarjeta con foto.
+
+                 La copia del marquee va con tabindex=-1 además de
+                 aria-hidden. Sin eso el recorrido de Tab pasaría dos veces
+                 por las mismas cuatro capacidades, y la segunda vuelta
+                 llevaría a enlaces que el lector de pantalla no anuncia. */
+              $ec_href = !empty($item['href']) ? $item['href'] : '';
+              ?>
+              <a
+                href="<?php echo esc_url($ec_href); ?>"
+                <?php echo $ec_clone ? 'tabindex="-1"' : ''; ?>
+                class="group block h-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember"
+              >
               <article class="flex h-full flex-col overflow-hidden bg-sand">
 
                 <?php if (!empty($item['image'])) : ?>
-                  <img
-                    src="<?php echo esc_url($item['image']); ?>"
-                    alt="<?php echo $ec_clone ? '' : esc_attr($item['alt']); ?>"
-                    class="aspect-[4/3] w-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <div class="aspect-[4/3] w-full overflow-hidden">
+                    <img
+                      src="<?php echo esc_url($item['image']); ?>"
+                      alt="<?php echo $ec_clone ? '' : esc_attr($item['alt']); ?>"
+                      class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                 <?php else : ?>
                   <!-- Respaldo: si una imagen se cae en la migración, la tarjeta
                        queda con un panel liso en verde de marca en lugar de un
@@ -834,7 +916,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                   <div class="aspect-[4/3] w-full bg-[linear-gradient(150deg,#696D56_0%,#565945_100%)]" aria-hidden="true"></div>
                 <?php endif; ?>
 
-                <div class="flex flex-1 flex-col border-t-4 border-ember p-7">
+                <div class="flex flex-1 flex-col border-t-4 border-ember p-7 transition-colors duration-300 group-hover:bg-breeze-100 motion-reduce:transition-none">
                   <h3 class="font-display text-lg font-bold tracking-tight text-ink">
                     <?php echo esc_html($item['title']); ?>
                   </h3>
@@ -843,6 +925,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                   </p>
                 </div>
               </article>
+              </a>
             </li>
           <?php endforeach;
         endfor; ?>

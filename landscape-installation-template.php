@@ -51,7 +51,7 @@ $ec_alt   = 'Commercial landscape installation in progress on a Northern Utah si
 $ec_media_scope = $ec_uploads['baseurl'] . '/2026/08/';
 
 $ec_img_sites       = $ec_media_scope . 'New_construction-scaled.jpg';
-$ec_img_multifamily = $ec_media_scope . 'MultifamilyComplex-scaled.jpg';
+$ec_img_multifamily = $ec_media_scope . 'LanscapingCapabilitiesMultifamily.jpg';
 $ec_img_grading     = $ec_media_scope . 'GradingSoilPreparation-scaled.jpg';
 $ec_img_irrigation  = $ec_media_scope . 'IrrigationPipeInstallation-scaled.jpg';
 $ec_img_planting    = $ec_media_scope . 'PlantingSodTrees-scaled.jpg';
