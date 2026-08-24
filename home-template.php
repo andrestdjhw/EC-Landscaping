@@ -26,15 +26,15 @@ $hero = array(
   'eyebrow' => 'Commercial landscape, hardscape & concrete · Northern Utah',
   'title'   => 'Commercial landscape installation that holds the schedule.',
   'lede'    => "Self-performed hardscape, concrete and landscape installation for general contractors, property managers, HOAs and multi-site brands across the Weber–Davis corridor. Thirty-one people on our crew. Licensed, insured, and on site when we said we'd be.",
-  'micro'   => 'Utah License 1106462255001 · S330 — General Liability, Workers’ Compensation and Commercial Auto certificates available on request.',
+  'micro'   => 'Utah License · S330 — General Liability, Workers’ Compensation and Commercial Auto certificates available on request.',
 
   // Se arma desde wp_get_upload_dir() para que la URL sobreviva la migración
   // de ec-landscaping.local a producción.
   //
-  // Reemplaza a ECLanscapingHero-1.mp4, que sigue en la biblioteca por si hay
-  // que volver atrás. El archivo nuevo está en la carpeta de agosto, no en la
-  // de julio como el de Projects.
-  'video'   => $ec_uploads['baseurl'] . '/2026/08/VIDEO-EC.mp4',
+  // Reemplaza a VIDEO-EC.mp4 (y antes a ECLanscapingHero-1.mp4), que siguen
+  // en la biblioteca por si hay que volver atrás. El segmento de drone está
+  // en la carpeta de agosto.
+  'video'   => $ec_uploads['baseurl'] . '/2026/08/Segmento-drone-9-EC-landscaping.mp4',
 
   // Fotograma del video exportado como JPG. Es lo que ven quienes no cargan
   // el video: móvil, prefers-reduced-motion y conexiones lentas. Sin poster
@@ -76,13 +76,13 @@ $proof_bar = array(
 $ec_img_gc        = $ec_uploads['baseurl'] . '/2026/08/GeneralContractors-scaled.jpg';
 
 // Prompt: "office park commercial property exterior"
-$ec_img_pm        = $ec_uploads['baseurl'] . '/2026/08/PropertyManagers-scaled.jpg';
+$ec_img_pm        = $ec_uploads['baseurl'] . '/2026/08/GroundsMaintenance.jpg';
 
 // Prompt: "residential community entrance landscaping" — área común, no una casa
-$ec_img_hoa       = $ec_uploads['baseurl'] . '/2026/08/HOABoards-scaled.jpg';
+$ec_img_hoa       = $ec_uploads['baseurl'] . '/2026/08/LandscapingProject3.jpg';
 
 // Prompt: "corporate campus building landscape"
-$ec_img_multisite = $ec_uploads['baseurl'] . '/2026/08/InstitutionalMultisiteBuildings-scaled.jpg';
+$ec_img_multisite = $ec_uploads['baseurl'] . '/2026/08/LanscapingCapabilitiesMultifamily.jpg';
 
 // Prompt: "convenience store exterior daytime" — sin marca legible
 $ec_img_retail    = $ec_uploads['baseurl'] . '/2026/08/ConvenienceStore-scaled.jpg';
@@ -296,14 +296,23 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
      video: la resuelve un scrim asimétrico, casi opaco en la columna de
      texto y transparente a la derecha. Eso mantiene el hero claro y deja
      ver el video como presencia, sin apostar el contraste a un fotograma. -->
-<!-- Hero + barra de prueba comparten una pantalla. El contenedor mide un
-     viewport y reparte el espacio: el hero toma lo que sobra (flex-1) y la
-     barra ocupa lo que necesita. Así no hay que adivinar el alto de la barra
-     con un número mágico que se rompe al cambiar el copy de las etiquetas.
+<!-- Hero + barra de prueba comparten una pantalla SOLO cuando el alto
+     alcanza. El clamp h-svh se condiciona a min-height:880px: en una laptop
+     corta (720–800px de alto útil) forzar todo dentro de un viewport
+     comprimía el hero — el formulario recortaba sus últimos campos y
+     activaba el scroll interno, los textos encogían y el micro-texto se
+     ocultaba. Por debajo del umbral la página fluye natural: el formulario
+     se muestra completo, el texto conserva su tamaño y la barra de prueba
+     queda tras un scroll corto.
+
+     Cuando el clamp aplica, el contenedor mide un viewport y reparte el
+     espacio: el hero toma lo que sobra (flex-1) y la barra ocupa lo que
+     necesita. Así no hay que adivinar el alto de la barra con un número
+     mágico que se rompe al cambiar el copy de las etiquetas.
      Solo en lg: en móvil la barra son dos filas y forzarlas dentro de la
      pantalla aplastaría el titular. -->
-<div class="lg:flex lg:h-svh lg:flex-col">
-<section class="relative isolate overflow-hidden bg-bone text-ink lg:min-h-0 lg:flex-1">
+<div class="lg:flex lg:flex-col [@media(min-width:1024px)_and_(min-height:880px)]:h-svh">
+<section class="relative isolate overflow-hidden bg-umber text-bone lg:min-h-0 lg:flex-1">
 
   <video
     data-bg-video
@@ -319,11 +328,32 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
     tabindex="-1"
   ></video>
 
-  <!-- Scrim: bone casi opaco donde va el texto, abriéndose hacia la derecha.
+  <!-- Scrim: velo verde casi UNIFORME, al estilo del hero de BC Landscaping
+       — el video se ve claramente en toda la sección, teñido parejo, y el
+       texto claro vive encima del metraje.
+
+       El tono es OLIVE (#696D56), el verde de marca. Como base del velo es
+       mejor superficie que el clay-600 que llevaba antes: LINEN sobre OLIVE
+       da 8.16:1 contra los 5.15:1 del terracota, así que el texto claro
+       tiene más margen frente a lo que salga en el video.
+
+       Sigue habiendo un sesgo leve hacia la columna de texto (0.74 → 0.55):
+       con un velo tan abierto, la legibilidad depende en parte del metraje,
+       y ese cuarto de opacidad extra del lado izquierdo es el seguro contra
+       un cielo blanco en el segmento de drone. LA PERILLA ES EL PRIMER
+       VALOR: si en el navegador el titular se lava contra una toma clara,
+       subí el 0.74 hacia 0.85; si querés más video, bajalo — pero probalo
+       contra el fotograma más claro del loop, no contra el más oscuro.
+
+       bg-umber en la sección (alias de OLIVE, la misma superficie que usan
+       credenciales y las bandas de cierre): es lo que se ve el instante
+       previo a que cargue el video, y lo que queda cuando el video no carga
+       (móvil, reduced-motion, saveData).
+
        Gradiente explícito en lugar de utilidad de Tailwind para no depender
        del renombre de bg-gradient-* a bg-linear-* en v4. -->
   <div
-    class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,#F1F0E6_0%,rgba(241,240,230,0.95)_34%,rgba(241,240,230,0.6)_62%,rgba(241,240,230,0.3)_100%)]"
+    class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgba(105,109,86,0.74)_0%,rgba(105,109,86,0.68)_40%,rgba(105,109,86,0.6)_70%,rgba(105,109,86,0.55)_100%)]"
     aria-hidden="true"
   ></div>
 
@@ -331,12 +361,19 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
        lugar de empujar la página. min-h en svh y no vh: en móvil, vh incluye
        la barra de direcciones y el hero salta cuando aparece o desaparece.
 
+       h-full y min-h-0 van tras el mismo umbral de alto que el clamp del
+       contenedor: solo tienen sentido cuando el hero mide una pantalla. En
+       pantallas cortas el clamp no aplica, así que acá manda el min-h-[38rem]
+       y el contenido fluye a su altura natural — un h-full contra un padre
+       de alto automático no resuelve nada, y el min-h-0 anularía el piso de
+       38rem justo donde hace falta.
+
        Desde xl el hero es una rejilla de dos columnas reales, no un texto con
        un panel flotando encima. El formulario dejó de ser una capa que aparece
        al hacer clic: ahora está siempre, así que necesita ocupar su espacio en
        el layout. Con position:absolute el titular no sabría que hay algo a su
        derecha y a 1280px exactos se tocarían. -->
-  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+1rem)] sm:px-8 lg:h-full lg:min-h-0 lg:px-10 lg:pb-12 lg:pt-[var(--header-offset)] [@media(min-width:1024px)_and_(max-height:800px)]:pb-6 xl:grid xl:min-h-0 xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-stretch xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_30rem]">
+  <div class="relative flex min-h-[38rem] items-center px-5 pb-20 pt-[calc(var(--header-offset)+1rem)] sm:px-8 lg:px-10 lg:pb-12 lg:pt-[var(--header-offset)] [@media(min-width:1024px)_and_(min-height:880px)]:h-full [@media(min-width:1024px)_and_(min-height:880px)]:min-h-0 xl:grid xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-stretch xl:gap-12 2xl:grid-cols-[minmax(0,1fr)_30rem]">
 
     <!-- La columna de texto se centra por su cuenta desde xl.
 
@@ -351,17 +388,28 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
          puede encogerse por debajo de su contenido y el centrado no tiene
          contra qué calcularse. -->
     <div class="max-w-3xl xl:flex xl:min-h-0 xl:flex-col xl:justify-center">
-      <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest [@media(min-width:1024px)_and_(max-height:800px)]:mb-3">
+      <!-- Sobre el velo el eyebrow no puede seguir en forest: el olive
+           desaparece contra su propio matiz. Bone a plena es lo que aguanta
+           el velo abriéndose.
+
+           Sin variantes de max-height: la compresión de pantalla corta se
+           retiró de todo el hero cuando el clamp de una pantalla pasó a ser
+           condicional — donde no hay alto, la página crece en lugar de
+           encoger el texto. -->
+      <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-bone">
         <?php echo esc_html($hero['eyebrow']); ?>
       </p>
-      <h1 class="ec-shine font-display text-4xl leading-[1.08] font-bold tracking-tight text-ink sm:text-5xl lg:text-[3.4rem] [@media(min-width:1024px)_and_(max-height:860px)]:text-[2.7rem] [@media(min-width:1024px)_and_(max-height:800px)]:text-[2.25rem]">
+      <h1 class="ec-shine ec-shine--light font-display text-4xl leading-[1.08] font-bold tracking-tight text-bone sm:text-5xl lg:text-[3.4rem]">
         <?php echo esc_html($hero['title']); ?>
       </h1>
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-ink/80 [@media(min-width:1024px)_and_(max-height:860px)]:mt-4 [@media(min-width:1024px)_and_(max-height:860px)]:text-base [@media(min-width:1024px)_and_(max-height:800px)]:mt-3 [@media(min-width:1024px)_and_(max-height:800px)]:text-sm">
+      <!-- Sin opacidad en el lede ni el micro: con el velo translúcido el
+           margen de contraste depende del metraje, y cualquier atenuación
+           come de ese margen. -->
+      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-bone">
         <?php echo esc_html($hero['lede']); ?>
       </p>
 
-      <div class="mt-9 flex flex-wrap items-center gap-4 [@media(min-width:1024px)_and_(max-height:800px)]:mt-6">
+      <div class="mt-9 flex flex-wrap items-center gap-4">
         <!-- Los pulsos van en hermanos detrás del botón, no en su box-shadow.
              El relieve del CTA (cta-relief-light) ya ocupa esa propiedad y
              animarla encima haría que las dos se pisen: el bisel latiría junto
@@ -372,6 +420,12 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
              se lee como un parpadeo intermitente en lugar de una emisión
              continua.
 
+             Sobre el velo OLIVE el botón y sus pulsos ember recuperan todo su
+             contraste: naranja sobre verde es la oposición más fuerte que da
+             la paleta, así que el CTA se lee primero — que es el punto. El
+             hover vuelve a ember-600 (cuando el velo era clay-600 se fundía
+             con el fondo y hubo que aclararlo).
+
              `group` vive en el envoltorio, no en el <a>: así los pulsos —que
              son hermanos del botón— pueden reaccionar al hover. El área es la
              misma, así que la flecha del botón sigue animando igual. -->
@@ -381,7 +435,7 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
           <a
             href="<?php echo esc_url($bid_href); ?>"
             data-bid-cta
-            class="cta-relief-light relative inline-flex items-center gap-2.5 border-2 border-white/60 bg-ember py-4 pl-7 pr-6 [@media(min-width:1024px)_and_(max-height:800px)]:py-3 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
+            class="cta-relief-light relative inline-flex items-center gap-2.5 border-2 border-white/60 bg-ember py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ember-600 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
           >
             Request a bid
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none">
@@ -391,13 +445,13 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
         </span>
 
         <?php if ($deck_href) : ?>
-          <a href="<?php echo esc_url($deck_href); ?>" class="text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink/75 underline decoration-forest decoration-2 underline-offset-8 transition-colors hover:text-ink">
+          <a href="<?php echo esc_url($deck_href); ?>" class="text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone underline decoration-bone/60 decoration-2 underline-offset-8 transition-colors hover:text-white">
             Download capability deck (PDF)
           </a>
         <?php endif; ?>
       </div>
 
-      <p class="mt-8 max-w-xl text-xs leading-relaxed text-ink/70 [@media(min-width:1024px)_and_(max-height:800px)]:mt-4 [@media(min-width:1024px)_and_(max-height:800px)]:hidden">
+      <p class="mt-8 max-w-xl text-xs leading-relaxed text-bone">
         <?php echo esc_html($hero['micro']); ?>
       </p>
     </div>
@@ -500,19 +554,20 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
         ? $ec_superficies[$i]
         : array('bg-ink', 'text-ember', 'text-bone/70', '');
       ?>
-      <!-- La barra encoge en pantalla corta: comparte viewport con el hero y
-           cada píxel que suelta acá es un píxel que gana el formulario. -->
-      <div class="<?php echo esc_attr($ec_bg); ?> relative px-5 py-7 sm:px-8 lg:px-10 lg:py-4 [@media(min-width:1024px)_and_(max-height:800px)]:py-2.5">
+      <!-- Sin variantes de pantalla corta: la barra solo comparte viewport
+           con el hero cuando el alto alcanza (el clamp es condicional), así
+           que ya no necesita encoger. -->
+      <div class="<?php echo esc_attr($ec_bg); ?> relative px-5 py-7 sm:px-8 lg:px-10 lg:py-4">
 
         <!-- Remate de rayas sobre el filo superior del bloque. Es el recurso
              de la valla girado: cierra el hero con el elemento gráfico de la
              marca en lugar de una línea lisa. -->
         <div class="ec-band ec-band--h <?php echo esc_attr($ec_banda); ?> pointer-events-none absolute inset-x-0 top-0 h-1.5 opacity-40" aria-hidden="true"></div>
 
-        <dt class="font-display text-3xl font-bold tracking-tight <?php echo esc_attr($ec_num); ?> sm:text-4xl lg:text-[1.85rem] [@media(min-width:1024px)_and_(max-height:800px)]:text-[1.5rem]">
+        <dt class="font-display text-3xl font-bold tracking-tight <?php echo esc_attr($ec_num); ?> sm:text-4xl lg:text-[1.85rem]">
           <?php echo esc_html($item['stat']); ?>
         </dt>
-        <dd class="mt-2 text-xs leading-relaxed <?php echo esc_attr($ec_lbl); ?> lg:mt-1 [@media(min-width:1024px)_and_(max-height:800px)]:mt-0.5">
+        <dd class="mt-2 text-xs leading-relaxed <?php echo esc_attr($ec_lbl); ?> lg:mt-1">
           <?php echo esc_html($item['label']); ?>
         </dd>
       </div>
@@ -620,7 +675,6 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
                   </p>
                 </div>
               </article>
-              </a>
             </li>
           <?php endforeach;
         endfor; ?>
