@@ -57,13 +57,26 @@ function ActionPlate({ icon: Icon, label, srLabel, href, external = false }) {
         aria-label={srLabel}
         {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         className={[
-          "group/plate flex items-center justify-end gap-0 rounded-full border border-white/12 bg-ink/95 py-3 pl-3.5 pr-3.5",
-          "text-bone/80 backdrop-blur-md",
+          /* Cuadrados, no píldoras (ago 2026): rounded-full salió y no
+             entra ningún rounded-*. Las esquinas rectas son el lenguaje de
+             todo el sitio.
+
+             Superficie CLARA (ago 2026): fondo blanco y letras oscuras,
+             invertido a pedido para acompañar al navbar claro. El cambio de
+             superficie arrastra su sistema entero:
+               · borde a ink/10 — el white/12 sobre blanco no se ve
+               · relieve bevel-tile / bevel-tile-raised, las utilidades del
+                 tema PARA claro (el par bevel/bevel-pressed es de superficie
+                 oscura y sobre blanco su luz interior desaparece)
+               · íconos en ember-600, no ember: el clay base da 3.12:1 sobre
+                 blanco; el 600 es el paso que el tema define para claro */
+          "group/plate flex items-center justify-end gap-0 border border-ink/10 bg-white/95 py-3 pl-3.5 pr-3.5",
+          "text-ink/80 backdrop-blur-md bevel-tile",
           "transition-[box-shadow,transform,gap,padding,color] duration-200 ease-out",
-          "hover:bevel hover:gap-2.5 hover:pl-4 hover:pr-5 hover:text-bone",
-          "focus-visible:bevel focus-visible:gap-2.5 focus-visible:pl-4 focus-visible:pr-5",
+          "hover:bevel-tile-raised hover:gap-2.5 hover:pl-4 hover:pr-5 hover:text-ink",
+          "focus-visible:bevel-tile-raised focus-visible:gap-2.5 focus-visible:pl-4 focus-visible:pr-5",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
-          "active:bevel-pressed",
+          "active:shadow-none",
           "motion-reduce:transition-none",
         ].join(" ")}
       >
@@ -80,9 +93,9 @@ function ActionPlate({ icon: Icon, label, srLabel, href, external = false }) {
         >
           {label}
         </span>
-        <Icon className="h-[1.15rem] w-[1.15rem] shrink-0 text-ember" />
+        <Icon className="h-[1.15rem] w-[1.15rem] shrink-0 text-ember-600" />
         {external && (
-          <ExternalIcon className="h-3 w-3 max-w-0 shrink-0 overflow-hidden text-bone/40 opacity-0 transition-opacity duration-200 group-hover/plate:max-w-3 group-hover/plate:opacity-100 motion-reduce:transition-none" />
+          <ExternalIcon className="h-3 w-3 max-w-0 shrink-0 overflow-hidden text-ink/40 opacity-0 transition-opacity duration-200 group-hover/plate:max-w-3 group-hover/plate:opacity-100 motion-reduce:transition-none" />
         )}
       </a>
     </li>

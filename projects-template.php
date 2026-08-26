@@ -85,8 +85,8 @@ $ec_img_main = array(
   6 => $ec_uploads_url . '/2026/08/HardscapeProject3.jpg',
 
   // ── Grounds maintenance ──
-  7 => $ec_uploads_url . '/2026/08/GroundsProject1.webp',
-  8 => $ec_uploads_url . '/2026/08/GroundsProject2.webp',
+  7 => $ec_uploads_url . '/2026/08/GroundsProject1.jpeg',
+  8 => $ec_uploads_url . '/2026/08/GroundsProject2.jpeg',
   9 => $ec_uploads_url . '/2026/08/GroundsProject3.jpg',
 
   // ── Water-wise retrofits ──
@@ -720,9 +720,12 @@ $ec_lb_data = array_map(
 <section class="bg-umber text-bone">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
 
-    <div data-reveal class="ec-plates grid gap-px lg:grid-cols-6">
+    <!-- Sin ec-plates (ago 2026): sus box-shadow sin capa pisan a las
+         utilidades bevel-* — la lección de la home. El relieve 3D lo hace
+         bevel-tile solo, como en los botones flotantes. -->
+    <div data-reveal class="grid gap-px lg:grid-cols-6">
 
-      <div class="flex flex-col justify-end bg-ink p-8 lg:col-span-2 lg:row-span-2 lg:p-10">
+      <div class="bevel-tile transition-[box-shadow,transform] duration-200 ease-out hover:bevel-tile-raised hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none relative flex flex-col justify-end bg-ink p-8 lg:col-span-2 lg:row-span-2 lg:p-10">
         <p class="mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300">What they reviewed</p>
         <h2 class="ec-shine ec-shine--light ec-mixed font-display text-3xl leading-tight font-bold tracking-tight text-bone sm:text-4xl">
           Four things <em>before the first shovel.</em>
@@ -736,7 +739,7 @@ $ec_lb_data = array_map(
       foreach ($review as $ec_i => $step) :
         $ec_bg = ((intdiv($ec_i, 2) + ($ec_i % 2)) % 2 === 0) ? 'bg-sand' : 'bg-breeze-100';
         ?>
-        <div class="<?php echo esc_attr($ec_bg); ?> flex flex-col p-8 lg:col-span-2 lg:p-10">
+        <div class="<?php echo esc_attr($ec_bg); ?> bevel-tile transition-[box-shadow,transform] duration-200 ease-out hover:bevel-tile-raised hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none relative flex flex-col p-8 lg:col-span-2 lg:p-10">
           <span class="font-display text-4xl font-bold leading-none tracking-tight text-ember-800 tabular-nums">
             <?php echo esc_html($step['n']); ?>
           </span>
@@ -751,7 +754,7 @@ $ec_lb_data = array_map(
 
       <!-- Enlace al detalle completo. La tabla de credenciales de la home es
            donde vive el dato duro; acá solo se apunta hacia ella. -->
-      <div class="flex items-center bg-ember p-8 lg:col-span-2 lg:p-10">
+      <div class="bevel-tile transition-[box-shadow,transform] duration-200 ease-out hover:bevel-tile-raised hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none relative flex items-center bg-ember p-8 lg:col-span-2 lg:p-10">
         <a
           href="<?php echo esc_url(home_url('/#credentials')); ?>"
           class="group inline-flex items-center gap-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
@@ -776,14 +779,15 @@ $ec_lb_data = array_map(
       </h2>
     </div>
 
-    <ul class="ec-plates mt-12 grid gap-px bg-ink/15 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Sin ec-plates: ver la nota de la rejilla de arriba. -->
+    <ul class="mt-12 grid gap-px bg-ink/15 sm:grid-cols-2 lg:grid-cols-4">
       <?php foreach ($capabilities as $ec_i => $cap) :
         $ec_bg = (0 === $ec_i % 2) ? 'bg-sand' : 'bg-breeze-100';
         ?>
         <li>
           <a
             href="<?php echo esc_url($cap['href']); ?>"
-            class="<?php echo esc_attr($ec_bg); ?> group flex h-full items-center justify-between gap-4 p-8 transition-colors duration-300 hover:bg-ember focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-ember motion-reduce:transition-none"
+            class="<?php echo esc_attr($ec_bg); ?> bevel-tile group relative flex h-full items-center justify-between gap-4 p-8 transition-[box-shadow,transform,background-color] duration-200 ease-out hover:bevel-tile-raised hover:-translate-y-0.5 hover:bg-ember focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
           >
             <span class="font-display text-base font-bold leading-snug tracking-tight text-ink">
               <?php echo esc_html($cap['label']); ?>

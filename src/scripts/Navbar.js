@@ -14,9 +14,12 @@ import React, { useEffect, useRef, useState } from "react"
  *                     hace falta subir la versión en positivo.
  *   phone             Teléfono en formato display.  ej. "(385) 240-3907"
  *   license           Línea de licencia.            ej. "UT License S330"
- *   social            Perfiles sociales. { facebook, instagram, tiktok }.
+ *   social            Perfiles sociales. { facebook, instagram, google }.
  *                     Clave vacía o ausente = el icono se dibuja apagado y
- *                     sin enlace. Pendiente 13 del brief.
+ *                     sin enlace. Las URLs se llenan en header.php — ya
+ *                     están definidas (Pendiente 13 resuelto): Facebook e
+ *                     Instagram de EC, y el perfil de Google Business en
+ *                     lugar de TikTok, que la empresa no tiene.
  *   links             [{ label, href, activeId, children }]
  *                     children: [{ label, href }] convierte la entrada en un
  *                     desplegable. El padre pasa a ser <button> y no <a>: un
@@ -190,10 +193,10 @@ function InstagramIcon({ className = "" }) {
   )
 }
 
-function TikTokIcon({ className = "" }) {
+function GoogleIcon({ className = "" }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
-      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 1 1 .77-5.06v-3.1a5.66 5.66 0 0 0-.77-.05A5.68 5.68 0 1 0 15.54 15.4V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.29 4.29 0 0 1-3.24-1.48Z" />
+      <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
     </svg>
   )
 }
@@ -203,14 +206,21 @@ function TikTokIcon({ className = "" }) {
    de Tab y engaña al lector de pantalla. El icono se ve —que es lo que
    permite evaluar la franja ahora— pero no promete nada.
 
+   Base en bone PLENO (antes bone/60): a 3.5px de trazo sobre la franja
+   pine-900, el 60% los volvía fantasmas — y el estado inerte les sumaba
+   opacity-40 encima, dejándolos en un ~24% efectivo. El inerte sube a
+   opacity-70: sigue marcando el escalón "pendiente" contra un enlace vivo,
+   pero ya se ve qué redes va a haber. Los enlaces vivos rematan en blanco
+   puro al hover.
+
    Cuando lleguen las URLs se llenan en header.php y estos se vuelven enlaces
    reales sin tocar el componente. */
 function SocialLink({ icon: Icon, label, href }) {
-  const clases = "flex h-7 w-7 items-center justify-center text-bone/60 transition-colors"
+  const clases = "flex h-7 w-7 items-center justify-center text-bone transition-colors"
 
   if (!href) {
     return (
-      <span className={`${clases} cursor-default opacity-40`} title={`${label} — pendiente`}>
+      <span className={`${clases} cursor-default opacity-70`} title={`${label} — pendiente`}>
         <Icon className="h-3.5 w-3.5" />
         <span className="sr-only">{label} (enlace pendiente)</span>
       </span>
@@ -222,7 +232,7 @@ function SocialLink({ icon: Icon, label, href }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${clases} hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`}
+      className={`${clases} hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`}
     >
       <Icon className="h-3.5 w-3.5" />
       <span className="sr-only">{label}</span>
@@ -274,17 +284,14 @@ function ContactPlate({ icon: Icon, label, srLabel, href, external = false }) {
 function BidButton({ href, onClick, skin = "ember", size = "sm", className = "" }) {
   const skins = {
     ember: [
-      // Texto en ink sobre CLAY (#BE805B): 3.90:1. Blanco da 2.85:1, así que
-      // ink es claramente la mejor de las dos — pero no llega al 4.5:1 que
-      // pide AA a 13px, porque el problema es la luminancia del fondo y no el
-      // color del texto.
-      //
-      // La salida está en el tema: bg-ember-600 (CLAY-600 #8C654B) con texto
-      // blanco da 5.15:1. No se aplicó porque cambia el botón en once archivos
-      // y aleja el CTA del CLAY exacto de la lámina de marca — es decisión de
-      // marca, no técnica. Ver la nota al pie de src/index.css.
-      "border-white/25 bg-ember text-ink cta-relief",
-      "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px",
+      /* CTA en PINE con texto blanco — redefinido a pedido (ago 2026): los
+         botones de bid dejan el CLAY y toman el verde oscuro de marca, que
+         además resuelve de una el viejo problema de contraste del clay
+         (blanco sobre pine pasa AA sobrado, ~11:1). La skin conserva el
+         nombre "ember" para no tocar los call sites. El hover profundiza a
+         ink-900, el mismo escalón que usa la franja de utilidad. */
+      "border-white/25 bg-ink text-white cta-relief",
+      "hover:cta-relief-tight hover:bg-ink-900 hover:-translate-y-px",
     ].join(" "),
     soft: [
       "border-white/[0.333] bg-[#e0e8ef] text-[#7e97b8] cta-soft",
@@ -392,8 +399,9 @@ function NavDropdown({ link, isActive, linkBase, linkActive, isLight }) {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen(v => !v)}
+        style={isLight ? undefined : { color: "#ffffff" }}
         className={[
-          "relative flex items-center gap-1.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.13em] transition-colors",
+          "relative flex items-center gap-1.5 py-1 text-[0.78rem] font-bold uppercase tracking-[0.13em] transition-colors",
           "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember",
           isActive ? linkActive : linkBase,
         ].join(" ")}
@@ -426,7 +434,7 @@ function NavDropdown({ link, isActive, linkBase, linkActive, isLight }) {
         <ul
           className={[
             "min-w-[16rem] overflow-hidden rounded-lg py-2 shadow-xl shadow-ink/20 backdrop-blur-md",
-            isLight ? "bg-white/95 ring-1 ring-mist" : "bg-ink/95 ring-1 ring-white/10",
+            isLight ? "bg-white/95 ring-1 ring-mist" : "bg-[#232322]/95 ring-1 ring-white/10",
           ].join(" ")}
         >
           {link.children.map(child => (
@@ -521,18 +529,47 @@ export default function Navbar({
    * no difumina nada: solo se ve el texto de la página cruzándose con el menú.
    * En ese caso la barra se queda opaca.
    */
+  /* ═══ SUPERFICIES DEL NAVBAR: NEGRO NEUTRO, NO PINE ═══
+     Este fue el hallazgo del debug de ago 2026: el "verde" del navbar nunca
+     fue el texto — era la superficie. bg-ink apunta a PINE (#2F342D), un
+     negro con base verde POR DISEÑO de la paleta, y sobre una franja de
+     120px de alto ese matiz se lee como barra verde sin importar de qué
+     color vayan las letras.
+
+     El navbar (y solo el navbar) pasa a un par de neutros sin canal verde
+     dominante: #232322 la barra, #171716 la franja de utilidad — el mismo
+     escalón que tenían pine y pine-900, en neutro. Son valores literales y
+     no tokens del tema a propósito: la paleta no tiene un oscuro neutro y
+     agregárselo invitaría a usarlo en secciones, donde el pine SÍ es la
+     decisión correcta. */
   const barSurface = isLight
     ? [
         "ring-1 ring-mist bg-white/95",
-        docked ? "supports-[backdrop-filter]:bg-white/80" : "",
+        docked ? "supports-[backdrop-filter]:bg-white/95" : "",
       ].join(" ")
     : [
-        "ring-1 ring-white/10 bg-ink/95",
-        docked ? "supports-[backdrop-filter]:bg-ink/80" : "",
+        "ring-1 ring-white/10 bg-[#232322]/95",
+        docked ? "supports-[backdrop-filter]:bg-[#232322]/95" : "",
       ].join(" ")
 
-  const linkBase = isLight ? "text-ink/70 hover:text-ink" : "text-bone/70 hover:text-bone"
-  const linkActive = isLight ? "text-ink" : "text-bone"
+  /* Los enlaces del menú van en BLANCO PURO sobre la barra oscura. Es la
+     excepción deliberada a la regla "nunca blanco puro" del tema: el bone
+     (#F1F0E6) es un hueso CÁLIDO con base verdosa, y sobre el pine de la
+     barra esa base se amplifica — incluso a plena opacidad se seguía
+     leyendo verdoso. A este tamaño (10-11px en mayúsculas) el matiz del
+     hueso no aporta nada y el blanco limpio es lo único que se lee neutro.
+     El estado activo se distingue por el subrayado ember.
+
+     linkStyle es el REFUERZO INLINE del mismo blanco: durante el debug de
+     ago 2026 los cambios de CSS no llegaban al navegador (stylesheet
+     cacheado) pero los de JS sí — el icono de Google lo probó. Un estilo
+     inline viaja en el bundle JS, así que pinta blanco aunque el CSS
+     compilado que reciba el navegador sea viejo. Cuando el encolado del
+     CSS lleve versión (?ver= desde index.asset.php) este refuerzo se puede
+     quitar; mientras tanto es inocuo: dice lo mismo que la clase. */
+  const linkBase = isLight ? "text-ink/70 hover:text-ink" : "text-white"
+  const linkActive = isLight ? "text-ink" : "text-white"
+  const linkStyle = isLight ? undefined : { color: "#ffffff" }
 
   return (
     <>
@@ -551,12 +588,10 @@ export default function Navbar({
             que al colapsar no queda un hueco, porque nunca lo hubo. ── */}
         <div
           className={[
-            /* bg-ink-900 y no bg-ink: la franja va pegada a la barra, así que
-               necesita un escalón propio para no leerse como un solo bloque
-               de 120px de alto. Hacia arriba no se puede —cualquier tono más
-               claro la volvería protagonista sobre la navegación— así que se
-               separa hacia abajo. */
-            "overflow-hidden border-b border-white/10 bg-ink-900 text-bone",
+            /* Neutro más oscuro que la barra (#171716 contra #232322): el
+               mismo escalón que hacían pine-900 y pine, sin la base verde.
+               Ver la nota de barSurface. */
+            "overflow-hidden border-b border-white/10 bg-[#171716] text-bone",
             "transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none",
             docked ? "max-h-0 opacity-0" : "max-h-12 opacity-100",
           ].join(" ")}
@@ -619,7 +654,7 @@ export default function Navbar({
               <div className="flex items-center gap-0.5">
                 <SocialLink icon={FacebookIcon}  label="Facebook"  href={social.facebook} />
                 <SocialLink icon={InstagramIcon} label="Instagram" href={social.instagram} />
-                <SocialLink icon={TikTokIcon}    label="TikTok"    href={social.tiktok} />
+                <SocialLink icon={GoogleIcon}    label="Google Business Profile" href={social.google} />
               </div>
             </div>
           </div>
@@ -641,7 +676,7 @@ export default function Navbar({
                  el contenido por detrás. */
               "px-5 sm:px-8 lg:px-10",
               docked
-                ? "py-3 shadow-[0_1px_0_0_rgba(0,0,0,0.25)] backdrop-blur-xl backdrop-saturate-150"
+                ? "py-3 shadow-[0_1px_0_0_rgba(0,0,0,0.25)] backdrop-blur-xl"
                 : "py-4",
             ].join(" ")}
           >
@@ -678,8 +713,9 @@ export default function Navbar({
                     <a
                       href={link.href}
                       aria-current={isActive ? "true" : undefined}
+                      style={linkStyle}
                       className={[
-                        "relative py-1 text-[0.7rem] font-semibold uppercase tracking-[0.13em] transition-colors",
+                        "relative py-1 text-[0.78rem] font-bold uppercase tracking-[0.13em] transition-colors",
                         "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember",
                         isActive ? linkActive : linkBase,
                       ].join(" ")}
@@ -736,7 +772,10 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* ── Panel móvil ── */}
+      {/* ── Panel móvil ──
+          Sigue al tema del navbar (ago 2026): con theme="light" el panel es
+          claro — fondo blanco, enlaces en ink — igual que la barra de
+          escritorio. La rama oscura se conserva por la prop. */}
       <div
         id="mobile-nav"
         ref={panelRef}
@@ -744,25 +783,32 @@ export default function Navbar({
         aria-modal="true"
         aria-label="Menu"
         hidden={!open}
-        className="fixed inset-0 z-[60] flex flex-col bg-ink text-bone lg:hidden"
+        className={[
+          "fixed inset-0 z-[60] flex flex-col lg:hidden",
+          isLight ? "bg-white text-ink" : "bg-[#232322] text-bone",
+        ].join(" ")}
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <div className={`flex items-center justify-between border-b px-5 py-4 ${isLight ? "border-ink/10" : "border-white/10"}`}>
           {logo ? (
             <img src={logo} alt="EC Landscaping" className="h-8 w-auto" />
           ) : (
-            <Wordmark theme="dark" />
+            <Wordmark theme={theme} />
           )}
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-md px-3 py-2 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-bone ring-1 ring-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+            className={[
+              "rounded-md px-3 py-2 text-[0.7rem] font-bold uppercase tracking-[0.12em]",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+              isLight ? "text-ink ring-1 ring-ink/15" : "text-bone ring-1 ring-white/15",
+            ].join(" ")}
           >
             Close
           </button>
         </div>
 
         <nav aria-label="Primary mobile" className="flex-1 overflow-y-auto px-5 py-6">
-          <ul className="flex flex-col divide-y divide-white/10">
+          <ul className={`flex flex-col divide-y ${isLight ? "divide-ink/10" : "divide-white/10"}`}>
             {links.map(link => (
               <li key={link.label}>
                 {/* En el panel móvil el submenú no se despliega: se muestra
@@ -771,16 +817,16 @@ export default function Navbar({
                     veces por el mismo destino. */}
                 {link.children && link.children.length ? (
                   <div className="py-4">
-                    <p className="font-display text-2xl font-bold tracking-tight text-bone/50">
+                    <p className={`font-display text-2xl font-bold tracking-tight ${isLight ? "text-ink/50" : "text-bone/50"}`}>
                       {link.label}
                     </p>
-                    <ul className="mt-3 flex flex-col gap-1 border-l border-white/15 pl-4">
+                    <ul className={`mt-3 flex flex-col gap-1 border-l pl-4 ${isLight ? "border-ink/15" : "border-white/15"}`}>
                       {link.children.map(child => (
                         <li key={child.href}>
                           <a
                             href={child.href}
                             onClick={() => setOpen(false)}
-                            className="block py-2 text-base font-medium text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+                            className={`block py-2 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember ${isLight ? "text-ink" : "text-bone"}`}
                           >
                             {child.label}
                           </a>
@@ -792,7 +838,7 @@ export default function Navbar({
                   <a
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="block py-4 font-display text-2xl font-bold tracking-tight text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+                    className={`block py-4 font-display text-2xl font-bold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember ${isLight ? "text-ink" : "text-bone"}`}
                   >
                     {link.label}
                   </a>
@@ -804,7 +850,7 @@ export default function Navbar({
                 <a
                   href={residentialHref}
                   onClick={() => setOpen(false)}
-                  className="block py-4 text-sm font-semibold uppercase tracking-[0.14em] text-bone/50"
+                  className={`block py-4 text-sm font-semibold uppercase tracking-[0.14em] ${isLight ? "text-ink/50" : "text-bone/50"}`}
                 >
                   Residential <span aria-hidden="true">→</span>
                 </a>
@@ -813,7 +859,7 @@ export default function Navbar({
           </ul>
         </nav>
 
-        <div className="border-t border-white/10 px-5 py-5">
+        <div className={`border-t px-5 py-5 ${isLight ? "border-ink/10" : "border-white/10"}`}>
           <ul className="mb-5 flex flex-col gap-2">
             {[
               { icon: PhoneIcon, label: phone, href: telHref, srLabel: `Call ${phone}`, external: false },
@@ -825,21 +871,29 @@ export default function Navbar({
                   href={item.href}
                   aria-label={item.srLabel}
                   {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="group flex items-center gap-3 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-bone/80 transition-[box-shadow,transform,background-color] duration-150 hover:bevel hover:-translate-y-px hover:bg-white/[0.09] active:bevel-pressed active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none"
+                  className={[
+                    "group flex items-center gap-3 rounded-md border px-3 py-2.5 text-sm",
+                    "transition-[box-shadow,transform,background-color] duration-150",
+                    "hover:-translate-y-px active:translate-y-0",
+                    "motion-reduce:transform-none motion-reduce:transition-none",
+                    isLight
+                      ? "border-ink/10 bg-ink/[0.03] text-ink/80 bevel-tile hover:bevel-tile-raised active:shadow-none"
+                      : "border-white/10 bg-white/[0.04] text-bone/80 hover:bevel hover:bg-white/[0.09] active:bevel-pressed",
+                  ].join(" ")}
                 >
-                  <item.icon className="h-4 w-4 shrink-0 text-ember/80 group-hover:text-ember" />
+                  <item.icon className={`h-4 w-4 shrink-0 ${isLight ? "text-ember-600" : "text-ember/80 group-hover:text-ember"}`} />
                   <span>{item.label}</span>
                 </a>
               </li>
             ))}
           </ul>
-          <p className="mb-4 text-[0.65rem] font-medium uppercase tracking-[0.14em] text-bone/50">
+          <p className={`mb-4 text-[0.65rem] font-medium uppercase tracking-[0.14em] ${isLight ? "text-ink/50" : "text-bone/50"}`}>
             {license}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <a
               href={telHref}
-              className="border-2 border-white/20 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone"
+              className={`border-2 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] ${isLight ? "border-ink/30 text-ink" : "border-white/20 text-bone"}`}
             >
               Call now
             </a>
@@ -856,17 +910,20 @@ export default function Navbar({
 
       {/* ── Barra inferior fija en móvil (fuera del panel) ── */}
       {!open && (
-        <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 gap-px border-t border-white/10 bg-ink lg:hidden">
+        <div className={[
+          "fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 gap-px border-t lg:hidden",
+          isLight ? "border-ink/10 bg-white" : "border-white/10 bg-[#232322]",
+        ].join(" ")}>
           <a
             href={telHref}
-            className="py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-bone"
+            className={`py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] ${isLight ? "text-ink" : "text-bone"}`}
           >
             Call {phone}
           </a>
           <a
             href={bidHref}
             data-bid-cta=""
-            className="bg-ember py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink"
+            className="bg-ink py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-white"
           >
             Request a Bid
           </a>

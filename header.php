@@ -1,133 +1,129 @@
-<!DOCTYPE html>
+<?php
+/**
+ * Header global — EC Landscaping
+ *
+ * Solo estructura y montaje: el markup real del navbar vive en
+ * src/scripts/Navbar.js y se monta sobre #ec-navbar con las props de abajo.
+ *
+ * --header-offset: alto reservado para el header fijo. Lo consumen las
+ * secciones (padding-top del hero) y el sticky del FAQ. Si el navbar cambia
+ * de alto, este es el único número que hay que tocar.
+ */
+?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
-  <head>
-    <meta charset="<?php bloginfo('charset'); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php wp_head(); ?>
-  </head>
-  <body <?php body_class(); ?>>
+<head>
+  <meta charset="<?php bloginfo('charset'); ?>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <?php wp_head(); ?>
+</head>
 
-    <a
-      href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-bone"
-    >Skip to content</a>
+<body <?php body_class('bg-bone font-sans text-ink antialiased'); ?>>
+<?php wp_body_open(); ?>
 
-    <?php
-    /**
-     * Todo el contenido editable del navbar vive aquí, no en el bundle de React.
-     * Los href con # apuntan a los IDs de los bloques de la landing comercial.
-     */
-    // El logo vive en la biblioteca de medios, no en el tema. Se arma desde
-    // wp_get_upload_dir() para que la URL siga funcionando al migrar de
-    // ec-landscaping.local a producción sin tocar código.
-    //
-    // Reemplaza a ecscapingneg.png, que sigue en la biblioteca por si hay que
-    // volver atrás. El archivo nuevo está en la carpeta de agosto.
-    //
-    // OJO con el tema del navbar: la barra es oscura (theme => 'dark' más
-    // abajo), así que este archivo tiene que ser la versión del logo en
-    // NEGATIVO —arte claro—. El anterior lo decía en el nombre; este no. Si
-    // al cargar se ve apagado o desaparece, es que subiste la versión en
-    // positivo y hace falta la otra.
-    $ec_uploads = wp_get_upload_dir();
-    $ec_logo    = $ec_uploads['baseurl'] . '/2026/08/EC_Imagotipo2-1-scaled.png';
+<?php
+$ec_uploads_header = wp_get_upload_dir();
 
-    $ec_navbar_props = array(
-      'logo'            => $ec_logo,
-      'phone'           => '(385) 240-3907',
-      'email'           => 'info@ecscaping.com',
-      // Higley Rd es el NAP único. La dirección de Hooper es solo billing
-      // y el cliente pidió expresamente que no se muestre (Pendiente 01).
-      'address'         => '3754 N Higley Rd, Suite 2 · Ogden, UT',
-      'mapsHref'        => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode('3754 N Higley Rd Suite 2, Ogden, UT 84404'),
-      /* Sin el número, solo la clase. La franja de utilidad es un lugar de
-         paso: el número completo no se lee de un vistazo y ocupa el ancho
-         que necesitan las tres placas de contacto de la derecha.
+/**
+ * Props del navbar. Se serializan a JSON en el data-props del nodo de
+ * montaje; Navbar.js las lee al montar.
+ *
+ * Los href se arman con home_url() y no con rutas literales: una instalación
+ * en subdirectorio rompería cualquier "/#commercial" pelado.
+ */
+$ec_navbar_props = array(
+  /* ═══ LOGO CANÓNICO — NO CAMBIAR SIN PEDIDO EXPLÍCITO ═══
+     NAVBAR: EC_Imagotipo2-2-scaled.png (definido ago 2026).
+     FOOTER: EC_Imagotipo2-1-scaled.png (en footer.php).
+     Son variantes distintas del mismo imagotipo, una por superficie — no
+     unificarlas ni revertir a ecscapingneg.png, que quedó obsoleto. Si el
+     logo cambia, este comentario y el de footer.php se actualizan juntos. */
+  'logo'    => $ec_uploads_header['baseurl'] . '/2026/08/EC_Imagotipo2-2-scaled.png',
 
-         El número NO se pierde: sigue completo en la tabla de credenciales
-         del bloque 08, que es donde un GC va a buscarlo, y en el footer. */
-      'license'         => 'UT License S330',
+  'phone'   => '(385) 240-3907',
+  'email'   => 'info@ecscaping.com',
+  'address' => '3754 N Higley Rd, Suite 2 · Ogden, UT',
 
-      /* Redes sociales — Pendiente 13 del brief.
-         Cada URL vacía se dibuja como icono apagado, sin enlace: se ve la
-         franja completa pero no se promete un destino que no existe.
+  // La misma cadena de dirección que el bloque de área de servicio y el
+  // footer: un solo NAP en todo el sitio (Pendiente 01 — nunca Hooper).
+  'mapsHref' => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode('3754 N Higley Rd Suite 2, Ogden, UT 84404'),
 
-         ANTES DE PUBLICAR: llenar las tres o borrar las claves que EC no
-         tenga. Un icono apagado es aceptable en desarrollo y no en producción
-         — comunica que la empresa tiene un perfil que en realidad no tiene. */
-      'social'          => array(
-        'facebook'  => '',
-        'instagram' => '',
-        'tiktok'    => '',
+  // Sin número: solo la clasificación. El número completo se retiró de la
+  // home a pedido (ago 2026).
+  'license' => 'UT License S330',
+
+  /* Redes sociales (Pendiente 13 resuelto, ago 2026). La clave es 'google'
+     y no 'tiktok': EC no tiene TikTok y sí perfil de Google Business.
+
+     La URL de Google va sin los parámetros de tracking (?entry=...&g_ep=...)
+     con los que la copia el navegador, y con el viewport centrado en el
+     negocio a nivel calle — la copiada venía con zoom de medio oeste de
+     EE.UU. Si Google cambia el formato y el enlace deja de abrir el perfil,
+     la alternativa simple es la misma URL de mapsHref de arriba. */
+  'social' => array(
+    'facebook'  => 'https://www.facebook.com/eclandscape',
+    'instagram' => 'https://www.instagram.com/ec_landscaping1/',
+    'google'    => 'https://www.google.com/maps/place/EC+LANDSCAPING+LLC/@41.1811977,-112.1034322,17z/data=!3m1!1e3!4m6!3m5!1s0x87530f2cfdca3adf:0x82a1eda6e66ff9eb!8m2!3d41.1811977!4d-112.1034322!16s%2Fg%2F11k638rcqc',
+  ),
+
+  /* Projects deja de ser un ancla de la home y pasa a página propia. El
+     resto siguen siendo anclas raíz-relativas para funcionar desde
+     cualquier página. Capabilities es desplegable: el padre no navega
+     (activeId mantiene el scrollspy) y los hijos van a las páginas de
+     capacidad. */
+  'links' => array(
+    array('label' => 'Commercial', 'href' => home_url('/#commercial')),
+    array('label' => 'Projects', 'href' => home_url('/projects')),
+    array(
+      'label'    => 'Capabilities',
+      'activeId' => '#capabilities',
+      'children' => array(
+        array('label' => 'All capabilities', 'href' => home_url('/capabilities')),
+        array('label' => 'Commercial landscape installation', 'href' => home_url('/landscape-installation')),
+        array('label' => 'Hardscape & concrete', 'href' => home_url('/hardscape-concrete')),
+        array('label' => 'Grounds maintenance, irrigation & snow', 'href' => home_url('/grounds-maintenance')),
+        array('label' => 'Water-wise retrofits', 'href' => home_url('/water-wise-retrofits')),
       ),
-      // Todos los CTA del sitio llevan a /contact. El modal global se retiró.
-      'bidHref'         => home_url('/contact'),
-      'theme'           => 'dark',
+    ),
+    array('label' => 'Credentials', 'href' => home_url('/#credentials')),
+    // A página propia, como Projects — ya no al ancla de la home.
+    array('label' => 'Service Area', 'href' => home_url('/service-area')),
+  ),
 
-      /**
-       * residentialHref se deja fuera a propósito: el sitio es de landscaping
-       * comercial y no expone salida a residencial.
-       *
-       * Esto revierte una decisión del brief, que pedía el enlace en jerarquía
-       * secundaria (Bloque 00). Se implementa quitando la prop y no borrando el
-       * markup del componente, así que restituirlo es agregar de nuevo esta
-       * línea — sin tocar Navbar.js:
-       *
-       *   'residentialHref' => home_url('/residential'),
-       */
+  'bidHref' => home_url('/contact'),
 
-      /**
-       * El orden replica el orden de los bloques en home-template.php: la
-       * prueba (Projects) va antes que las capacidades, por lo que el menú
-       * tiene que leerse en la misma secuencia que la página.
-       *
-       * Capabilities es un desplegable: cada capacidad tiene página propia,
-       * servidas todas por service-template.php. Los slugs de abajo tienen
-       * que coincidir con las claves de $ec_services en esa plantilla y con
-       * los slugs reales de las páginas en el admin — tres lugares que se
-       * mueven juntos.
-       *
-       * Los href son absolutos, no anclas sueltas. Un '#projects' pelado no
-       * lleva a ninguna parte desde /contact o desde una página de capacidad:
-       * el navegador busca esa sección en la página actual, no la encuentra y
-       * no hace nada. Con home_url('/#projects') carga la home y salta.
-       *
-       * En la propia home no recarga: el navegador reconoce que la URL es la
-       * misma y trata el fragmento como salto interno.
-       *
-       * activeId conserva el resaltado del scrollspy: el padre del desplegable
-       * no tiene href de sección, pero corresponde a #capabilities.
-       */
-      'links'           => array(
-        array('label' => 'Commercial', 'href' => home_url('/#commercial')),
-        // Projects deja de ser un ancla de la home y pasa a página propia.
-        // El scrollspy de la navbar sigue funcionando: fragmentOf() devuelve
-        // null para un href sin '#', así que este enlace queda fuera del
-        // seguimiento en lugar de romperlo.
-        array('label' => 'Projects',   'href' => home_url('/projects')),
-        array(
-          'label'    => 'Capabilities',
-          'activeId' => '#capabilities',
-          'children' => array(
-            array('label' => 'All capabilities',                     'href' => home_url('/capabilities')),
-            array('label' => 'Commercial landscape installation',    'href' => home_url('/landscape-installation')),
-            array('label' => 'Hardscape & concrete',                 'href' => home_url('/hardscape-concrete')),
-            array('label' => 'Grounds maintenance, irrigation & snow','href' => home_url('/grounds-maintenance')),
-            array('label' => 'Water-wise retrofits',                 'href' => home_url('/water-wise-retrofits')),
-          ),
-        ),
-        array('label' => 'Credentials',  'href' => home_url('/#credentials')),
-        // Service Area también pasa a página propia. El bloque 09 se queda en
-        // la home: es el que responde "¿llegan hasta acá?" sin salir de la
-        // landing, y esta página lo desarrolla condado por condado.
-        array('label' => 'Service Area', 'href' => home_url('/service-area')),
-      ),
-    );
-    ?>
+  // Sin residentialHref: el sitio es comercial y no expone salida a
+  // residencial. Restituirlo es agregar la prop acá, sin tocar Navbar.js.
 
-    <div
-      id="ec-navbar"
-      data-props="<?php echo esc_attr(wp_json_encode($ec_navbar_props)); ?>"
-    ></div>
+  /* BARRA CLARA, ITEMS OSCUROS — la inversión pedida (ago 2026): la barra
+     de navegación va en blanco y los nav items en ink. La franja de
+     utilidad de arriba se queda oscura, haciendo el contraste. Todo el
+     manejo de colores del modo claro ya vive en Navbar.js (prop theme). */
+  'theme'    => 'light',
+  'ctaStyle' => 'ember',
+);
+?>
 
-    <main id="main">
+<div
+  id="ec-navbar"
+  data-props="<?php echo esc_attr(wp_json_encode($ec_navbar_props)); ?>"
+></div>
+
+<?php
+/**
+ * FloatingActions: los tres botones flotantes (llamar, correo, mapa) del
+ * borde derecho. Montaje aparte del navbar porque viven fijos sobre toda la
+ * página, no dentro del header.
+ */
+$ec_floating_props = array(
+  'phone'    => '(385) 240-3907',
+  'email'    => 'info@ecscaping.com',
+  'mapsHref' => $ec_navbar_props['mapsHref'],
+);
+?>
+
+<div
+  id="ec-floating-actions"
+  data-props="<?php echo esc_attr(wp_json_encode($ec_floating_props)); ?>"
+></div>
+
+<main id="main">

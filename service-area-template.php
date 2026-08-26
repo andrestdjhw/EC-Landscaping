@@ -182,7 +182,12 @@ $bid_href = home_url('/contact');
      porque son la promesa comercial que el mapa no puede mostrar. -->
 <section class="bg-bone">
   <div class="w-full px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
-    <div data-reveal class="ec-plates grid gap-px bg-ink/15 lg:grid-cols-6">
+    <!-- Sin ec-plates (ago 2026): sus box-shadow sin capa pisan a las
+         utilidades bevel-* — la lección de la home. El relieve 3D de cada
+         bloque lo hace bevel-tile solo, como en los botones flotantes; el
+         mapa se queda quieto (levantar un iframe mientras se navega el mapa
+         sería un tirón). -->
+    <div data-reveal class="grid gap-px bg-ink/15 lg:grid-cols-6">
 
       <!-- El iframe va en absolute dentro de una celda con alto propio: así
            el espacio queda reservado antes de que cargue y la página no salta.
@@ -208,7 +213,7 @@ $bid_href = home_url('/contact');
         // por debajo de AA. Sobre ink sí hay margen para atenuarlo.
         $ec_sub = (0 === $ec_i) ? 'text-ink' : 'text-bone/80';
         ?>
-        <div class="<?php echo esc_attr($ec_bg . ' ' . $ec_txt); ?> flex flex-col justify-center p-8 lg:col-span-2 lg:p-10">
+        <div class="<?php echo esc_attr($ec_bg . ' ' . $ec_txt); ?> bevel-tile transition-[box-shadow,transform] duration-200 ease-out hover:bevel-tile-raised hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none relative flex flex-col justify-center p-8 lg:col-span-2 lg:p-10">
           <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] <?php echo esc_attr($ec_sub); ?>">
             <?php echo esc_html($r['label']); ?>
           </p>
@@ -222,7 +227,7 @@ $bid_href = home_url('/contact');
       <?php endforeach; ?>
 
       <!-- El patio, cerrando la fila. -->
-      <div class="flex flex-col justify-center bg-sand p-8 lg:col-span-6 lg:p-10">
+      <div class="bevel-tile transition-[box-shadow,transform] duration-200 ease-out hover:bevel-tile-raised hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none relative flex flex-col justify-center bg-sand p-8 lg:col-span-6 lg:p-10">
         <p class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ember-800">The yard</p>
         <p class="mt-3 text-base text-ink">
           <a
@@ -269,7 +274,7 @@ $bid_href = home_url('/contact');
         $ec_href  = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($c['map']);
 
         $ec_texto = function () use ($c, $ec_bg, $ec_href) { ?>
-          <div class="<?php echo esc_attr($ec_bg); ?> flex flex-col justify-center p-8 lg:p-12">
+          <div class="<?php echo esc_attr($ec_bg); ?> bevel-tile transition-[box-shadow,transform] duration-200 ease-out hover:bevel-tile-raised hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none relative flex flex-col justify-center p-8 lg:p-12">
             <h3 class="font-display text-2xl font-bold leading-none tracking-tight text-ink sm:text-3xl">
               <?php echo esc_html($c['name']); ?>
             </h3>
@@ -319,7 +324,9 @@ $bid_href = home_url('/contact');
         <!-- El orden se invierte en el DOM y no con `order`: con `order` el
              lector de pantalla oiría el mapa antes que el nombre del condado
              al que pertenece. -->
-        <div data-reveal class="ec-plates grid gap-px lg:grid-cols-2">
+        <!-- Sin ec-plates en la rejilla interna: sus hijos directos son el texto
+             y el mapa, y sus box-shadow pisarían al bevel del texto. -->
+        <div data-reveal class="grid gap-px lg:grid-cols-2">
           <?php if ($ec_izq) { $ec_texto(); $ec_mapa(); } else { $ec_mapa(); $ec_texto(); } ?>
         </div>
       <?php endforeach; ?>

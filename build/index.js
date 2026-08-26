@@ -21,9 +21,10 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * ContactForm — "Request a bid" · EC Landscaping
  *
- * Un componente, tres usos, combinando cuatro props:
+ * Un componente, tres usos, combinando cinco props:
  *
  *   Hero          variant="inline"  persistent  density="compact"
+ *                 surface="glass"
  *                 inlineMinWidth="(min-width: 1280px)"
  *                 Siempre visible en la columna derecha del hero. Por debajo
  *                 del umbral no hay sitio, así que cae a modal y el CTA del
@@ -31,6 +32,7 @@ __webpack_require__.r(__webpack_exports__);
  *
  *   Página /contact  variant="inline" persistent density="comfortable"
  *                 Sin umbral: la página es suya, no compite con nada.
+ *                 Sin surface: usa "solid", ver abajo por qué.
  *
  *   (sin uso hoy)  variant="modal"
  *                 El modal global se retiró: su trabajo lo hace /contact.
@@ -45,6 +47,15 @@ __webpack_require__.r(__webpack_exports__);
  *                   No se deriva del viewport: las variantes sm: de Tailwind
  *                   miden la ventana, no el contenedor, y el panel del hero
  *                   mide 27rem dentro de una ventana de 1280+.
+ *   surface         "solid" (default) | "glass" — superficie del panel inline.
+ *                   "glass" baja el fondo a ink/70 y sube el blur: el panel
+ *                   deja ver el slideshow del hero a través.
+ *                   SOLO para instancias cuyo fondo es un medio velado en
+ *                   oscuro (el hero). La página /contact se queda en "solid":
+ *                   su panel apoya sobre el bone de la página, y con ink/70
+ *                   encima el fondo efectivo se aclara hasta hundir las
+ *                   etiquetas en bone/55 por debajo de AA. La transparencia
+ *                   es del hero, no del formulario.
  *   inlineMinWidth  media query. Por debajo, la variante inline cae a modal.
  *                   null = nunca cae.
  *   trigger         selector de los disparadores. Vacío o null = la
@@ -138,6 +149,7 @@ function ContactForm({
   variant = "modal",
   persistent = false,
   density = "comfortable",
+  surface = "solid",
   inlineMinWidth = null,
   trigger = null,
   endpoint = "/wp-json/ec/v1/bid",
@@ -580,7 +592,11 @@ function ContactForm({
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("button", {
             type: "submit",
             disabled: status === "sending",
-            className: ["cta-relief group inline-flex items-center justify-center gap-2.5 border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6", "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink whitespace-nowrap", "transition-all duration-200 ease-out", "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px", "active:translate-y-0 active:shadow-none", "disabled:pointer-events-none disabled:opacity-60", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", compact ? "order-first w-full" : ""].join(" "),
+            className: [
+            // CTA en PINE con texto blanco — redefinición global de los
+            // botones de bid (ago 2026). Sobre el panel de vidrio el
+            // borde white/25 y el relief son lo que lo delimitan.
+            "cta-relief group inline-flex items-center justify-center gap-2.5 border-2 border-white/25 bg-ink py-3.5 pl-7 pr-6", "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-white whitespace-nowrap", "transition-all duration-200 ease-out", "hover:cta-relief-tight hover:bg-ink-900 hover:-translate-y-px", "active:translate-y-0 active:shadow-none", "disabled:pointer-events-none disabled:opacity-60", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none", compact ? "order-first w-full" : ""].join(" "),
             children: [status === "sending" ? "Sending…" : "Send it", status !== "sending" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
               viewBox: "0 0 24 24",
               fill: "none",
@@ -612,20 +628,37 @@ function ContactForm({
      no bloquea la página, así que anunciarlo como diálogo modal sería
      mentirle al lector de pantalla. Va como región con nombre. */
   if (!asModal) {
+    /* ── Superficie del panel ──
+       "solid": bg-ink/95 con blur suave. Es la de /contact, donde el panel
+       apoya sobre el bone de la página — ahí la transparencia no muestra
+       nada que valga la pena y solo aclara el fondo bajo las etiquetas.
+        "glass": bg-ink/55 con blur fuerte, para el hero. El slideshow se ve
+       claramente a través del panel. Dos decisiones que sostienen el
+       contraste con un fondo tan abierto:
+        · backdrop-blur-xl + saturate: el blur promedia la foto detrás — sin
+         él, el borde de un techo blanco cruzaría por debajo de una etiqueta
+         y la cortaría en dos. Difuminado, el fondo se comporta como un tono
+         parejo. A esta transparencia el blur ya no es un refinamiento: es
+         la condición para que el texto se lea.
+       · el velo del hero ya oscurece la foto antes de que el panel se
+         mezcle encima, así que el fondo efectivo sigue siendo oscuro.
+        LA PERILLA: /55 es un punto agresivo — contra el slide más claro de
+       los cinco, las etiquetas en bone/55 van a estar cerca del límite.
+       Si se lavan, subí a /65; si querés aún más vidrio, /45 es el piso
+       razonable antes de que el panel deje de leerse como superficie.
+       Está acá y no en la plantilla porque es una decisión del componente,
+       no del contenido. */
+    const surfaceClasses = surface === "glass" ? "bg-ink/55 backdrop-blur-xl backdrop-saturate-150" : "bg-ink/95 backdrop-blur-md";
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
       ref: panelRef,
       role: "region",
       "aria-labelledby": "ec-bid-title",
       className: ["pointer-events-auto flex max-h-full w-full flex-col overflow-hidden",
-      // bg-ink y no bg-umber. Con la paleta nueva, umber apunta a OLIVE
-      // #696D56, que es un tono MEDIO y no un oscuro: las etiquetas del
-      // formulario van en bone/55 y ahí caían a 2.57:1, y el botón ember
-      // quedaba en 1.64:1 contra su propio panel — invisible.
-      //
-      // Sobre PINE las mismas opacidades dan 4.54:1 y el botón 3.90:1.
-      // Es lo que devuelve la jerarquía entre etiqueta, valor y acción sin
-      // tocar una sola clase de los campos.
-      "bg-ink/95 text-bone shadow-2xl shadow-ink/50 ring-1 ring-white/12 backdrop-blur-md",
+      // Sobre PINE. Con la paleta nueva umber apunta a OLIVE, un tono
+      // MEDIO: las etiquetas en bone/55 caían a 2.57:1 y el botón ember
+      // quedaba invisible contra su propio panel. Sobre PINE las mismas
+      // opacidades dan 4.54:1 y el botón 3.90:1.
+      surfaceClasses, "text-bone shadow-2xl shadow-ink/50 ring-1 ring-white/12",
       // Permanente no anima: el panel no entra desde ningún lado, ya
       // estaba ahí cuando cargó la página.
       alwaysOn ? "" : ["transition-[opacity,transform] ease-out motion-reduce:transition-none", entered ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"].join(" ")].join(" "),
@@ -746,14 +779,27 @@ function ActionPlate({
         target: "_blank",
         rel: "noopener noreferrer"
       } : {}),
-      className: ["group/plate flex items-center justify-end gap-0 rounded-full border border-white/12 bg-ink/95 py-3 pl-3.5 pr-3.5", "text-bone/80 backdrop-blur-md", "transition-[box-shadow,transform,gap,padding,color] duration-200 ease-out", "hover:bevel hover:gap-2.5 hover:pl-4 hover:pr-5 hover:text-bone", "focus-visible:bevel focus-visible:gap-2.5 focus-visible:pl-4 focus-visible:pr-5", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "active:bevel-pressed", "motion-reduce:transition-none"].join(" "),
+      className: [
+      /* Cuadrados, no píldoras (ago 2026): rounded-full salió y no
+         entra ningún rounded-*. Las esquinas rectas son el lenguaje de
+         todo el sitio.
+          Superficie CLARA (ago 2026): fondo blanco y letras oscuras,
+         invertido a pedido para acompañar al navbar claro. El cambio de
+         superficie arrastra su sistema entero:
+           · borde a ink/10 — el white/12 sobre blanco no se ve
+           · relieve bevel-tile / bevel-tile-raised, las utilidades del
+             tema PARA claro (el par bevel/bevel-pressed es de superficie
+             oscura y sobre blanco su luz interior desaparece)
+           · íconos en ember-600, no ember: el clay base da 3.12:1 sobre
+             blanco; el 600 es el paso que el tema define para claro */
+      "group/plate flex items-center justify-end gap-0 border border-ink/10 bg-white/95 py-3 pl-3.5 pr-3.5", "text-ink/80 backdrop-blur-md bevel-tile", "transition-[box-shadow,transform,gap,padding,color] duration-200 ease-out", "hover:bevel-tile-raised hover:gap-2.5 hover:pl-4 hover:pr-5 hover:text-ink", "focus-visible:bevel-tile-raised focus-visible:gap-2.5 focus-visible:pl-4 focus-visible:pr-5", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "active:shadow-none", "motion-reduce:transition-none"].join(" "),
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
         className: ["max-w-0 overflow-hidden whitespace-nowrap text-[0.78rem] font-medium tabular-nums opacity-0", "transition-[max-width,opacity] duration-200 ease-out", "group-hover/plate:max-w-[16rem] group-hover/plate:opacity-100", "group-focus-visible/plate:max-w-[16rem] group-focus-visible/plate:opacity-100", "motion-reduce:transition-none"].join(" "),
         children: label
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(Icon, {
-        className: "h-[1.15rem] w-[1.15rem] shrink-0 text-ember"
+        className: "h-[1.15rem] w-[1.15rem] shrink-0 text-ember-600"
       }), external && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_Icons__WEBPACK_IMPORTED_MODULE_1__.ExternalIcon, {
-        className: "h-3 w-3 max-w-0 shrink-0 overflow-hidden text-bone/40 opacity-0 transition-opacity duration-200 group-hover/plate:max-w-3 group-hover/plate:opacity-100 motion-reduce:transition-none"
+        className: "h-3 w-3 max-w-0 shrink-0 overflow-hidden text-ink/40 opacity-0 transition-opacity duration-200 group-hover/plate:max-w-3 group-hover/plate:opacity-100 motion-reduce:transition-none"
       })]
     })
   });
@@ -817,314 +863,311 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Footer — EC Landscaping · landing comercial
  *
- * Estructura tomada de la referencia: columna de marca a la izquierda,
- * columnas de enlaces a la derecha, filete y fila inferior con copyright
- * y redes. Dos diferencias deliberadas:
+ * Tres zonas sobre PINE:
+ *   1. Rejilla principal: marca + NAP · columnas de navegación · contacto.
+ *   2. Banda de rayas (el faldón de la van, girado).
+ *   3. Línea legal: copyright + licencia.
  *
- *   1. Ancho casi completo (px-5 → px-10), sin tarjeta flotante centrada.
- *   2. La columna de marca carga el bloque NAP, no una tagline. El NAP del
- *      footer es la referencia contra la que se audita cada citation del
- *      directorio: si aquí dice algo distinto a Google Business, el ranking
- *      local lo paga. Por eso ocupa el lugar más visible.
- *
- * Props:
- *   logo        URL del logotipo en POSITIVO (arte oscuro). En theme="light"
- *               el ecscapingneg.png no sirve: es la versión en negativo y
- *               desaparece sobre fondo claro. Sin logo se usa el wordmark.
- *   stamp       URL del estampado de marca. Solo se dibuja en theme="dark":
- *               el tartán es claro y sobre bone no se distinguiría. Vacío =
- *               el footer va liso.
- *   theme       "light" (default, fondo bone) | "dark" (fondo ink)
- *   socials     [{ network, href }] — network: facebook | instagram | google
- *               | linkedin | youtube. Vacío = no se renderiza la fila.
- *   columns     [{ title, links: [{ label, href, cta }] }]
- *               cta: true marca el enlace con data-bid-cta, que es lo que
- *               ContactForm escucha. En /contact eso enfoca el formulario en
- *               lugar de recargar la página contra sí misma.
+ * Props (inyectadas desde footer.php como JSON):
+ *   logo        URL del logotipo en negativo. Sin él, wordmark tipográfico.
+ *   phone       Teléfono display.           ej. "(385) 240-3907"
+ *   email       Correo de contacto.
+ *   address     NAP display, una línea.
+ *   mapsHref    Enlace del NAP a Google Maps.
+ *   license     Línea de licencia para la banda legal.
+ *   pattern     URL del estampado de apoyo de la marca. Se pinta como capa
+ *               de fondo sobre toda la superficie del footer, repetido y a
+ *               opacidad baja. Sin URL, la capa no se renderiza y el footer
+ *               queda en ink liso.
+ *   social      Perfiles sociales. { facebook, instagram, google }.
+ *               Clave vacía o ausente = el icono no se renderiza — a
+ *               diferencia del navbar, acá no hay estado "pendiente":
+ *               el footer es el cierre del sitio y un icono muerto ahí
+ *               se lee como enlace roto, no como aviso de obra.
+ *   nav         { grupo: [{ label, href }] } — columnas de navegación.
+ *   bidHref     Destino del CTA.
  */
 
-// Raíz-relativos, nunca anclas sueltas: el footer sale en todas las páginas y
-// un "#projects" pelado no lleva a ninguna parte fuera de la home.
-// footer.php los reemplaza por home_url(), que además aguanta una instalación
-// en subdirectorio.
-
-const DEFAULT_COLUMNS = [{
-  title: "Commercial",
-  links: [{
-    label: "Commercial overview",
-    href: "/#commercial"
-  }, {
-    label: "Capabilities",
-    href: "/capabilities"
-  }, {
-    label: "Projects",
-    href: "/#projects"
-  }, {
-    label: "Credentials",
-    href: "/#credentials"
-  }, {
-    label: "Service area",
-    href: "/#service-area"
-  }]
-}, {
-  title: "Company",
-  links: [{
-    label: "About EC",
-    href: "/about"
-  },
-  // El enlace a residencial se retiró: el sitio es de landscaping
-  // comercial y no expone esa salida.
-  {
-    label: "Request a bid",
-    href: "/contact",
-    cta: true
-  }]
-}, {
-  title: "Legal",
-  links: [{
-    label: "Privacy policy",
-    href: "/privacy-policy"
-  }, {
-    label: "Terms of service",
-    href: "/terms-of-service"
-  }]
-}];
-const socialPaths = {
-  facebook: "M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h3l1-3h-4v-2a1 1 0 0 1 1-1z",
-  instagram: null,
-  google: null,
-  linkedin: null,
-  youtube: null
+const iconProps = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.6,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": "true",
+  focusable: "false"
 };
-function SocialIcon({
-  network
+const PhoneIcon = props => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+  ...iconProps,
+  ...props,
+  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+    d: "M4 4h4l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 3 5a1 1 0 0 1 1-1z"
+  })
+});
+const MailIcon = props => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("svg", {
+  ...iconProps,
+  ...props,
+  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("rect", {
+    x: "3",
+    y: "5",
+    width: "18",
+    height: "14",
+    rx: "1.5"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+    d: "m3.5 7 8.5 6 8.5-6"
+  })]
+});
+const PinIcon = props => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("svg", {
+  ...iconProps,
+  ...props,
+  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+    d: "M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("circle", {
+    cx: "12",
+    cy: "10",
+    r: "2.5"
+  })]
+});
+
+/* ── Iconos sociales ──
+   DUPLICADOS de Navbar.js a conciencia: allá viven como componentes locales
+   de la franja de utilidad y este archivo no puede importarlos sin exponer
+   internals del navbar. Son tres paths estáticos — el costo de la copia es
+   menor que el de acoplar los dos componentes. Si aparece un tercer
+   consumidor, ese es el momento de moverlos a un Icons.js compartido y
+   dejar imports en los tres.
+
+   Siluetas macizas con fill, no stroke: a este tamaño un contorno de 1.5
+   se empasta. */
+
+function FacebookIcon({
+  className = ""
 }) {
-  const common = {
-    viewBox: "0 0 24 24",
-    "aria-hidden": "true",
-    focusable: "false",
-    className: "h-4 w-4"
-  };
-  if (network === "instagram") {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("svg", {
-      ...common,
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "1.6",
-      strokeLinecap: "round",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("rect", {
-        x: "3.5",
-        y: "3.5",
-        width: "17",
-        height: "17",
-        rx: "4.5"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("circle", {
-        cx: "12",
-        cy: "12",
-        r: "3.8"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("circle", {
-        cx: "17.2",
-        cy: "6.8",
-        r: "0.9",
-        fill: "currentColor",
-        stroke: "none"
-      })]
-    });
-  }
-  if (network === "linkedin") {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
-      ...common,
-      fill: "currentColor",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-        d: "M4.5 9h3v10.5h-3zM6 4.2a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6zM9.5 9h2.9v1.5a3.2 3.2 0 0 1 2.9-1.6c2.3 0 3.7 1.5 3.7 4.2v6.4h-3v-5.7c0-1.4-.5-2.2-1.7-2.2-1 0-1.8.7-1.8 2.2v5.7h-3z"
-      })
-    });
-  }
-  if (network === "google") {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("svg", {
-      ...common,
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "1.6",
-      strokeLinecap: "round",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-        d: "M20.5 12H12v3h5a5 5 0 1 1-1.5-5.3"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("circle", {
-        cx: "12",
-        cy: "12",
-        r: "8.5"
-      })]
-    });
-  }
-  if (network === "youtube") {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
-      ...common,
-      fill: "currentColor",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-        d: "M21.3 8.3a2.6 2.6 0 0 0-1.8-1.8C17.8 6 12 6 12 6s-5.8 0-7.5.5A2.6 2.6 0 0 0 2.7 8.3C2.2 10 2.2 12 2.2 12s0 2 .5 3.7a2.6 2.6 0 0 0 1.8 1.8C6.2 18 12 18 12 18s5.8 0 7.5-.5a2.6 2.6 0 0 0 1.8-1.8c.5-1.7.5-3.7.5-3.7s0-2-.5-3.7zM10.2 15.1V8.9l5.3 3.1z"
-      })
-    });
-  }
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
-    ...common,
+    viewBox: "0 0 24 24",
     fill: "currentColor",
+    "aria-hidden": "true",
+    className: className,
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-      d: socialPaths.facebook
+      d: "M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.9h-2.33V22C18.34 21.24 22 17.08 22 12.06Z"
     })
   });
 }
-function Wordmark({
-  dark
+function InstagramIcon({
+  className = ""
 }) {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    "aria-hidden": "true",
+    className: className,
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 1.98c-3.14 0-3.51.01-4.75.07-1.15.05-1.77.24-2.18.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.18-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.15.24 1.77.4 2.18.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.18.4 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.15-.05 1.77-.24 2.18-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.18.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.15-.24-1.77-.4-2.18a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.18-.4-1.24-.06-1.61-.07-4.75-.07Zm0 3.37a5.49 5.49 0 1 1 0 10.98 5.49 5.49 0 0 1 0-10.98Zm0 1.98a3.51 3.51 0 1 0 0 7.02 3.51 3.51 0 0 0 0-7.02Zm5.71-3.24a1.28 1.28 0 1 1 0 2.56 1.28 1.28 0 0 1 0-2.56Z"
+    })
+  });
+}
+function GoogleIcon({
+  className = ""
+}) {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    "aria-hidden": "true",
+    className: className,
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+    })
+  });
+}
+
+/* Enlace social del footer. Placa cuadrada con el mismo lenguaje de las
+   placas de contacto: borde tenue, fondo apenas levantado, bisel al hover.
+   Sin estado inerte — ver la nota de la prop social. */
+function SocialLink({
+  icon: Icon,
+  label,
+  href
+}) {
+  if (!href) return null;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+    href: href,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    "aria-label": label,
+    className: ["flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-bone/80", "transition-[box-shadow,transform,color,background-color] duration-150 ease-out", "hover:bevel hover:-translate-y-px hover:bg-white/[0.09] hover:text-bone", "active:bevel-pressed active:translate-y-0", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", "motion-reduce:transform-none motion-reduce:transition-none"].join(" "),
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Icon, {
+      className: "h-4 w-4"
+    })
+  });
+}
+function Wordmark() {
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("span", {
-    className: "flex flex-col gap-1.5",
+    className: "flex items-baseline gap-2 leading-none",
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-      className: `font-display text-[2rem] leading-none font-bold tracking-tight ${dark ? "text-bone" : "text-ink"}`,
+      className: "font-display text-[1.35rem] font-bold tracking-tight text-bone",
       children: "EC Landscaping"
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-      className: "text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-ember",
-      children: "Commercial \xB7 Hardscape \xB7 Concrete"
+      className: "text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-ember",
+      children: "Commercial"
     })]
   });
 }
 function Footer({
   logo = null,
-  stamp = null,
-  theme = "light",
-  legalName = "EC Landscaping LLC",
-  address = "3754 N Higley Rd, Suite 2",
-  cityState = "Ogden, UT 84404",
   phone = "(385) 240-3907",
   email = "info@ecscaping.com",
+  address = "3754 N Higley Rd, Suite 2, Ogden, UT 84404",
   mapsHref = "https://www.google.com/maps/search/?api=1&query=3754+N+Higley+Rd+Suite+2+Ogden+UT+84404",
-  license = "Utah License 1106462255001 · S330",
-  // "bonded" queda fuera a propósito: el capability deck aún no confirma
-  // capacidad de bonding (Pendiente 04). No se publica hasta que Tomás lo
-  // confirme por escrito.
-  credentialLine = "Licensed and insured · General Liability · Workers' Comp · Commercial Auto",
-  counties = "Serving Weber, Davis, Morgan and Box Elder counties",
-  columns = DEFAULT_COLUMNS,
-  socials = [],
-  year = new Date().getFullYear()
+  license = "Utah License S330",
+  pattern = null,
+  social = {},
+  nav = {},
+  bidHref = "/contact"
 }) {
-  const dark = theme === "dark";
   const telHref = `tel:+1${phone.replace(/\D/g, "")}`;
-  const surface = dark ? "bg-ink text-bone" : "bg-bone text-ink";
-  const rule = dark ? "border-white/10" : "border-ink/10";
-
-  /* En oscuro el texto atenuado sube de /60 y /65 a /75 y /80. No es un
-     ajuste de gusto: con el estampado al 14% el punto más claro del tartán
-     deja el fondo en #484B43, y ahí bone/60 da 3.97:1 y bone/65 da 4.35:1
-     — los dos por debajo de AA. A /75 y /80 quedan en 5.22:1 y 5.66:1.
-      En claro se conservan los valores originales: ahí no hay estampado. */
-  const muted = dark ? "text-bone/75" : "text-ink/60";
-  const linkTone = dark ? "text-bone/80 hover:text-bone" : "text-ink/65 hover:text-ink";
-  const headingTone = dark ? "text-bone" : "text-ink";
+  const mailHref = `mailto:${email}`;
+  const year = new Date().getFullYear();
+  const groups = Object.entries(nav);
+  const hasSocial = !!(social.facebook || social.instagram || social.google);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("footer", {
-    className: `relative isolate overflow-hidden ${surface} border-t ${rule}`,
-    children: [dark && stamp && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-      className: "pointer-events-none absolute inset-0 -z-10",
-      "aria-hidden": "true",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
-        className: "ec-stamp",
-        style: {
-          "--stamp": `url('${stamp}')`
-        }
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "relative px-5 pt-14 pb-8 sm:px-8 lg:px-10",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "grid gap-12 lg:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,1fr))] lg:gap-10",
+    className: "relative isolate overflow-hidden bg-ink text-bone",
+    children: [pattern && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "pointer-events-none absolute inset-0 -z-10 opacity-[0.07]",
+      style: {
+        backgroundImage: `url(${pattern})`,
+        backgroundRepeat: "repeat",
+        backgroundSize: "480px auto"
+      },
+      "aria-hidden": "true"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "px-5 py-14 sm:px-8 lg:px-10 lg:py-20",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:gap-10",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-          className: "flex flex-col gap-6",
-          children: [logo ?
-          /*#__PURE__*/
-          /* brightness(0) invert(1) pinta el logo de blanco pleno, sea cual
-             sea su color original: brightness(0) lo lleva todo a negro y el
-             invert lo devuelve como blanco. Es lo que permite usar el mismo
-             archivo en las dos superficies sin subir una segunda versión.
-              Tiene un costo: aplana. El arco terracota del imagotipo
-             desaparece y queda una silueta blanca. Si esa parte tiene que
-             conservar su color, no hay filtro que lo resuelva — hace falta
-             el archivo en negativo de verdad, y entonces se quita esta
-             clase.
-              Solo en tema oscuro: sobre bone un logo blanco no se vería. */
-          (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
-            src: logo,
-            alt: legalName,
-            className: `h-11 w-auto self-start ${dark ? "[filter:brightness(0)_invert(1)]" : ""}`
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Wordmark, {
-            dark: dark
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("address", {
-            className: "flex flex-col gap-1 text-sm not-italic leading-relaxed",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
-              href: mapsHref,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: `${linkTone} transition-colors`,
-              children: [address, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("br", {}), cityState]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-              href: telHref,
-              className: `${linkTone} mt-2 tabular-nums transition-colors`,
-              children: phone
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-              href: `mailto:${email}`,
-              className: `${linkTone} transition-colors`,
-              children: email
-            })]
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+            href: "/",
+            className: "inline-block rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember",
+            children: logo ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
+              src: logo,
+              alt: "EC Landscaping",
+              className: "h-9 w-auto"
+            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Wordmark, {})
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-            className: `max-w-sm text-xs leading-relaxed ${muted}`,
-            children: credentialLine
+            className: "mt-6 max-w-xs text-sm leading-relaxed text-bone/70",
+            children: "Commercial landscape, hardscape and concrete. Self-performed across the Weber\u2013Davis corridor."
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
+            href: mapsHref,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "mt-5 inline-flex items-start gap-2.5 text-sm text-bone/80 underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(PinIcon, {
+              className: "mt-0.5 h-4 w-4 shrink-0 text-ember/80"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+              children: address
+            })]
           })]
-        }), columns.map(column => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("nav", {
-          "aria-label": column.title,
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h2", {
-            className: `mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.16em] ${headingTone}`,
-            children: column.title
+        }), groups.map(([title, links]) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("nav", {
+          "aria-label": title,
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+            className: "mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300",
+            children: title
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
             className: "flex flex-col gap-2.5",
-            children: column.links.map(link => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
+            children: links.map(link => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
                 href: link.href,
-                ...(link.cta ? {
-                  "data-bid-cta": ""
-                } : {}),
-                className: `${linkTone} text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`,
+                className: "text-sm text-bone/70 transition-colors hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
                 children: link.label
               })
-            }, link.href + link.label))
+            }, link.href))
           })]
-        }, column.title))]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("hr", {
-        className: `mt-14 border-t ${rule}`
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-          className: `flex flex-col gap-1 text-xs ${muted}`,
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
-            children: ["\xA9 ", year, " ", legalName, ". All rights reserved."]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-            className: "tabular-nums",
-            children: license
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-            children: counties
-          })]
-        }), socials.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
-          className: "flex items-center gap-2",
-          children: socials.map(social => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
-              href: social.href,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              "aria-label": `${legalName} on ${social.network}`,
-              className: ["flex h-9 w-9 items-center justify-center rounded-md border transition-colors", dark ? "border-white/15 text-bone/70 hover:border-white/30 hover:text-bone" : "border-ink/15 text-ink/60 hover:border-ink/35 hover:text-ink", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"].join(" "),
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(SocialIcon, {
-                network: social.network
+        }, title)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+            className: "mb-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ember-300",
+            children: "Contact"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("ul", {
+            className: "flex flex-col gap-2.5",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
+                href: telHref,
+                className: "group flex items-center gap-2.5 text-sm text-bone/80 transition-colors hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(PhoneIcon, {
+                  className: "h-4 w-4 shrink-0 text-ember/80 transition-colors group-hover:text-ember"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+                  className: "font-semibold tabular-nums",
+                  children: phone
+                })]
               })
-            })
-          }, social.network))
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
+                href: mailHref,
+                className: "group flex items-center gap-2.5 text-sm text-bone/80 transition-colors hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(MailIcon, {
+                  className: "h-4 w-4 shrink-0 text-ember/80 transition-colors group-hover:text-ember"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+                  children: email
+                })]
+              })
+            })]
+          }), hasSocial && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+            className: "mt-7",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+              className: "mb-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-bone/50",
+              children: "Follow the work"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+              className: "flex items-center gap-2",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(SocialLink, {
+                icon: FacebookIcon,
+                label: "EC Landscaping on Facebook",
+                href: social.facebook
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(SocialLink, {
+                icon: InstagramIcon,
+                label: "EC Landscaping on Instagram",
+                href: social.instagram
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(SocialLink, {
+                icon: GoogleIcon,
+                label: "EC Landscaping on Google",
+                href: social.google
+              })]
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
+            href: bidHref,
+            "data-bid-cta": "",
+            className: "mt-7 inline-flex items-center gap-2.5 border-2 border-white/25 bg-ember px-6 py-3 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink transition-colors hover:bg-ember-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+            children: ["Request a Bid", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+              ...iconProps,
+              className: "h-4 w-4",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+                d: "M5 12h13M13 6l6 6-6 6"
+              })
+            })]
+          })]
         })]
-      })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "ec-band ec-band--h h-2 opacity-40",
+      "aria-hidden": "true"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "border-t border-white/10 px-5 py-5 sm:px-8 lg:px-10",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "grid gap-2 text-center text-xs text-bone/50 sm:grid-cols-3 sm:items-center sm:gap-4 sm:text-left",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
+          children: ["\xA9 ", year, " EC Landscaping LLC. All rights reserved."]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("p", {
+          className: "sm:text-center",
+          children: ["Site by", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+            href: "https://828marketingsolutions.com/",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "text-bone/70 underline decoration-ember decoration-2 underline-offset-4 transition-colors hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+            children: "828 Marketing Solutions"
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+          className: "sm:text-right",
+          children: license
+        })]
+      })
     })]
   });
 }
@@ -1240,9 +1283,12 @@ __webpack_require__.r(__webpack_exports__);
  *                     hace falta subir la versión en positivo.
  *   phone             Teléfono en formato display.  ej. "(385) 240-3907"
  *   license           Línea de licencia.            ej. "UT License S330"
- *   social            Perfiles sociales. { facebook, instagram, tiktok }.
+ *   social            Perfiles sociales. { facebook, instagram, google }.
  *                     Clave vacía o ausente = el icono se dibuja apagado y
- *                     sin enlace. Pendiente 13 del brief.
+ *                     sin enlace. Las URLs se llenan en header.php — ya
+ *                     están definidas (Pendiente 13 resuelto): Facebook e
+ *                     Instagram de EC, y el perfil de Google Business en
+ *                     lugar de TikTok, que la empresa no tiene.
  *   links             [{ label, href, activeId, children }]
  *                     children: [{ label, href }] convierte la entrada en un
  *                     desplegable. El padre pasa a ser <button> y no <a>: un
@@ -1452,7 +1498,7 @@ function InstagramIcon({
     })
   });
 }
-function TikTokIcon({
+function GoogleIcon({
   className = ""
 }) {
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
@@ -1461,7 +1507,7 @@ function TikTokIcon({
     "aria-hidden": "true",
     className: className,
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-      d: "M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 1 1 .77-5.06v-3.1a5.66 5.66 0 0 0-.77-.05A5.68 5.68 0 1 0 15.54 15.4V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.29 4.29 0 0 1-3.24-1.48Z"
+      d: "M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
     })
   });
 }
@@ -1471,6 +1517,13 @@ function TikTokIcon({
    de Tab y engaña al lector de pantalla. El icono se ve —que es lo que
    permite evaluar la franja ahora— pero no promete nada.
 
+   Base en bone PLENO (antes bone/60): a 3.5px de trazo sobre la franja
+   pine-900, el 60% los volvía fantasmas — y el estado inerte les sumaba
+   opacity-40 encima, dejándolos en un ~24% efectivo. El inerte sube a
+   opacity-70: sigue marcando el escalón "pendiente" contra un enlace vivo,
+   pero ya se ve qué redes va a haber. Los enlaces vivos rematan en blanco
+   puro al hover.
+
    Cuando lleguen las URLs se llenan en header.php y estos se vuelven enlaces
    reales sin tocar el componente. */
 function SocialLink({
@@ -1478,10 +1531,10 @@ function SocialLink({
   label,
   href
 }) {
-  const clases = "flex h-7 w-7 items-center justify-center text-bone/60 transition-colors";
+  const clases = "flex h-7 w-7 items-center justify-center text-bone transition-colors";
   if (!href) {
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("span", {
-      className: `${clases} cursor-default opacity-40`,
+      className: `${clases} cursor-default opacity-70`,
       title: `${label} — pendiente`,
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Icon, {
         className: "h-3.5 w-3.5"
@@ -1495,7 +1548,7 @@ function SocialLink({
     href: href,
     target: "_blank",
     rel: "noopener noreferrer",
-    className: `${clases} hover:text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`,
+    className: `${clases} hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember`,
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Icon, {
       className: "h-3.5 w-3.5"
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
@@ -1554,16 +1607,13 @@ function BidButton({
 }) {
   const skins = {
     ember: [
-    // Texto en ink sobre CLAY (#BE805B): 3.90:1. Blanco da 2.85:1, así que
-    // ink es claramente la mejor de las dos — pero no llega al 4.5:1 que
-    // pide AA a 13px, porque el problema es la luminancia del fondo y no el
-    // color del texto.
-    //
-    // La salida está en el tema: bg-ember-600 (CLAY-600 #8C654B) con texto
-    // blanco da 5.15:1. No se aplicó porque cambia el botón en once archivos
-    // y aleja el CTA del CLAY exacto de la lámina de marca — es decisión de
-    // marca, no técnica. Ver la nota al pie de src/index.css.
-    "border-white/25 bg-ember text-ink cta-relief", "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px"].join(" "),
+    /* CTA en PINE con texto blanco — redefinido a pedido (ago 2026): los
+       botones de bid dejan el CLAY y toman el verde oscuro de marca, que
+       además resuelve de una el viejo problema de contraste del clay
+       (blanco sobre pine pasa AA sobrado, ~11:1). La skin conserva el
+       nombre "ember" para no tocar los call sites. El hover profundiza a
+       ink-900, el mismo escalón que usa la franja de utilidad. */
+    "border-white/25 bg-ink text-white cta-relief", "hover:cta-relief-tight hover:bg-ink-900 hover:-translate-y-px"].join(" "),
     soft: ["border-white/[0.333] bg-[#e0e8ef] text-[#7e97b8] cta-soft", "hover:cta-soft-tight hover:bg-[#e5edf5] hover:text-[#516d91]"].join(" ")
   };
   const sizes = {
@@ -1660,7 +1710,10 @@ function NavDropdown({
       "aria-expanded": open,
       "aria-controls": panelId,
       onClick: () => setOpen(v => !v),
-      className: ["relative flex items-center gap-1.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.13em] transition-colors", "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember", isActive ? linkActive : linkBase].join(" "),
+      style: isLight ? undefined : {
+        color: "#ffffff"
+      },
+      className: ["relative flex items-center gap-1.5 py-1 text-[0.78rem] font-bold uppercase tracking-[0.13em] transition-colors", "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember", isActive ? linkActive : linkBase].join(" "),
       children: [link.label, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(ChevronIcon, {
         className: ["h-3 w-3 shrink-0 transition-transform duration-200 motion-reduce:transition-none", open ? "rotate-180" : ""].join(" ")
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
@@ -1672,7 +1725,7 @@ function NavDropdown({
       hidden: !open,
       className: "absolute left-0 top-full z-10 pt-3",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
-        className: ["min-w-[16rem] overflow-hidden rounded-lg py-2 shadow-xl shadow-ink/20 backdrop-blur-md", isLight ? "bg-white/95 ring-1 ring-mist" : "bg-ink/95 ring-1 ring-white/10"].join(" "),
+        className: ["min-w-[16rem] overflow-hidden rounded-lg py-2 shadow-xl shadow-ink/20 backdrop-blur-md", isLight ? "bg-white/95 ring-1 ring-mist" : "bg-[#232322]/95 ring-1 ring-white/10"].join(" "),
         children: link.children.map(child => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
             href: child.href,
@@ -1753,20 +1806,48 @@ function Navbar({
    * no difumina nada: solo se ve el texto de la página cruzándose con el menú.
    * En ese caso la barra se queda opaca.
    */
-  const barSurface = isLight ? ["ring-1 ring-mist bg-white/95", docked ? "supports-[backdrop-filter]:bg-white/80" : ""].join(" ") : ["ring-1 ring-white/10 bg-ink/95", docked ? "supports-[backdrop-filter]:bg-ink/80" : ""].join(" ");
-  const linkBase = isLight ? "text-ink/70 hover:text-ink" : "text-bone/70 hover:text-bone";
-  const linkActive = isLight ? "text-ink" : "text-bone";
+  /* ═══ SUPERFICIES DEL NAVBAR: NEGRO NEUTRO, NO PINE ═══
+     Este fue el hallazgo del debug de ago 2026: el "verde" del navbar nunca
+     fue el texto — era la superficie. bg-ink apunta a PINE (#2F342D), un
+     negro con base verde POR DISEÑO de la paleta, y sobre una franja de
+     120px de alto ese matiz se lee como barra verde sin importar de qué
+     color vayan las letras.
+      El navbar (y solo el navbar) pasa a un par de neutros sin canal verde
+     dominante: #232322 la barra, #171716 la franja de utilidad — el mismo
+     escalón que tenían pine y pine-900, en neutro. Son valores literales y
+     no tokens del tema a propósito: la paleta no tiene un oscuro neutro y
+     agregárselo invitaría a usarlo en secciones, donde el pine SÍ es la
+     decisión correcta. */
+  const barSurface = isLight ? ["ring-1 ring-mist bg-white/95", docked ? "supports-[backdrop-filter]:bg-white/95" : ""].join(" ") : ["ring-1 ring-white/10 bg-[#232322]/95", docked ? "supports-[backdrop-filter]:bg-[#232322]/95" : ""].join(" ");
+
+  /* Los enlaces del menú van en BLANCO PURO sobre la barra oscura. Es la
+     excepción deliberada a la regla "nunca blanco puro" del tema: el bone
+     (#F1F0E6) es un hueso CÁLIDO con base verdosa, y sobre el pine de la
+     barra esa base se amplifica — incluso a plena opacidad se seguía
+     leyendo verdoso. A este tamaño (10-11px en mayúsculas) el matiz del
+     hueso no aporta nada y el blanco limpio es lo único que se lee neutro.
+     El estado activo se distingue por el subrayado ember.
+      linkStyle es el REFUERZO INLINE del mismo blanco: durante el debug de
+     ago 2026 los cambios de CSS no llegaban al navegador (stylesheet
+     cacheado) pero los de JS sí — el icono de Google lo probó. Un estilo
+     inline viaja en el bundle JS, así que pinta blanco aunque el CSS
+     compilado que reciba el navegador sea viejo. Cuando el encolado del
+     CSS lleve versión (?ver= desde index.asset.php) este refuerzo se puede
+     quitar; mientras tanto es inocuo: dice lo mismo que la clase. */
+  const linkBase = isLight ? "text-ink/70 hover:text-ink" : "text-white";
+  const linkActive = isLight ? "text-ink" : "text-white";
+  const linkStyle = isLight ? undefined : {
+    color: "#ffffff"
+  };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("header", {
       className: "fixed inset-x-0 top-0 z-50",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
         className: [
-        /* bg-ink-900 y no bg-ink: la franja va pegada a la barra, así que
-           necesita un escalón propio para no leerse como un solo bloque
-           de 120px de alto. Hacia arriba no se puede —cualquier tono más
-           claro la volvería protagonista sobre la navegación— así que se
-           separa hacia abajo. */
-        "overflow-hidden border-b border-white/10 bg-ink-900 text-bone", "transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none", docked ? "max-h-0 opacity-0" : "max-h-12 opacity-100"].join(" "),
+        /* Neutro más oscuro que la barra (#171716 contra #232322): el
+           mismo escalón que hacían pine-900 y pine, sin la base verde.
+           Ver la nota de barSurface. */
+        "overflow-hidden border-b border-white/10 bg-[#171716] text-bone", "transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none", docked ? "max-h-0 opacity-0" : "max-h-12 opacity-100"].join(" "),
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
           className: "grid grid-cols-[1fr_auto] items-center gap-4 px-5 py-1.5 sm:px-8 lg:grid-cols-3 lg:px-10",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
@@ -1810,9 +1891,9 @@ function Navbar({
                 label: "Instagram",
                 href: social.instagram
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(SocialLink, {
-                icon: TikTokIcon,
-                label: "TikTok",
-                href: social.tiktok
+                icon: GoogleIcon,
+                label: "Google Business Profile",
+                href: social.google
               })]
             })]
           })]
@@ -1825,7 +1906,7 @@ function Navbar({
              que cambia al acoplarse es el alto —py-3 contra py-4— y el
              desenfoque, que aparece cuando la barra empieza a dejar ver
              el contenido por detrás. */
-          "px-5 sm:px-8 lg:px-10", docked ? "py-3 shadow-[0_1px_0_0_rgba(0,0,0,0.25)] backdrop-blur-xl backdrop-saturate-150" : "py-4"].join(" "),
+          "px-5 sm:px-8 lg:px-10", docked ? "py-3 shadow-[0_1px_0_0_rgba(0,0,0,0.25)] backdrop-blur-xl" : "py-4"].join(" "),
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
             href: "/",
             className: "flex shrink-0 items-center gap-3 rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember",
@@ -1854,7 +1935,8 @@ function Navbar({
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
                   href: link.href,
                   "aria-current": isActive ? "true" : undefined,
-                  className: ["relative py-1 text-[0.7rem] font-semibold uppercase tracking-[0.13em] transition-colors", "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember", isActive ? linkActive : linkBase].join(" "),
+                  style: linkStyle,
+                  className: ["relative py-1 text-[0.78rem] font-bold uppercase tracking-[0.13em] transition-colors", "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ember", isActive ? linkActive : linkBase].join(" "),
                   children: [link.label, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
                     "aria-hidden": "true",
                     className: ["absolute -bottom-0.5 left-0 h-0.5 w-full origin-left bg-ember", "transition-transform duration-200 motion-reduce:transition-none", isActive ? "scale-x-100" : "scale-x-0"].join(" ")
@@ -1898,39 +1980,39 @@ function Navbar({
       "aria-modal": "true",
       "aria-label": "Menu",
       hidden: !open,
-      className: "fixed inset-0 z-[60] flex flex-col bg-ink text-bone lg:hidden",
+      className: ["fixed inset-0 z-[60] flex flex-col lg:hidden", isLight ? "bg-white text-ink" : "bg-[#232322] text-bone"].join(" "),
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "flex items-center justify-between border-b border-white/10 px-5 py-4",
+        className: `flex items-center justify-between border-b px-5 py-4 ${isLight ? "border-ink/10" : "border-white/10"}`,
         children: [logo ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("img", {
           src: logo,
           alt: "EC Landscaping",
           className: "h-8 w-auto"
         }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(Wordmark, {
-          theme: "dark"
+          theme: theme
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
           type: "button",
           onClick: () => setOpen(false),
-          className: "rounded-md px-3 py-2 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-bone ring-1 ring-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+          className: ["rounded-md px-3 py-2 text-[0.7rem] font-bold uppercase tracking-[0.12em]", "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember", isLight ? "text-ink ring-1 ring-ink/15" : "text-bone ring-1 ring-white/15"].join(" "),
           children: "Close"
         })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("nav", {
         "aria-label": "Primary mobile",
         className: "flex-1 overflow-y-auto px-5 py-6",
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("ul", {
-          className: "flex flex-col divide-y divide-white/10",
+          className: `flex flex-col divide-y ${isLight ? "divide-ink/10" : "divide-white/10"}`,
           children: [links.map(link => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
             children: link.children && link.children.length ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
               className: "py-4",
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-                className: "font-display text-2xl font-bold tracking-tight text-bone/50",
+                className: `font-display text-2xl font-bold tracking-tight ${isLight ? "text-ink/50" : "text-bone/50"}`,
                 children: link.label
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
-                className: "mt-3 flex flex-col gap-1 border-l border-white/15 pl-4",
+                className: `mt-3 flex flex-col gap-1 border-l pl-4 ${isLight ? "border-ink/15" : "border-white/15"}`,
                 children: link.children.map(child => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
                   children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
                     href: child.href,
                     onClick: () => setOpen(false),
-                    className: "block py-2 text-base font-medium text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+                    className: `block py-2 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember ${isLight ? "text-ink" : "text-bone"}`,
                     children: child.label
                   })
                 }, child.href))
@@ -1938,14 +2020,14 @@ function Navbar({
             }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
               href: link.href,
               onClick: () => setOpen(false),
-              className: "block py-4 font-display text-2xl font-bold tracking-tight text-bone focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
+              className: `block py-4 font-display text-2xl font-bold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember ${isLight ? "text-ink" : "text-bone"}`,
               children: link.label
             })
           }, link.label)), residentialHref && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("li", {
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
               href: residentialHref,
               onClick: () => setOpen(false),
-              className: "block py-4 text-sm font-semibold uppercase tracking-[0.14em] text-bone/50",
+              className: `block py-4 text-sm font-semibold uppercase tracking-[0.14em] ${isLight ? "text-ink/50" : "text-bone/50"}`,
               children: ["Residential ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
                 "aria-hidden": "true",
                 children: "\u2192"
@@ -1954,7 +2036,7 @@ function Navbar({
           })]
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "border-t border-white/10 px-5 py-5",
+        className: `border-t px-5 py-5 ${isLight ? "border-ink/10" : "border-white/10"}`,
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
           className: "mb-5 flex flex-col gap-2",
           children: [{
@@ -1983,22 +2065,22 @@ function Navbar({
                 target: "_blank",
                 rel: "noopener noreferrer"
               } : {}),
-              className: "group flex items-center gap-3 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-bone/80 transition-[box-shadow,transform,background-color] duration-150 hover:bevel hover:-translate-y-px hover:bg-white/[0.09] active:bevel-pressed active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none",
+              className: ["group flex items-center gap-3 rounded-md border px-3 py-2.5 text-sm", "transition-[box-shadow,transform,background-color] duration-150", "hover:-translate-y-px active:translate-y-0", "motion-reduce:transform-none motion-reduce:transition-none", isLight ? "border-ink/10 bg-ink/[0.03] text-ink/80 bevel-tile hover:bevel-tile-raised active:shadow-none" : "border-white/10 bg-white/[0.04] text-bone/80 hover:bevel hover:bg-white/[0.09] active:bevel-pressed"].join(" "),
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(item.icon, {
-                className: "h-4 w-4 shrink-0 text-ember/80 group-hover:text-ember"
+                className: `h-4 w-4 shrink-0 ${isLight ? "text-ember-600" : "text-ember/80 group-hover:text-ember"}`
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
                 children: item.label
               })]
             })
           }, item.href))
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
-          className: "mb-4 text-[0.65rem] font-medium uppercase tracking-[0.14em] text-bone/50",
+          className: `mb-4 text-[0.65rem] font-medium uppercase tracking-[0.14em] ${isLight ? "text-ink/50" : "text-bone/50"}`,
           children: license
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
           className: "grid grid-cols-2 gap-3",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
             href: telHref,
-            className: "border-2 border-white/20 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-bone",
+            className: `border-2 py-3 text-center text-[0.8125rem] font-medium uppercase tracking-[0.4px] ${isLight ? "border-ink/30 text-ink" : "border-white/20 text-bone"}`,
             children: "Call now"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(BidButton, {
             href: bidHref,
@@ -2010,15 +2092,15 @@ function Navbar({
         })]
       })]
     }), !open && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: "fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 gap-px border-t border-white/10 bg-ink lg:hidden",
+      className: ["fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 gap-px border-t lg:hidden", isLight ? "border-ink/10 bg-white" : "border-white/10 bg-[#232322]"].join(" "),
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("a", {
         href: telHref,
-        className: "py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-bone",
+        className: `py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] ${isLight ? "text-ink" : "text-bone"}`,
         children: ["Call ", phone]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
         href: bidHref,
         "data-bid-cta": "",
-        className: "bg-ember py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink",
+        className: "bg-ink py-4 text-center text-[0.72rem] font-bold uppercase tracking-[0.12em] text-white",
         children: "Request a Bid"
       })]
     })]

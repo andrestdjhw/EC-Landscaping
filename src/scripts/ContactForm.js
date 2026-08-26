@@ -3,9 +3,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react"
 /**
  * ContactForm — "Request a bid" · EC Landscaping
  *
- * Un componente, tres usos, combinando cuatro props:
+ * Un componente, tres usos, combinando cinco props:
  *
  *   Hero          variant="inline"  persistent  density="compact"
+ *                 surface="glass"
  *                 inlineMinWidth="(min-width: 1280px)"
  *                 Siempre visible en la columna derecha del hero. Por debajo
  *                 del umbral no hay sitio, así que cae a modal y el CTA del
@@ -13,6 +14,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react"
  *
  *   Página /contact  variant="inline" persistent density="comfortable"
  *                 Sin umbral: la página es suya, no compite con nada.
+ *                 Sin surface: usa "solid", ver abajo por qué.
  *
  *   (sin uso hoy)  variant="modal"
  *                 El modal global se retiró: su trabajo lo hace /contact.
@@ -27,6 +29,15 @@ import React, { useCallback, useEffect, useRef, useState } from "react"
  *                   No se deriva del viewport: las variantes sm: de Tailwind
  *                   miden la ventana, no el contenedor, y el panel del hero
  *                   mide 27rem dentro de una ventana de 1280+.
+ *   surface         "solid" (default) | "glass" — superficie del panel inline.
+ *                   "glass" baja el fondo a ink/70 y sube el blur: el panel
+ *                   deja ver el slideshow del hero a través.
+ *                   SOLO para instancias cuyo fondo es un medio velado en
+ *                   oscuro (el hero). La página /contact se queda en "solid":
+ *                   su panel apoya sobre el bone de la página, y con ink/70
+ *                   encima el fondo efectivo se aclara hasta hundir las
+ *                   etiquetas en bone/55 por debajo de AA. La transparencia
+ *                   es del hero, no del formulario.
  *   inlineMinWidth  media query. Por debajo, la variante inline cae a modal.
  *                   null = nunca cae.
  *   trigger         selector de los disparadores. Vacío o null = la
@@ -147,6 +158,7 @@ export default function ContactForm({
   variant = "modal",
   persistent = false,
   density = "comfortable",
+  surface = "solid",
   inlineMinWidth = null,
   trigger = null,
   endpoint = "/wp-json/ec/v1/bid",
@@ -609,10 +621,13 @@ export default function ContactForm({
                 type="submit"
                 disabled={status === "sending"}
                 className={[
-                  "cta-relief group inline-flex items-center justify-center gap-2.5 border-2 border-white/25 bg-ember py-3.5 pl-7 pr-6",
-                  "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-ink whitespace-nowrap",
+                  // CTA en PINE con texto blanco — redefinición global de los
+                  // botones de bid (ago 2026). Sobre el panel de vidrio el
+                  // borde white/25 y el relief son lo que lo delimitan.
+                  "cta-relief group inline-flex items-center justify-center gap-2.5 border-2 border-white/25 bg-ink py-3.5 pl-7 pr-6",
+                  "text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-white whitespace-nowrap",
                   "transition-all duration-200 ease-out",
-                  "hover:cta-relief-tight hover:bg-ember-600 hover:-translate-y-px",
+                  "hover:cta-relief-tight hover:bg-ink-900 hover:-translate-y-px",
                   "active:translate-y-0 active:shadow-none",
                   "disabled:pointer-events-none disabled:opacity-60",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
@@ -646,6 +661,34 @@ export default function ContactForm({
      no bloquea la página, así que anunciarlo como diálogo modal sería
      mentirle al lector de pantalla. Va como región con nombre. */
   if (!asModal) {
+    /* ── Superficie del panel ──
+       "solid": bg-ink/95 con blur suave. Es la de /contact, donde el panel
+       apoya sobre el bone de la página — ahí la transparencia no muestra
+       nada que valga la pena y solo aclara el fondo bajo las etiquetas.
+
+       "glass": bg-ink/55 con blur fuerte, para el hero. El slideshow se ve
+       claramente a través del panel. Dos decisiones que sostienen el
+       contraste con un fondo tan abierto:
+
+       · backdrop-blur-xl + saturate: el blur promedia la foto detrás — sin
+         él, el borde de un techo blanco cruzaría por debajo de una etiqueta
+         y la cortaría en dos. Difuminado, el fondo se comporta como un tono
+         parejo. A esta transparencia el blur ya no es un refinamiento: es
+         la condición para que el texto se lea.
+       · el velo del hero ya oscurece la foto antes de que el panel se
+         mezcle encima, así que el fondo efectivo sigue siendo oscuro.
+
+       LA PERILLA: /55 es un punto agresivo — contra el slide más claro de
+       los cinco, las etiquetas en bone/55 van a estar cerca del límite.
+       Si se lavan, subí a /65; si querés aún más vidrio, /45 es el piso
+       razonable antes de que el panel deje de leerse como superficie.
+       Está acá y no en la plantilla porque es una decisión del componente,
+       no del contenido. */
+    const surfaceClasses =
+      surface === "glass"
+        ? "bg-ink/55 backdrop-blur-xl backdrop-saturate-150"
+        : "bg-ink/95 backdrop-blur-md"
+
     return (
       <div
         ref={panelRef}
@@ -653,15 +696,12 @@ export default function ContactForm({
         aria-labelledby="ec-bid-title"
         className={[
           "pointer-events-auto flex max-h-full w-full flex-col overflow-hidden",
-          // bg-ink y no bg-umber. Con la paleta nueva, umber apunta a OLIVE
-          // #696D56, que es un tono MEDIO y no un oscuro: las etiquetas del
-          // formulario van en bone/55 y ahí caían a 2.57:1, y el botón ember
-          // quedaba en 1.64:1 contra su propio panel — invisible.
-          //
-          // Sobre PINE las mismas opacidades dan 4.54:1 y el botón 3.90:1.
-          // Es lo que devuelve la jerarquía entre etiqueta, valor y acción sin
-          // tocar una sola clase de los campos.
-          "bg-ink/95 text-bone shadow-2xl shadow-ink/50 ring-1 ring-white/12 backdrop-blur-md",
+          // Sobre PINE. Con la paleta nueva umber apunta a OLIVE, un tono
+          // MEDIO: las etiquetas en bone/55 caían a 2.57:1 y el botón ember
+          // quedaba invisible contra su propio panel. Sobre PINE las mismas
+          // opacidades dan 4.54:1 y el botón 3.90:1.
+          surfaceClasses,
+          "text-bone shadow-2xl shadow-ink/50 ring-1 ring-white/12",
           // Permanente no anima: el panel no entra desde ningún lado, ya
           // estaba ahí cuando cargó la página.
           alwaysOn
