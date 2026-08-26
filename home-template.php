@@ -469,26 +469,63 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
            retiró de todo el hero cuando el clamp de una pantalla pasó a ser
            condicional — donde no hay alto, la página crece en lugar de
            encoger el texto. -->
-      <p class="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-bone">
+      <!-- ── Badge BBB — abre la columna de texto ──
+         Arriba de todo, antes del eyebrow (esquema de Daniel, ago 2026):
+         la acreditación se lee ANTES que el pitch — el sello primero, el
+         argumento después. Patrón del sitio de 828: antorcha + "BBB
+         Accredited Business" / "Better Business Bureau", al perfil.
+
+           La leyenda de acreditación está VERIFICADA contra el perfil
+           (ago 2026): EC es BBB Accredited desde 2/4/2026, con rating A+.
+           Si la acreditación venciera, esta línea es un reclamo que BBB
+           persigue — el badge se baja a "BBB Business Profile".
+
+           Pendiente 01, ampliado tras leer el perfil: BBB lista la
+           dirección de HOOPER, el teléfono (801) 920-7425 y el dominio
+           ecscapes.com — los tres distintos del NAP del sitio (Higley Rd,
+           (385) 240-3907, este dominio). Conviene que EC actualice su
+           listing completo para que la citation coincida. -->
+      <a
+        href="https://www.bbb.org/us/ut/hooper/profile/landscape-contractors/ec-landscaping-1126-90055383"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="EC Landscaping — BBB Accredited Business profile on the Better Business Bureau"
+        class="inline-flex w-full items-center gap-3 border-2 border-ember/70 bg-ember/10 px-5 py-3 transition-[box-shadow,border-color,background-color] duration-300 shadow-[0_0_28px_rgba(190,128,91,0.4)] hover:border-ember hover:bg-ember/15 hover:shadow-[0_0_44px_rgba(190,128,91,0.65)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transition-none sm:w-[calc(50%-0.5rem)]"
+      >
+        <!-- El ancho es EL DE UNA COLUMNA de la rejilla de CTAs de abajo:
+             calc(50% - 0.5rem) reproduce exactamente una mitad de la
+             grid-cols-2 con gap-4, así el badge remata en la misma vertical
+             que el botón de bid. Si el gap de los CTAs cambia, este calc
+             cambia con él.
+
+             La antorcha en el naranja de marca; el resplandor (shadow
+             difuso en el RGB de EMBER, 190·128·91) es el guiño al glow del
+             sitio de 828 y se intensifica al hover. -->
+        <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true" class="h-8 w-8 shrink-0 text-ember">
+          <path d="M11.166 20.194c.806.577 2.809 1.923 3.222 2.358.412.435.023 1.099.023 1.099l.618.252c.137-.298.962-1.397 1.511-2.084.496-.62.926-1.706.941-2.503.047-2.572-3.367-3.794-4.949-5.237-.778-.71-.16-1.122-.16-1.122l-.527-.343C9.808 14.926 7.662 17.686 11.166 20.194zM12.922 11.605c1.969 1.74 5.435 3.548 5.679 4.717.318 1.523-.412 2.382-.412 2.382l.394.321c.213-.304.451-.591.67-.891.892-1.222 1.752-2.463 2.629-3.695 2.004-2.818 1.254-5.49-1.765-7.648-1.537-1.098-3.032-2.26-4.584-3.339-.871-.733-.275-2.107-.275-2.107l-.367-.32c0 0-3.286 3.984-3.573 5.588C11.045 8.148 10.953 9.865 12.922 11.605zM23 27L22.341 25 7.659 25 7 27 11.19 27 11.822 29 18.217 29 18.816 27z"></path>
+        </svg>
+        <span class="flex flex-col gap-0.5 text-left leading-none">
+          <span class="text-[0.72rem] font-bold uppercase tracking-[0.08em] text-white">BBB Accredited Business</span>
+          <span class="text-[0.6rem] font-medium uppercase tracking-[0.12em] text-ember-300">Better Business Bureau</span>
+        </span>
+      </a>
+
+      <p class="mb-5 mt-7 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-bone">
         <?php echo esc_html($hero['eyebrow']); ?>
       </p>
       <h1 class="ec-shine ec-shine--light font-display text-4xl leading-[1.08] font-bold tracking-tight text-bone sm:text-5xl lg:text-[3.4rem]">
         <?php echo esc_html($hero['title']); ?>
       </h1>
-      <!-- Sin opacidad en el lede ni el micro: con el velo translúcido el
-           margen de contraste depende del metraje, y cualquier atenuación
-           come de ese margen. -->
-      <!-- Un escalón menos que antes (text-lg → text-base): a 18px el
-           párrafo competía en peso con el titular; a 16px acompaña. El
-           max-w baja con él para conservar las ~70 letras por línea. -->
-      <p class="mt-6 max-w-xl text-base leading-relaxed text-bone">
-        <?php echo esc_html($hero['lede']); ?>
-      </p>
+      <!-- Sin lede (esquema de Daniel, ago 2026): el párrafo salió del hero.
+           El titular carga solo con el mensaje y los CTAs quedan más cerca.
+           El texto sigue en $hero['lede'] por si el schema o una meta lo
+           quieren — solo dejó de imprimirse acá. -->
 
-      <!-- items-stretch y no items-center: los tres botones igualan su altura
-           contra el más alto de la fila, sin adivinar paddings. Cada uno
-           centra su propio contenido. -->
-      <div class="mt-9 flex flex-wrap items-stretch gap-4">
+      <!-- Los DOS CTAs repartidos al ancho del titular (esquema de Daniel):
+           rejilla de dos mitades desde sm — cada botón llena la suya y entre
+           los dos cubren la columna, alineados con el bloque del h1. En
+           móvil apilan a todo el ancho. items-stretch iguala alturas. -->
+      <div class="mt-9 grid w-full grid-cols-1 items-stretch gap-4 sm:grid-cols-2">
         <!-- Los pulsos van en hermanos detrás del botón, no en su box-shadow.
              El relieve del CTA (cta-relief-light) ya ocupa esa propiedad y
              animarla encima haría que las dos se pisen: el bisel latiría junto
@@ -508,13 +545,13 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
              `group` vive en el envoltorio, no en el <a>: así los pulsos —que
              son hermanos del botón— pueden reaccionar al hover. El área es la
              misma, así que la flecha del botón sigue animando igual. -->
-        <span class="group relative inline-flex">
+        <span class="group relative inline-flex w-full">
           <span class="ec-cta-pulse absolute inset-0 transition-opacity duration-200 group-hover:opacity-0" aria-hidden="true"></span>
           <span class="ec-cta-pulse ec-cta-pulse--delayed absolute inset-0 rounded-full transition-opacity duration-200 group-hover:opacity-0" aria-hidden="true"></span>
           <a
             href="<?php echo esc_url($bid_href); ?>"
             data-bid-cta
-            class="cta-relief-light relative inline-flex items-center gap-2.5 border-2 border-white/60 bg-ink py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-white transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ink-900 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
+            class="cta-relief-light relative inline-flex w-full items-center justify-center gap-2.5 border-2 border-white/60 bg-ink py-4 px-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-white transition-all duration-200 ease-out hover:cta-relief-light-tight hover:bg-ink-900 hover:-translate-y-px active:translate-y-0 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember motion-reduce:transform-none motion-reduce:transition-none"
           >
             Request a bid
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none">
@@ -529,35 +566,12 @@ $deck_href = ''; // Pendiente 15: el Capability Deck en PDF todavía no existe.
              quiere ver obra antes de pedir precio. -->
         <a
           href="<?php echo esc_url(home_url('/projects')); ?>"
-          class="group/proj inline-flex items-center gap-2.5 border-2 border-white/60 py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-white transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+          class="group/proj inline-flex w-full items-center justify-center gap-2.5 border-2 border-white/60 py-4 px-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-white transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
         >
           See our projects
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" class="h-4 w-4 transition-transform duration-200 group-hover/proj:translate-x-0.5 motion-reduce:transform-none">
             <path d="M5 12h13M13 6l6 6-6 6" />
           </svg>
-        </a>
-
-        <!-- ── Badge BBB ──
-             Enlace al perfil de EC en el Better Business Bureau. Texto, no
-             el sello oficial: el logo de la antorcha es marca registrada de
-             BBB y se usa vía su programa de sellos, no redibujado — si EC
-             quiere el sello gráfico, se descarga del panel de BBB y esta
-             etiqueta se reemplaza por la imagen.
-
-             OJO (Pendiente 01): la URL del perfil dice /hooper/ — BBB tiene
-             registrada la dirección VIEJA. El enlace funciona igual, pero
-             conviene que EC actualice su listing a Higley Rd para que la
-             citation coincida con el NAP del sitio. -->
-        <a
-          href="https://www.bbb.org/us/ut/hooper/profile/landscape-contractors/ec-landscaping-1126-90055383"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="EC Landscaping profile on the Better Business Bureau"
-          class="inline-flex items-center gap-2.5 border-2 border-white/60 py-4 pl-7 pr-6 text-[0.8125rem] font-medium uppercase tracking-[0.4px] text-white transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
-        >
-          <span class="font-display font-bold tracking-tight">BBB</span>
-          <span class="h-4 w-px bg-white/30" aria-hidden="true"></span>
-          Business Profile
         </a>
 
         <?php if ($deck_href) : ?>
